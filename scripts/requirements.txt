@@ -1,0 +1,10 @@
+numpy
+scipy
+tqdm
+pytz
+graphviz
+scikit-learn
+matplotlib
+aalpy
+tabulate
+# dynet

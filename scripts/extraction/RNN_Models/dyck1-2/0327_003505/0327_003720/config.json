@@ -1,0 +1,79 @@
+{
+    "data_txt_file": "../../data/0327_003505/dyck1-2.txt",
+    "num_layers": 1,
+    "hidden_dim": 16,
+    "batch_size": 64,
+    "nn_type": "GRU",
+    "metadata": {
+        "date": "0327_003505",
+        "max_depth": 2,
+        "max_length": 20,
+        "min_length": 1,
+        "transition": [
+            0.1,
+            0.25,
+            0.65
+        ],
+        "num_positive": 1000,
+        "num_negative": 3000,
+        "weights_max_depth_for_valid": [
+            10,
+            40
+        ],
+        "transition_for_invalid": [
+            0.2,
+            0.25,
+            0.55
+        ],
+        "weights_for_invalid_strategy": [
+            0.15,
+            0.2,
+            0.3,
+            0.35
+        ],
+        "length_dist_pos": {
+            "2": 90,
+            "4": 115,
+            "6": 67,
+            "8": 61,
+            "10": 112,
+            "12": 98,
+            "14": 116,
+            "16": 120,
+            "18": 113,
+            "20": 108
+        },
+        "depth_dist_pos": {
+            "1": 363,
+            "2": 637
+        },
+        "length_dist_neg": {
+            "1": 59,
+            "2": 104,
+            "3": 160,
+            "4": 147,
+            "5": 142,
+            "6": 106,
+            "7": 132,
+            "8": 190,
+            "9": 135,
+            "10": 219,
+            "11": 127,
+            "12": 205,
+            "13": 117,
+            "14": 229,
+            "15": 95,
+            "16": 253,
+            "17": 64,
+            "18": 242,
+            "19": 41,
+            "20": 233
+        },
+        "strategy_dist_neg": {
+            "insert": 461,
+            "remove": 611,
+            "swap": 872,
+            "messup": 1056
+        }
+    }
+}

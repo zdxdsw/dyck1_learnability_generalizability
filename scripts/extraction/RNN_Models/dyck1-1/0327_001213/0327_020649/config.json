@@ -1,0 +1,77 @@
+{
+    "data_txt_file": "../../data/0327_001213/dyck1-1.txt",
+    "num_layers": 1,
+    "hidden_dim": 64,
+    "batch_size": 64,
+    "nn_type": "GRU",
+    "metadata": {
+        "date": "0327_001213",
+        "max_depth": 1,
+        "max_length": 20,
+        "min_length": 1,
+        "transition": [
+            0.15,
+            0.05,
+            0.8
+        ],
+        "num_positive": 1000,
+        "num_negative": 3000,
+        "weights_max_depth_for_valid": [
+            10
+        ],
+        "transition_for_invalid": [
+            0.25,
+            0.05,
+            0.7
+        ],
+        "weights_for_invalid_strategy": [
+            0.15,
+            0.2,
+            0.3,
+            0.35
+        ],
+        "length_dist_pos": {
+            "2": 98,
+            "4": 41,
+            "6": 77,
+            "8": 84,
+            "10": 94,
+            "12": 133,
+            "14": 134,
+            "16": 140,
+            "18": 101,
+            "20": 98
+        },
+        "depth_dist_pos": {
+            "1": 1000
+        },
+        "length_dist_neg": {
+            "1": 95,
+            "2": 148,
+            "3": 141,
+            "4": 75,
+            "5": 107,
+            "6": 142,
+            "7": 133,
+            "8": 191,
+            "9": 155,
+            "10": 212,
+            "11": 119,
+            "12": 211,
+            "13": 118,
+            "14": 225,
+            "15": 92,
+            "16": 246,
+            "17": 62,
+            "18": 260,
+            "19": 42,
+            "20": 226
+        },
+        "strategy_dist_neg": {
+            "insert": 471,
+            "remove": 593,
+            "swap": 858,
+            "messup": 1078
+        }
+    }
+}

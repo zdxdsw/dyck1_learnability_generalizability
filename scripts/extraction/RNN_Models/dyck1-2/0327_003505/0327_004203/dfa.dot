@@ -1,0 +1,16 @@
+digraph dfa {
+s0 [label="s0"];
+s1 [label="s1"];
+s2 [label="s2", shape=doublecircle];
+s3 [label="s3"];
+s0 -> s1 [label="("];
+s0 -> s3 [label=")"];
+s1 -> s3 [label="("];
+s1 -> s2 [label=")"];
+s2 -> s1 [label="("];
+s2 -> s3 [label=")"];
+s3 -> s3 [label="("];
+s3 -> s3 [label=")"];
+__start0 [shape=none, label=""];
+__start0 -> s0 [label=""];
+}
