@@ -162,7 +162,7 @@ for epoch in range(global_epoch, config.num_epochs):
     
     ### Evaluate on validation and testing sets at the end of every epoch
     with accelerator.autocast():
-        if accelerator.is_main_process and epoch % 5 == 4:
+        if accelerator.is_main_process: # and (epoch % 5 == 4 or epoch==config.num_epochs-1):
             model_to_eval = accelerator.unwrap_model(model)
             model_to_eval.eval()
             Print(f"\nEpoch {epoch} Step {global_step} Metrics on Validation Sets:\n")
@@ -176,20 +176,19 @@ for epoch in range(global_epoch, config.num_epochs):
             )
             Print(f"Validation set: {val_dataloader.dataset.name}")
             Print(metrics)
-            more_eval = True if metrics["acc"] >= 0.9 else False
+            more_eval = True #if (metrics["acc"] >= 0.9 or epoch==config.num_epochs-1) else False
+
+            for val_dataloader in val_dataloaders[1:]:
+                metrics = inference(
+                    model_to_eval,
+                    val_dataloader,
+                    accelerator.device,
+                    config
+                )
+                Print(f"Validation set: {val_dataloader.dataset.name}")
+                Print(metrics)
 
             if more_eval:
-                
-                for val_dataloader in val_dataloaders[1:]:
-                    metrics = inference(
-                        model_to_eval,
-                        val_dataloader,
-                        accelerator.device,
-                        config
-                    )
-                    Print(f"Validation set: {val_dataloader.dataset.name}")
-                    Print(metrics)
-                
                 Print(f"\nEpoch {epoch} Step {global_step} Metrics on Testing Sets:\n")
                 num_test_samples, total_test_correct = 0, 0
                 for test_dataloader in test_dataloaders:
