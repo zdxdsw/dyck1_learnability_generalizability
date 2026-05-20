@@ -5,9 +5,12 @@ timezone = pytz.timezone('America/New_York')
 from matplotlib import pyplot as plt
 import numpy as np
 
-output_dir = "/home/yingshac/workspace/tmlr/scripts/rnn/output"
+output_dir = "/home/yingshac/workspace/tmlr/scripts/rnn/output/S1_d_leq[2-8]_b"
+figure_dir = "./S1_d_leq[2-8]_b/"
+# create figure_dir if not exist
+os.makedirs(figure_dir, exist_ok=True)
 """
-    Process each terminal.txt file in <output_dir>/S1_d_[2-8]/<handle>/
+    Process each terminal.txt file in <output_dir>/<task_suite>/<handle>/
     The terminal.txt file contains the training log, so ignore them. 
     Extract lines that include "Epoch <epoch> Step <step> Metrics on [Validation|Testing] Sets:"
     If metrics for multiple epochs are printed, keep the one with the last epoch.
@@ -82,9 +85,10 @@ test_l_to_acc = {d: {i: [] for i in range(41, 121)} for d in range(2, 9)}
 test_l_to_loss = {d: {i: [] for i in range(41, 121)} for d in range(2, 9)}
 
 print("Extracting metrics from terminal.txt files...")
+task_suite_prefix = os.listdir(f"{output_dir}/")[0][:-1]
 for d in trange(2, 9):
-    for handle in os.listdir(f"{output_dir}/S1_d_{d}"):
-        with open(f"{output_dir}/S1_d_{d}/{handle}/terminal.txt", "r") as f:
+    for handle in os.listdir(f"{output_dir}/{task_suite_prefix}{d}"):
+        with open(f"{output_dir}/{task_suite_prefix}{d}/{handle}/terminal.txt", "r") as f:
             lines = f.readlines()
         
         # iterate from the last line and go backwards, 
@@ -97,7 +101,7 @@ for d in trange(2, 9):
                 last_val_line_idx = i
                 break
         if last_val_line_idx == -1:
-            print(f"Cannot find Validation Metrics in S1_d_{d}/{handle}")
+            print(f"Cannot find Validation Metrics in {task_suite_prefix}{d}/{handle}")
             continue
         # extract the metrics for each validation set
         for j in range(last_val_line_idx+1, len(lines)):
@@ -120,7 +124,7 @@ for d in trange(2, 9):
                 last_test_line_idx = i
                 break
         if last_test_line_idx == -1:
-            print(f"Cannot find Testing Metrics in S1_d_{d}/{handle}")
+            print(f"Cannot find Testing Metrics in {task_suite_prefix}{d}/{handle}")
             continue
         # extract the metrics for each testing set
         for j in range(last_test_line_idx+1, len(lines)):
@@ -153,10 +157,10 @@ for d in range(2, 9):
         y.append(np.mean(val_d_to_acc[d][val_d]))
         y_err.append(np.std(val_d_to_acc[d][val_d]))
     plt.plot(x, y, label=f"train d={d}", color=colors[d-2])
-    plt.fill_between(x, np.array(y)-np.array(y_err), np.array(y)+np.array(y_err), alpha=0.2)
+    plt.fill_between(x, np.array(y)-np.array(y_err), np.array(y)+np.array(y_err), color=colors[d-2], alpha=0.2)
 plt.xlabel("test d")
 plt.ylabel("acc")
-plt.title("Acc on greater depth, dim=64")
+plt.title("Acc on greater depth")
 plt.legend()
 
 plt.subplot(1, 2, 2)
@@ -169,14 +173,14 @@ for d in range(2, 9):
         y.append(np.mean(val_d_to_loss[d][val_d]))
         y_err.append(np.std(val_d_to_loss[d][val_d]))
     plt.plot(x, y, label=f"train d={d}", color=colors[d-2])
-    plt.fill_between(x, np.array(y)-np.array(y_err), np.array(y)+np.array(y_err), alpha=0.2)
+    plt.fill_between(x, np.array(y)-np.array(y_err), np.array(y)+np.array(y_err), color=colors[d-2], alpha=0.2)
 plt.xlabel("test d")
 plt.ylabel("loss")
-plt.title("Loss on greater depth, dim=64")
+plt.title("Loss on greater depth")
 plt.legend()
 
 plt.tight_layout()
-plt.savefig(f"greater_depth.png", dpi=250, bbox_inches='tight')
+plt.savefig(f"{figure_dir}greater_depth.png", dpi=250, bbox_inches='tight')
 plt.close()
 
 """
@@ -201,10 +205,10 @@ for d in range(2, 9):
         y.append(np.mean(test_l_to_acc[d][test_l]))
         y_err.append(np.std(test_l_to_acc[d][test_l]))
     plt.plot(x, y, label=f"train d={d}", color=colors[d-2])
-    plt.fill_between(x, np.array(y)-np.array(y_err), np.array(y)+np.array(y_err), alpha=0.2)
+    plt.fill_between(x, np.array(y)-np.array(y_err), np.array(y)+np.array(y_err), color=colors[d-2], alpha=0.2)
 plt.xlabel("test l")
 plt.ylabel("acc")
-plt.title("Acc on greater length, dim=64")
+plt.title("Acc on greater length")
 plt.legend()
 
 plt.subplot(1, 2, 2)
@@ -217,12 +221,12 @@ for d in range(2, 9):
         y.append(np.mean(test_l_to_loss[d][test_l]))
         y_err.append(np.std(test_l_to_loss[d][test_l]))
     plt.plot(x, y, label=f"train d={d}", color=colors[d-2])
-    plt.fill_between(x, np.array(y)-np.array(y_err), np.array(y)+np.array(y_err), alpha=0.2)
+    plt.fill_between(x, np.array(y)-np.array(y_err), np.array(y)+np.array(y_err), color=colors[d-2], alpha=0.2)
 plt.xlabel("test l")
 plt.ylabel("loss")
-plt.title("Loss on greater length, dim=64")
+plt.title("Loss on greater length")
 plt.legend()
 
 plt.tight_layout()
-plt.savefig(f"greater_length.png", dpi=250, bbox_inches='tight')
+plt.savefig(f"{figure_dir}greater_length.png", dpi=250, bbox_inches='tight')
 plt.close()

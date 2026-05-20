@@ -119,3 +119,308 @@ class S1_d_8_Config(Basic_Config):
         ("/data/yingshac/tmlr/validation/fix_d_7.json", "d_7", None),
     ]
     test_files = [("/data/yingshac/tmlr/test/fix_d_8.json", f"d_8_l_{l}", l) for l in range(41, 121)]
+
+@dataclass
+class S1_d_leq2_Config(Basic_Config):
+    dataset = "S1"
+    in_vocab = ['(', ')', '<eos>','<pad>']
+    out_vocab = ['a', 'r']
+    train_files = ["/data/yingshac/tmlr/train/fix_d_2.json"]
+    val_files = [
+        ("/data/yingshac/tmlr/validation/fix_d_2.json", "d_2", None),
+        ("/data/yingshac/tmlr/validation/fix_d_3.json", "d_3", None),
+        ("/data/yingshac/tmlr/validation/fix_d_4.json", "d_4", None),
+        ("/data/yingshac/tmlr/validation/fix_d_5.json", "d_5", None),
+        ("/data/yingshac/tmlr/validation/fix_d_6.json", "d_6", None),
+        ("/data/yingshac/tmlr/validation/fix_d_7.json", "d_7", None),
+        ("/data/yingshac/tmlr/validation/fix_d_8.json", "d_8", None),
+    ]
+    test_files = [("/data/yingshac/tmlr/test/fix_d_2.json", f"d_2_l_{l}", l) for l in range(41, 121)]
+
+@dataclass
+class S1_d_leq3_Config(Basic_Config):
+    dataset = "S1"
+    in_vocab = ['(', ')', '<eos>','<pad>']
+    out_vocab = ['a', 'r']
+    train_files = [
+        "/data/yingshac/tmlr/train/fix_d_2.json",
+        "/data/yingshac/tmlr/train/fix_d_3.json"
+    ]
+    val_files = [
+        ("/data/yingshac/tmlr/validation/fix_d_3.json", "d_3", None),
+        ("/data/yingshac/tmlr/validation/fix_d_2.json", "d_2", None),
+        ("/data/yingshac/tmlr/validation/fix_d_4.json", "d_4", None),
+        ("/data/yingshac/tmlr/validation/fix_d_5.json", "d_5", None),
+        ("/data/yingshac/tmlr/validation/fix_d_6.json", "d_6", None),
+        ("/data/yingshac/tmlr/validation/fix_d_7.json", "d_7", None),
+        ("/data/yingshac/tmlr/validation/fix_d_8.json", "d_8", None),
+    ]
+    test_files = [("/data/yingshac/tmlr/test/fix_d_3.json", f"d_3_l_{l}", l) for l in range(41, 121)]
+
+@dataclass
+class S1_d_leq4_Config(Basic_Config):
+    dataset = "S1"
+    in_vocab = ['(', ')', '<eos>','<pad>']
+    out_vocab = ['a', 'r']
+    train_files = [
+        "/data/yingshac/tmlr/train/fix_d_2.json",
+        "/data/yingshac/tmlr/train/fix_d_3.json",
+        "/data/yingshac/tmlr/train/fix_d_4.json",
+    ]
+    val_files = [
+        ("/data/yingshac/tmlr/validation/fix_d_4.json", "d_4", None),
+        ("/data/yingshac/tmlr/validation/fix_d_2.json", "d_2", None),
+        ("/data/yingshac/tmlr/validation/fix_d_3.json", "d_3", None),
+        ("/data/yingshac/tmlr/validation/fix_d_5.json", "d_5", None),
+        ("/data/yingshac/tmlr/validation/fix_d_6.json", "d_6", None),
+        ("/data/yingshac/tmlr/validation/fix_d_7.json", "d_7", None),
+        ("/data/yingshac/tmlr/validation/fix_d_8.json", "d_8", None),
+    ]
+    test_files = [("/data/yingshac/tmlr/test/fix_d_4.json", f"d_4_l_{l}", l) for l in range(41, 121)]
+
+@dataclass
+class S1_d_leq5_Config(Basic_Config):
+    dataset = "S1"
+    in_vocab = ['(', ')', '<eos>','<pad>']
+    out_vocab = ['a', 'r']
+    train_files = [
+        "/data/yingshac/tmlr/train/fix_d_2.json",
+        "/data/yingshac/tmlr/train/fix_d_3.json",
+        "/data/yingshac/tmlr/train/fix_d_4.json",
+        "/data/yingshac/tmlr/train/fix_d_5.json",
+    ]
+    val_files = [
+        ("/data/yingshac/tmlr/validation/fix_d_5.json", "d_5", None),
+        ("/data/yingshac/tmlr/validation/fix_d_2.json", "d_2", None),
+        ("/data/yingshac/tmlr/validation/fix_d_3.json", "d_3", None),
+        ("/data/yingshac/tmlr/validation/fix_d_4.json", "d_4", None),
+        ("/data/yingshac/tmlr/validation/fix_d_6.json", "d_6", None),
+        ("/data/yingshac/tmlr/validation/fix_d_7.json", "d_7", None),
+        ("/data/yingshac/tmlr/validation/fix_d_8.json", "d_8", None),
+    ]
+    test_files = [("/data/yingshac/tmlr/test/fix_d_5.json", f"d_5_l_{l}", l) for l in range(41, 121)]
+
+@dataclass
+class S1_d_leq6_Config(Basic_Config):
+    dataset = "S1"
+    in_vocab = ['(', ')', '<eos>','<pad>']
+    out_vocab = ['a', 'r']
+    train_files = [
+        "/data/yingshac/tmlr/train/fix_d_2.json",
+        "/data/yingshac/tmlr/train/fix_d_3.json",
+        "/data/yingshac/tmlr/train/fix_d_4.json",
+        "/data/yingshac/tmlr/train/fix_d_5.json",
+        "/data/yingshac/tmlr/train/fix_d_6.json",
+    ]
+    val_files = [
+        ("/data/yingshac/tmlr/validation/fix_d_6.json", "d_6", None),
+        ("/data/yingshac/tmlr/validation/fix_d_2.json", "d_2", None),
+        ("/data/yingshac/tmlr/validation/fix_d_3.json", "d_3", None),
+        ("/data/yingshac/tmlr/validation/fix_d_4.json", "d_4", None),
+        ("/data/yingshac/tmlr/validation/fix_d_5.json", "d_5", None),
+        ("/data/yingshac/tmlr/validation/fix_d_7.json", "d_7", None),
+        ("/data/yingshac/tmlr/validation/fix_d_8.json", "d_8", None),
+    ]
+    test_files = [("/data/yingshac/tmlr/test/fix_d_6.json", f"d_6_l_{l}", l) for l in range(41, 121)]
+
+@dataclass
+class S1_d_leq7_Config(Basic_Config):
+    dataset = "S1"
+    in_vocab = ['(', ')', '<eos>','<pad>']
+    out_vocab = ['a', 'r']
+    train_files = [
+        "/data/yingshac/tmlr/train/fix_d_2.json",
+        "/data/yingshac/tmlr/train/fix_d_3.json",
+        "/data/yingshac/tmlr/train/fix_d_4.json",
+        "/data/yingshac/tmlr/train/fix_d_5.json",
+        "/data/yingshac/tmlr/train/fix_d_6.json",
+        "/data/yingshac/tmlr/train/fix_d_7.json",
+    ]
+    val_files = [
+        ("/data/yingshac/tmlr/validation/fix_d_7.json", "d_7", None),
+        ("/data/yingshac/tmlr/validation/fix_d_2.json", "d_2", None),
+        ("/data/yingshac/tmlr/validation/fix_d_3.json", "d_3", None),
+        ("/data/yingshac/tmlr/validation/fix_d_4.json", "d_4", None),
+        ("/data/yingshac/tmlr/validation/fix_d_5.json", "d_5", None),
+        ("/data/yingshac/tmlr/validation/fix_d_6.json", "d_6", None),
+        ("/data/yingshac/tmlr/validation/fix_d_8.json", "d_8", None),
+    ]
+    test_files = [("/data/yingshac/tmlr/test/fix_d_7.json", f"d_7_l_{l}", l) for l in range(41, 121)]
+
+@dataclass
+class S1_d_leq8_Config(Basic_Config):
+    dataset = "S1"
+    in_vocab = ['(', ')', '<eos>','<pad>']
+    out_vocab = ['a', 'r']
+    train_files = [
+        "/data/yingshac/tmlr/train/fix_d_2.json",
+        "/data/yingshac/tmlr/train/fix_d_3.json",
+        "/data/yingshac/tmlr/train/fix_d_4.json",
+        "/data/yingshac/tmlr/train/fix_d_5.json",
+        "/data/yingshac/tmlr/train/fix_d_6.json",
+        "/data/yingshac/tmlr/train/fix_d_7.json",
+        "/data/yingshac/tmlr/train/fix_d_8.json",
+    ]
+    val_files = [
+        ("/data/yingshac/tmlr/validation/fix_d_8.json", "d_8", None),
+        ("/data/yingshac/tmlr/validation/fix_d_2.json", "d_2", None),
+        ("/data/yingshac/tmlr/validation/fix_d_3.json", "d_3", None),
+        ("/data/yingshac/tmlr/validation/fix_d_4.json", "d_4", None),
+        ("/data/yingshac/tmlr/validation/fix_d_5.json", "d_5", None),
+        ("/data/yingshac/tmlr/validation/fix_d_6.json", "d_6", None),
+        ("/data/yingshac/tmlr/validation/fix_d_7.json", "d_7", None),
+    ]
+    test_files = [("/data/yingshac/tmlr/test/fix_d_8.json", f"d_8_l_{l}", l) for l in range(41, 121)]
+
+### without eos; cumulative
+@dataclass
+class S1a_d_leq2_Config(Basic_Config):
+    dataset = "S1a_"
+    in_vocab = ['(', ')', '<pad>']
+    out_vocab = ['a', 'r']
+    train_files = ["/data/yingshac/tmlr/train/fix_d_2.json"]
+    val_files = [
+        ("/data/yingshac/tmlr/validation/fix_d_2.json", "d_2", None),
+        ("/data/yingshac/tmlr/validation/fix_d_3.json", "d_3", None),
+        ("/data/yingshac/tmlr/validation/fix_d_4.json", "d_4", None),
+        ("/data/yingshac/tmlr/validation/fix_d_5.json", "d_5", None),
+        ("/data/yingshac/tmlr/validation/fix_d_6.json", "d_6", None),
+        ("/data/yingshac/tmlr/validation/fix_d_7.json", "d_7", None),
+        ("/data/yingshac/tmlr/validation/fix_d_8.json", "d_8", None),
+    ]
+    test_files = [("/data/yingshac/tmlr/test/fix_d_2.json", f"d_2_l_{l}", l) for l in range(41, 121)]
+
+@dataclass
+class S1a_d_leq3_Config(Basic_Config):
+    dataset = "S1a_"
+    in_vocab = ['(', ')', '<pad>']
+    out_vocab = ['a', 'r']
+    train_files = [
+        "/data/yingshac/tmlr/train/fix_d_2.json",
+        "/data/yingshac/tmlr/train/fix_d_3.json"
+    ]
+    val_files = [
+        ("/data/yingshac/tmlr/validation/fix_d_3.json", "d_3", None),
+        ("/data/yingshac/tmlr/validation/fix_d_2.json", "d_2", None),
+        ("/data/yingshac/tmlr/validation/fix_d_4.json", "d_4", None),
+        ("/data/yingshac/tmlr/validation/fix_d_5.json", "d_5", None),
+        ("/data/yingshac/tmlr/validation/fix_d_6.json", "d_6", None),
+        ("/data/yingshac/tmlr/validation/fix_d_7.json", "d_7", None),
+        ("/data/yingshac/tmlr/validation/fix_d_8.json", "d_8", None),
+    ]
+    test_files = [("/data/yingshac/tmlr/test/fix_d_3.json", f"d_3_l_{l}", l) for l in range(41, 121)]
+
+@dataclass
+class S1a_d_leq4_Config(Basic_Config):
+    dataset = "S1a_"
+    in_vocab = ['(', ')', '<pad>']
+    out_vocab = ['a', 'r']
+    train_files = [
+        "/data/yingshac/tmlr/train/fix_d_2.json",
+        "/data/yingshac/tmlr/train/fix_d_3.json",
+        "/data/yingshac/tmlr/train/fix_d_4.json",
+    ]
+    val_files = [
+        ("/data/yingshac/tmlr/validation/fix_d_4.json", "d_4", None),
+        ("/data/yingshac/tmlr/validation/fix_d_2.json", "d_2", None),
+        ("/data/yingshac/tmlr/validation/fix_d_3.json", "d_3", None),
+        ("/data/yingshac/tmlr/validation/fix_d_5.json", "d_5", None),
+        ("/data/yingshac/tmlr/validation/fix_d_6.json", "d_6", None),
+        ("/data/yingshac/tmlr/validation/fix_d_7.json", "d_7", None),
+        ("/data/yingshac/tmlr/validation/fix_d_8.json", "d_8", None),
+    ]
+    test_files = [("/data/yingshac/tmlr/test/fix_d_4.json", f"d_4_l_{l}", l) for l in range(41, 121)]
+
+@dataclass
+class S1a_d_leq5_Config(Basic_Config):
+    dataset = "S1a_"
+    in_vocab = ['(', ')', '<pad>']
+    out_vocab = ['a', 'r']
+    train_files = [
+        "/data/yingshac/tmlr/train/fix_d_2.json",
+        "/data/yingshac/tmlr/train/fix_d_3.json",
+        "/data/yingshac/tmlr/train/fix_d_4.json",
+        "/data/yingshac/tmlr/train/fix_d_5.json",
+    ]
+    val_files = [
+        ("/data/yingshac/tmlr/validation/fix_d_5.json", "d_5", None),
+        ("/data/yingshac/tmlr/validation/fix_d_2.json", "d_2", None),
+        ("/data/yingshac/tmlr/validation/fix_d_3.json", "d_3", None),
+        ("/data/yingshac/tmlr/validation/fix_d_4.json", "d_4", None),
+        ("/data/yingshac/tmlr/validation/fix_d_6.json", "d_6", None),
+        ("/data/yingshac/tmlr/validation/fix_d_7.json", "d_7", None),
+        ("/data/yingshac/tmlr/validation/fix_d_8.json", "d_8", None),
+    ]
+    test_files = [("/data/yingshac/tmlr/test/fix_d_5.json", f"d_5_l_{l}", l) for l in range(41, 121)]
+
+@dataclass
+class S1a_d_leq6_Config(Basic_Config):
+    dataset = "S1a_"
+    in_vocab = ['(', ')', '<pad>']
+    out_vocab = ['a', 'r']
+    train_files = [
+        "/data/yingshac/tmlr/train/fix_d_2.json",
+        "/data/yingshac/tmlr/train/fix_d_3.json",
+        "/data/yingshac/tmlr/train/fix_d_4.json",
+        "/data/yingshac/tmlr/train/fix_d_5.json",
+        "/data/yingshac/tmlr/train/fix_d_6.json",
+    ]
+    val_files = [
+        ("/data/yingshac/tmlr/validation/fix_d_6.json", "d_6", None),
+        ("/data/yingshac/tmlr/validation/fix_d_2.json", "d_2", None),
+        ("/data/yingshac/tmlr/validation/fix_d_3.json", "d_3", None),
+        ("/data/yingshac/tmlr/validation/fix_d_4.json", "d_4", None),
+        ("/data/yingshac/tmlr/validation/fix_d_5.json", "d_5", None),
+        ("/data/yingshac/tmlr/validation/fix_d_7.json", "d_7", None),
+        ("/data/yingshac/tmlr/validation/fix_d_8.json", "d_8", None),
+    ]
+    test_files = [("/data/yingshac/tmlr/test/fix_d_6.json", f"d_6_l_{l}", l) for l in range(41, 121)]
+
+@dataclass
+class S1a_d_leq7_Config(Basic_Config):
+    dataset = "S1a_"
+    in_vocab = ['(', ')', '<pad>']
+    out_vocab = ['a', 'r']
+    train_files = [
+        "/data/yingshac/tmlr/train/fix_d_2.json",
+        "/data/yingshac/tmlr/train/fix_d_3.json",
+        "/data/yingshac/tmlr/train/fix_d_4.json",
+        "/data/yingshac/tmlr/train/fix_d_5.json",
+        "/data/yingshac/tmlr/train/fix_d_6.json",
+        "/data/yingshac/tmlr/train/fix_d_7.json",
+    ]
+    val_files = [
+        ("/data/yingshac/tmlr/validation/fix_d_7.json", "d_7", None),
+        ("/data/yingshac/tmlr/validation/fix_d_2.json", "d_2", None),
+        ("/data/yingshac/tmlr/validation/fix_d_3.json", "d_3", None),
+        ("/data/yingshac/tmlr/validation/fix_d_4.json", "d_4", None),
+        ("/data/yingshac/tmlr/validation/fix_d_5.json", "d_5", None),
+        ("/data/yingshac/tmlr/validation/fix_d_6.json", "d_6", None),
+        ("/data/yingshac/tmlr/validation/fix_d_8.json", "d_8", None),
+    ]
+    test_files = [("/data/yingshac/tmlr/test/fix_d_7.json", f"d_7_l_{l}", l) for l in range(41, 121)]
+
+@dataclass
+class S1a_d_leq8_Config(Basic_Config):
+    dataset = "S1a_"
+    in_vocab = ['(', ')', '<pad>']
+    out_vocab = ['a', 'r']
+    train_files = [
+        "/data/yingshac/tmlr/train/fix_d_2.json",
+        "/data/yingshac/tmlr/train/fix_d_3.json",
+        "/data/yingshac/tmlr/train/fix_d_4.json",
+        "/data/yingshac/tmlr/train/fix_d_5.json",
+        "/data/yingshac/tmlr/train/fix_d_6.json",
+        "/data/yingshac/tmlr/train/fix_d_7.json",
+        "/data/yingshac/tmlr/train/fix_d_8.json",
+    ]
+    val_files = [
+        ("/data/yingshac/tmlr/validation/fix_d_8.json", "d_8", None),
+        ("/data/yingshac/tmlr/validation/fix_d_2.json", "d_2", None),
+        ("/data/yingshac/tmlr/validation/fix_d_3.json", "d_3", None),
+        ("/data/yingshac/tmlr/validation/fix_d_4.json", "d_4", None),
+        ("/data/yingshac/tmlr/validation/fix_d_5.json", "d_5", None),
+        ("/data/yingshac/tmlr/validation/fix_d_6.json", "d_6", None),
+        ("/data/yingshac/tmlr/validation/fix_d_7.json", "d_7", None),
+    ]
+    test_files = [("/data/yingshac/tmlr/test/fix_d_8.json", f"d_8_l_{l}", l) for l in range(41, 121)]

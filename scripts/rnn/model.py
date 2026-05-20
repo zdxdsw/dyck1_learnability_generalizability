@@ -36,11 +36,14 @@ class RNNModel(nn.Module):
         self.apply(self._init_weights)
 
         # print shapes, param_count for each parameter matrix, then total param_count
-        print("Encoder weight shape:", self.encoder.weight.shape, "param count:", self.encoder.weight.numel())
-        for i in range(config.num_hidden_layers):
-            print(f"RNN layer {i} weight_ih shape:", self.model.weight_ih_l0.shape, "param count:", self.model.weight_ih_l0.numel())
-            print(f"RNN layer {i} weight_hh shape:", self.model.weight_hh_l0.shape, "param count:", self.model.weight_hh_l0.numel())
-        print("Decoder weight shape:", self.decoder.weight.shape, "param count:", self.decoder.weight.numel())
+        # print("Encoder weight shape:", self.encoder.weight.shape, "param count:", self.encoder.weight.numel())
+        # for i in range(config.num_hidden_layers):
+        #     print(f"RNN layer {i} weight_ih shape:", self.model.weight_ih_l0.shape, "param count:", self.model.weight_ih_l0.numel())
+        #     print(f"RNN layer {i} weight_hh shape:", self.model.weight_hh_l0.shape, "param count:", self.model.weight_hh_l0.numel())
+        # print("Decoder weight shape:", self.decoder.weight.shape, "param count:", self.decoder.weight.numel())
+        for name, param in self.named_parameters():
+            print(name, param.shape, param.numel())
+        
         total_params = sum(p.numel() for p in self.parameters())
         print("Total param count:", total_params)
 
