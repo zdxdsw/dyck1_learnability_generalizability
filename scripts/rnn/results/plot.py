@@ -5,8 +5,8 @@ timezone = pytz.timezone('America/New_York')
 from matplotlib import pyplot as plt
 import numpy as np
 
-output_dir = "/home/yingshac/workspace/tmlr/scripts/rnn/output/S1_d_leq[2-8]_b"
-figure_dir = "./S1_d_leq[2-8]_b/"
+output_dir = "/home/yingshac/workspace/tmlr/scripts/rnn/output/S1a_d_leq[2-8]_A"
+figure_dir = "./S1a_d_leq[2-8]_A/"
 # create figure_dir if not exist
 os.makedirs(figure_dir, exist_ok=True)
 """

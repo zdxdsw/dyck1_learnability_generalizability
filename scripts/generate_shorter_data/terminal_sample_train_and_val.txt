@@ -1,0 +1,20 @@
+
+finish fix_d=2
+train samples=7814, (pos=3888, neg=3926),
+val samples=200, (pos=100, neg=100)
+
+finish fix_d=3
+train samples=23956, (pos=12523, neg=11433),
+val samples=200, (pos=100, neg=100)
+
+finish fix_d=4
+train samples=22472, (pos=11020, neg=11452),
+val samples=200, (pos=100, neg=100)
+
+finish fix_d=5
+train samples=26418, (pos=12720, neg=13698),
+val samples=200, (pos=100, neg=100)
+
+finish fix_d=6
+train samples=28580, (pos=14640, neg=13940),
+val samples=200, (pos=100, neg=100)

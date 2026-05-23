@@ -58,10 +58,11 @@ for seed in SEEDS:
     for i in trange(args.sleep, desc="Sleeping"):
       time.sleep(60)
 
-  os.system("{} accelerate launch --main_process_port {} --num_processes 1 trainer.py --date {} --task {} | tee {}".format(
+  os.system("{} accelerate launch --main_process_port {} --num_processes 1 trainer.py --date {} --task {} --output_dir '{}' | tee {}".format(
     args.cuda,
     args.port,
     config.date,
     args.task,
+    config.output_dir,
     os.path.join(config.output_dir, date, "terminal.txt"),
   ))

@@ -20,15 +20,15 @@ def Print(s):
 parser = argparse.ArgumentParser()
 parser.add_argument('--date', type=str, default="debug")
 parser.add_argument('--task', type=str)
+parser.add_argument('--output_dir', type=str)
 args = parser.parse_args()
 
 
 """----------- Preparing Accelerator -----------"""
 
 config = eval(f"{args.task}_Config")()
-tmp = json.load(open(os.path.join(config.output_dir, args.task, args.date, "config.json"), "r"))
+tmp = json.load(open(os.path.join(args.output_dir, args.date, "config.json"), "r"))
 for k, v in tmp.items(): setattr(config, k, v)
-# config.date = args.date
 if "hf_cache_dir" in dir(config) and config.hf_cache_dir is not None: os.environ['HF_HOME'] = config.hf_cache_dir
 
 # Fix all seeds to ensure reproducibility
@@ -162,7 +162,7 @@ for epoch in range(global_epoch, config.num_epochs):
     
     ### Evaluate on validation and testing sets at the end of every epoch
     with accelerator.autocast():
-        if accelerator.is_main_process: # and (epoch % 5 == 4 or epoch==config.num_epochs-1):
+        if accelerator.is_main_process and ((1+epoch) % config.more_eval_th_by_epoch == 0 or epoch==config.num_epochs-1):
             model_to_eval = accelerator.unwrap_model(model)
             model_to_eval.eval()
             Print(f"\nEpoch {epoch} Step {global_step} Metrics on Validation Sets:\n")
@@ -176,7 +176,7 @@ for epoch in range(global_epoch, config.num_epochs):
             )
             Print(f"Validation set: {val_dataloader.dataset.name}")
             Print(metrics)
-            more_eval = True #if (metrics["acc"] >= 0.9 or epoch==config.num_epochs-1) else False
+            more_eval = True if (metrics["acc"] >= config.more_eval_th_by_val_acc or epoch==config.num_epochs-1) else False
 
             for val_dataloader in val_dataloaders[1:]:
                 metrics = inference(
