@@ -1,17 +1,17 @@
 #!/bin/bash
 
-start=29521
+start=29541
 
-for i in {0..3}; do
+for i in {0..4}; do
     port=$((start + i))
     d=$((i + 2))
     cuda=$((port % 4))
 
-    echo "Launching: python run.py --port $port --cuda $cuda --task shorterS1a_d_leq${d}"
+    echo "Launching: python run.py --port $port --cuda $cuda --task shorterS1a_d_trulyleq${d}"
     
     python run.py \
         --port "$port" \
         --cuda "$cuda" \
-        --task "shorterS1a_d_leq${d}" \
+        --task "shorterS1a_d_trulyleq${d}" \
         > /dev/null 2>&1 &
 done
