@@ -1,0 +1,120 @@
+
+l=40 for pos samples
+calculated x=2319, actual_x=2326
+
+l=40 for neg2 samples
+calculated x=1754, actual_x=1759
+
+l=39 for neg1 samples
+calculated x=590, actual_x=594
+
+finish fix_d=9
+val samples=10000, (pos=5000, neg=5000)
+
+
+
+
+l=40 for pos samples
+calculated x=2318, actual_x=2322
+
+l=40 for neg2 samples
+calculated x=1739, actual_x=1744
+
+l=39 for neg1 samples
+calculated x=600, actual_x=605
+
+finish fix_d=10
+val samples=10000, (pos=5000, neg=5000)
+
+
+
+
+l=40 for pos samples
+calculated x=2200, actual_x=2206
+
+l=40 for neg2 samples
+calculated x=1566, actual_x=1571
+
+l=39 for neg1 samples
+calculated x=602, actual_x=608
+
+finish fix_d=11
+val samples=10000, (pos=5000, neg=5000)
+
+
+
+
+l=40 for pos samples
+calculated x=2311, actual_x=2315
+
+l=40 for neg2 samples
+calculated x=1611, actual_x=1615
+
+l=39 for neg1 samples
+calculated x=630, actual_x=634
+
+finish fix_d=12
+val samples=10000, (pos=5000, neg=5000)
+
+
+
+
+l=40 for pos samples
+calculated x=1915, actual_x=1920
+
+l=40 for neg2 samples
+calculated x=1384, actual_x=1388
+
+l=39 for neg1 samples
+calculated x=501, actual_x=504
+
+finish fix_d=13
+val samples=8000, (pos=4000, neg=4000)
+
+
+
+
+l=40 for pos samples
+calculated x=722, actual_x=726
+
+l=40 for neg2 samples
+calculated x=502, actual_x=506
+
+l=39 for neg1 samples
+calculated x=203, actual_x=206
+
+finish fix_d=14
+val samples=3000, (pos=1500, neg=1500)
+
+
+
+
+l=40 for pos samples
+calculated x=258, actual_x=261
+
+l=40 for neg2 samples
+calculated x=188, actual_x=192
+
+l=39 for neg1 samples
+calculated x=69, actual_x=72
+
+finish fix_d=15
+val samples=1000, (pos=500, neg=500)
+
+
+
+
+l=40 for pos samples
+calculated x=84, actual_x=86
+
+l=40 for neg2 samples
+calculated x=57, actual_x=59
+
+l=39 for neg1 samples
+calculated x=22, actual_x=24
+
+finish fix_d=16
+val samples=320, (pos=160, neg=160)
+
+
+

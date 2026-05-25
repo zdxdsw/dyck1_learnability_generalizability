@@ -5,8 +5,9 @@ timezone = pytz.timezone('America/New_York')
 from matplotlib import pyplot as plt
 import numpy as np
 
-output_dir = "/home/yingshac/workspace/tmlr/scripts/rnn/output/shorterS1a_d_leq[2-6]_A"
-figure_dir = "./shorterS1a_d_leq[2-6]_A/"
+task_suite = "shorterS1a_d_trulyleq[2-6]_C"
+output_dir = f"/home/yingshac/workspace/tmlr/scripts/rnn/output/{task_suite}/"
+figure_dir = f"./{task_suite}/"
 # extract range of d as a tuple (i1, i2) from output_dir name: matching "[\d-\d]_"
 match = re.search(r"(\d)-(\d)", output_dir)
 i1, i2 = int(match.group(1)), int(match.group(2))
@@ -53,8 +54,9 @@ os.makedirs(figure_dir, exist_ok=True)
         ...
     }
 """
-val_d_to_acc = {d: {i: [] for i in range(*RANGE)} for d in range(*RANGE)}
-val_d_to_loss = {d: {i: [] for i in range(*RANGE)} for d in range(*RANGE)}
+# assume we don't know the range of val_d in advance, but we know the range of train_d is RANGE
+val_d_to_acc = {d: {} for d in range(*RANGE)}
+val_d_to_loss = {d: {} for d in range(*RANGE)}
 
 """
     Testing Metrics in terminal.txt look like:
@@ -138,6 +140,8 @@ for d in trange(*RANGE):
             if line.startswith("Validation set: d_"):
                 val_d = int(line.strip().split("Validation set: d_")[1])
                 metrics = eval(lines[j+1].strip())
+                if val_d not in val_d_to_acc[d]: val_d_to_acc[d][val_d] = []
+                if val_d not in val_d_to_loss[d]: val_d_to_loss[d][val_d] = []
                 val_d_to_acc[d][val_d].append(metrics["acc"])
                 val_d_to_loss[d][val_d].append(metrics["loss"])
 
@@ -183,7 +187,8 @@ for d in range(*RANGE):
     x = []
     y = []
     y_err = []
-    for val_d in range(*RANGE):
+    VAL_D_RANGE = (min(val_d_to_acc[d].keys()), max(val_d_to_acc[d].keys())+1)
+    for val_d in range(*VAL_D_RANGE):
         x.append(val_d)
         y.append(np.mean(val_d_to_acc[d][val_d]))
         y_err.append(np.std(val_d_to_acc[d][val_d]))
@@ -199,7 +204,8 @@ for d in range(*RANGE):
     x = []
     y = []
     y_err = []
-    for val_d in range(*RANGE):
+    VAL_D_RANGE = (min(val_d_to_loss[d].keys()), max(val_d_to_loss[d].keys())+1)
+    for val_d in range(*VAL_D_RANGE):
         x.append(val_d)
         y.append(np.mean(val_d_to_loss[d][val_d]))
         y_err.append(np.std(val_d_to_loss[d][val_d]))

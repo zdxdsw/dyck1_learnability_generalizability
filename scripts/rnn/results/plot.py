@@ -1,12 +1,20 @@
-import random, os, pytz, json
+import random, os, pytz, json, re
 from tqdm import tqdm, trange
 from datetime import datetime
 timezone = pytz.timezone('America/New_York') 
 from matplotlib import pyplot as plt
 import numpy as np
 
-output_dir = "/home/yingshac/workspace/tmlr/scripts/rnn/output/S1a_d_leq[2-8]_A"
-figure_dir = "./S1a_d_leq[2-8]_A/"
+task_suite = "shorterS1a_d_trulyleq[2-6]_B"
+output_dir = f"/home/yingshac/workspace/tmlr/scripts/rnn/output/{task_suite}/"
+figure_dir = f"./{task_suite}/"
+
+# extract range of d as a tuple (i1, i2) from output_dir name: matching "[\d-\d]_"
+match = re.search(r"(\d)-(\d)", output_dir)
+i1, i2 = int(match.group(1)), int(match.group(2))
+RANGE = (i1, i2+1)
+print(f"range of d: [{i1}, {i2}]")
+
 # create figure_dir if not exist
 os.makedirs(figure_dir, exist_ok=True)
 """
@@ -47,8 +55,9 @@ os.makedirs(figure_dir, exist_ok=True)
         ...
     }
 """
-val_d_to_acc = {d: {i: [] for i in range(2, 9)} for d in range(2, 9)}
-val_d_to_loss = {d: {i: [] for i in range(2, 9)} for d in range(2, 9)}
+# assume we don't know the range of val_d in advance, but we know the range of train_d is RANGE
+val_d_to_acc = {d: {} for d in range(*RANGE)}
+val_d_to_loss = {d: {} for d in range(*RANGE)}
 
 """
     Testing Metrics in terminal.txt look like:
@@ -81,12 +90,13 @@ val_d_to_loss = {d: {i: [] for i in range(2, 9)} for d in range(2, 9)}
         ...
     }
 """
-test_l_to_acc = {d: {i: [] for i in range(41, 121)} for d in range(2, 9)}
-test_l_to_loss = {d: {i: [] for i in range(41, 121)} for d in range(2, 9)}
+# assume we do not know the range of test_l in advance
+test_l_to_acc = {d: {} for d in range(*RANGE)}
+test_l_to_loss = {d: {} for d in range(*RANGE)}
 
 print("Extracting metrics from terminal.txt files...")
 task_suite_prefix = os.listdir(f"{output_dir}/")[0][:-1]
-for d in trange(2, 9):
+for d in trange(*RANGE):
     for handle in os.listdir(f"{output_dir}/{task_suite_prefix}{d}"):
         with open(f"{output_dir}/{task_suite_prefix}{d}/{handle}/terminal.txt", "r") as f:
             lines = f.readlines()
@@ -111,6 +121,8 @@ for d in trange(2, 9):
             if line.startswith("Validation set: d_"):
                 val_d = int(line.strip().split("Validation set: d_")[1])
                 metrics = eval(lines[j+1].strip())
+                if val_d not in val_d_to_acc[d]: val_d_to_acc[d][val_d] = []
+                if val_d not in val_d_to_loss[d]: val_d_to_loss[d][val_d] = []
                 val_d_to_acc[d][val_d].append(metrics["acc"])
                 val_d_to_loss[d][val_d].append(metrics["loss"])
 
@@ -132,27 +144,30 @@ for d in trange(2, 9):
             if line.startswith("Testing set: d_"):
                 test_l = int(line.strip().split("Testing set: d_")[1].split("_l_")[1])
                 metrics = eval(lines[j+1].strip())
+                if test_l not in test_l_to_acc[d]: test_l_to_acc[d][test_l] = []
+                if test_l not in test_l_to_loss[d]: test_l_to_loss[d][test_l] = []
                 test_l_to_acc[d][test_l].append(metrics["acc"])
                 test_l_to_loss[d][test_l].append(metrics["loss"])
 
 """
     Plot Validation Metrics 
-    7 lines, each line corresponds to train d in [2, 8] -> legend
-    x-axis: test d in [2, 8]
+    i2-i1+1 lines, each line corresponds to train d in RANGE -> legend
+    x-axis: test d in RANGE
     y-axis: one plot for acc and another for loss
-    error bar: std across 5 seeds (shaded)
+    error bar: std across 9 seeds (shaded)
     title: "Acc/Loss on greater depth, dim=64"
-    color: sample 7 colors from 'winter' colormap
+    color: sample i2-i1+1 colors from 'winter' colormap
 """
 print("Plot Validation Metrics...")
 plt.figure(figsize=(12, 5))
 plt.subplot(1, 2, 1)
-colors = plt.cm.winter(np.linspace(0, 1, 7))
-for d in range(2, 9):
+colors = plt.cm.winter(np.linspace(0, 1, i2-i1+1))
+for d in range(*RANGE):
     x = []
     y = []
     y_err = []
-    for val_d in range(2, 9):
+    VAL_D_RANGE = (min(val_d_to_acc[d].keys()), max(val_d_to_acc[d].keys())+1)
+    for val_d in range(*VAL_D_RANGE):
         x.append(val_d)
         y.append(np.mean(val_d_to_acc[d][val_d]))
         y_err.append(np.std(val_d_to_acc[d][val_d]))
@@ -164,11 +179,12 @@ plt.title("Acc on greater depth")
 plt.legend()
 
 plt.subplot(1, 2, 2)
-for d in range(2, 9):
+for d in range(*RANGE):
     x = []
     y = []
     y_err = []
-    for val_d in range(2, 9):
+    VAL_D_RANGE = (min(val_d_to_loss[d].keys()), max(val_d_to_loss[d].keys())+1)
+    for val_d in range(*VAL_D_RANGE):
         x.append(val_d)
         y.append(np.mean(val_d_to_loss[d][val_d]))
         y_err.append(np.std(val_d_to_loss[d][val_d]))
@@ -185,22 +201,23 @@ plt.close()
 
 """
     Plot Testing Metrics 
-    7 lines, each line corresponds to train d in [2, 8] -> legend
-    x-axis: test l in [41, 120]
+    i2-i1+1 lines, each line corresponds to train d in RANGE -> legend
+    x-axis: test l in TEST_L_RANGE
     y-axis: one plot for acc and another for loss
-    error bar: std across 5 seeds (shaded)
+    error bar: std across 9 seeds (shaded)
     title: "Acc/Loss on greater length, dim=64"
-    color: sample 7 colors from 'autumn' colormap
+    color: sample i2-i1+1 colors from 'autumn' colormap
 """
 print("Plot Testing Metrics...")
 plt.figure(figsize=(12, 5))
 plt.subplot(1, 2, 1)
-colors = plt.cm.autumn(np.linspace(0, 1, 7))
-for d in range(2, 9):
+colors = plt.cm.autumn(np.linspace(0, 1, i2-i1+1))
+for d in range(*RANGE):
     x = []
     y = []
     y_err = []
-    for test_l in range(41, 121):
+    TEST_L_RANGE = (min(test_l_to_acc[d].keys()), max(test_l_to_acc[d].keys())+1)
+    for test_l in range(*TEST_L_RANGE):
         x.append(test_l)
         y.append(np.mean(test_l_to_acc[d][test_l]))
         y_err.append(np.std(test_l_to_acc[d][test_l]))
@@ -212,11 +229,12 @@ plt.title("Acc on greater length")
 plt.legend()
 
 plt.subplot(1, 2, 2)
-for d in range(2, 9):
+for d in range(*RANGE):
     x = []
     y = []
     y_err = []
-    for test_l in range(41, 121):
+    TEST_L_RANGE = (min(test_l_to_loss[d].keys()), max(test_l_to_loss[d].keys())+1)
+    for test_l in range(*TEST_L_RANGE):
         x.append(test_l)
         y.append(np.mean(test_l_to_loss[d][test_l]))
         y_err.append(np.std(test_l_to_loss[d][test_l]))
