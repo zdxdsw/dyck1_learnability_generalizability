@@ -5,7 +5,7 @@ timezone = pytz.timezone('America/New_York')
 from matplotlib import pyplot as plt
 import numpy as np
 
-task_suite = "shorterS1a_d_trulyleq[2-6]_C"
+task_suite = "S1a_d_trulyleq[2-8]_C"
 output_dir = f"/home/yingshac/workspace/tmlr/scripts/rnn/output/{task_suite}/"
 figure_dir = f"./{task_suite}/"
 # extract range of d as a tuple (i1, i2) from output_dir name: matching "[\d-\d]_"

@@ -1,8 +1,8 @@
 #!/bin/bash
 
-start=29542
+start=29504
 
-for i in {0..6}; do
+for i in {4..6}; do
     port=$((start + i))
     d=$((i + 2))
     cuda=$((port % 4))
