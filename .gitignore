@@ -3,3 +3,4 @@ venv/
 __pycache__
 __pycache__/
 scripts/rnn/output
+scripts/rnn_with_head/output
