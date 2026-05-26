@@ -32,15 +32,20 @@ class RNNModel(nn.Module):
 
         # Linear decoder
         self.decoder = nn.Linear(config.hidden_size, len(config.out_vocab), bias=False)
-        
+
+        # Avoid exec() here. It's unsafe. Use setattr / getattr. 
+        for supervision_tag in ["S2", "S3"]:
+            if supervision_tag in config.task:
+                vocab_name = f"out_{supervision_tag}_vocab"
+                assert hasattr(config, vocab_name), f"{vocab_name} is required for {supervision_tag} head"
+                setattr(
+                    self,
+                    f"{supervision_tag}_head",
+                    nn.Linear(config.hidden_size, len(getattr(config, vocab_name)), bias=False),
+                )
+    
         self.apply(self._init_weights)
 
-        # print shapes, param_count for each parameter matrix, then total param_count
-        # print("Encoder weight shape:", self.encoder.weight.shape, "param count:", self.encoder.weight.numel())
-        # for i in range(config.num_hidden_layers):
-        #     print(f"RNN layer {i} weight_ih shape:", self.model.weight_ih_l0.shape, "param count:", self.model.weight_ih_l0.numel())
-        #     print(f"RNN layer {i} weight_hh shape:", self.model.weight_hh_l0.shape, "param count:", self.model.weight_hh_l0.numel())
-        # print("Decoder weight shape:", self.decoder.weight.shape, "param count:", self.decoder.weight.numel())
         for name, param in self.named_parameters():
             print(name, param.shape, param.numel())
         
@@ -62,6 +67,11 @@ class RNNModel(nn.Module):
     def forward(self, x, **kwargs):
         x = self.encoder(x)
         x, _ = self.model(x)        
-        x = self.decoder(x)  # (B, seq_len, d_model) -> (B, seq_len, d_output)
+        result = {'logits': self.decoder(x)}  # (B, seq_len, d_model) -> (B, seq_len, d_output)
 
-        return x
+        for supervision_tag in ["S2", "S3"]:
+            if supervision_tag in self.config.task:
+                head = getattr(self, f"{supervision_tag}_head")
+                result[f"{supervision_tag}_logits"] = head(x)
+        
+        return result

@@ -3,7 +3,7 @@ from torch.utils.data import Dataset
 
 class S1Dataset(Dataset):
 
-    def __init__(self, files, in_vocab, out_vocab, name="", specific_length=None):
+    def __init__(self, files, config, name="", specific_length=None):
         """ files is a list of paths, each (<*_data_dir>/fix_d_{d}.json) is a json file with the format:
         {
             "pos": {
@@ -15,12 +15,12 @@ class S1Dataset(Dataset):
         }
         """
         self.name = name
-        self.in_vocab = in_vocab
-        self.in_v2i = {v: i for i, v in enumerate(in_vocab)}
+        self.in_vocab = config.in_vocab
+        self.in_v2i = {v: i for i, v in enumerate(self.in_vocab)}
         self.eos_token_id = self.in_v2i.get("<eos>")
 
-        self.out_vocab = out_vocab
-        self.out_v2i = {v: i for i, v in enumerate(out_vocab)}
+        self.out_vocab = config.out_vocab
+        self.out_v2i = {v: i for i, v in enumerate(self.out_vocab)}
 
         # process all json files, create a list of [([token_ids], [labels]), ...]
         self.data = []
@@ -34,15 +34,15 @@ class S1Dataset(Dataset):
                 pos_samples = [s for l in J["pos"] for s in J["pos"][l]]
                 neg_samples = [s for l in J["neg"] for s in J["neg"][l]]
             for s in pos_samples:
-                self.data.append((
-                    list(map(self.in_v2i.get, s)) + [self.eos_token_id], 
-                     [-1]*len(s) + [self.out_v2i.get("a")]
-                ))
+                self.data.append(({
+                    "input": list(map(self.in_v2i.get, s)) + [self.eos_token_id],
+                    "labels": [-1]*len(s) + [self.out_v2i.get("a")]
+                }))
             for s in neg_samples:
-                self.data.append((
-                    list(map(self.in_v2i.get, s)) + [self.eos_token_id], 
-                     [-1]*len(s) + [self.out_v2i.get("r")]
-                ))
+                self.data.append(({
+                    "input": list(map(self.in_v2i.get, s)) + [self.eos_token_id],
+                    "labels": [-1]*len(s) + [self.out_v2i.get("r")]
+                }))
         # shuffle
         random.shuffle(self.data)
             
@@ -55,7 +55,7 @@ class S1Dataset(Dataset):
 
 class S1a_Dataset(Dataset): # no eos; supervised a/r labels for the last token
 
-    def __init__(self, files, in_vocab, out_vocab, name="", specific_length=None):
+    def __init__(self, files, config, name="", specific_length=None):
         """ files is a list of paths, each (<*_data_dir>/fix_d_{d}.json) is a json file with the format:
         {
             "pos": {
@@ -67,11 +67,11 @@ class S1a_Dataset(Dataset): # no eos; supervised a/r labels for the last token
         }
         """
         self.name = name
-        self.in_vocab = in_vocab
-        self.in_v2i = {v: i for i, v in enumerate(in_vocab)}
+        self.in_vocab = config.in_vocab
+        self.in_v2i = {v: i for i, v in enumerate(self.in_vocab)}
 
-        self.out_vocab = out_vocab
-        self.out_v2i = {v: i for i, v in enumerate(out_vocab)}
+        self.out_vocab = config.out_vocab
+        self.out_v2i = {v: i for i, v in enumerate(self.out_vocab)}
 
         # process all json files, create a list of [([token_ids], [labels]), ...]
         self.data = []
@@ -85,15 +85,15 @@ class S1a_Dataset(Dataset): # no eos; supervised a/r labels for the last token
                 pos_samples = [s for l in J["pos"] for s in J["pos"][l]]
                 neg_samples = [s for l in J["neg"] for s in J["neg"][l]]
             for s in pos_samples:
-                self.data.append((
-                    list(map(self.in_v2i.get, s)), 
-                     [-1]*(len(s) - 1) + [self.out_v2i.get("a")]
-                ))
+                self.data.append(({
+                    "input": list(map(self.in_v2i.get, s)),
+                    "labels": [-1]*(len(s) - 1) + [self.out_v2i.get("a")]
+                }))
             for s in neg_samples:
-                self.data.append((
-                    list(map(self.in_v2i.get, s)), 
-                     [-1]*(len(s) - 1) + [self.out_v2i.get("r")]
-                ))
+                self.data.append(({
+                    "input": list(map(self.in_v2i.get, s)),
+                    "labels": [-1]*(len(s) - 1) + [self.out_v2i.get("r")]
+                }))
         # shuffle
         random.shuffle(self.data)
             
@@ -125,7 +125,7 @@ def get_S2_idx(s):
 class S2Dataset(Dataset): 
     # 2nd head labels: 1 until the first symbol that implies rejection, 0 until the end.
 
-    def __init__(self, files, in_vocab, out_vocab, name="", specific_length=None):
+    def __init__(self, files, config, name="", specific_length=None):
         """ files is a list of paths, each (<*_data_dir>/fix_d_{d}.json) is a json file with the format:
         {
             "pos": {
@@ -137,12 +137,15 @@ class S2Dataset(Dataset):
         }
         """
         self.name = name
-        self.in_vocab = in_vocab
-        self.in_v2i = {v: i for i, v in enumerate(in_vocab)}
+        self.in_vocab = config.in_vocab
+        self.in_v2i = {v: i for i, v in enumerate(self.in_vocab)}
         self.eos_token_id = self.in_v2i.get("<eos>")
 
-        self.out_vocab = out_vocab
-        self.out_v2i = {v: i for i, v in enumerate(out_vocab)}
+        self.out_vocab = config.out_vocab
+        self.out_v2i = {v: i for i, v in enumerate(self.out_vocab)}
+
+        self.out_S2_vocab = config.out_S2_vocab
+        self.out_S2_v2i = {v: i for i, v in enumerate(self.out_S2_vocab)}
 
         # process all json files, create a list of [([token_ids], [labels]), ...]
         self.data = []
@@ -159,11 +162,11 @@ class S2Dataset(Dataset):
                 self.data.append(({
                     "input": list(map(self.in_v2i.get, s)) + [self.eos_token_id], 
                     "labels": [-1]*len(s) + [self.out_v2i.get("a")],
-                    "S2_labels": ["1"]*len(s),
+                    "S2_labels": [self.out_S2_v2i.get("1")]*len(s) + [-1] # don't supervise on eos,
                 }))
             for s in neg_samples:
                 S2_idx = get_S2_idx(s)
-                S2_labels = ["1"]*S2_idx + ["0"]*(len(s) - S2_idx)
+                S2_labels = [self.out_S2_v2i.get("1")]*S2_idx + [self.out_S2_v2i.get("0")]*(len(s) - S2_idx) + [-1] # don't supervise on eos
                 self.data.append(({
                     "input": list(map(self.in_v2i.get, s)) + [self.eos_token_id],  
                     "labels": [-1]*len(s) + [self.out_v2i.get("r")], 
@@ -182,7 +185,7 @@ class S2Dataset(Dataset):
 class S2a_Dataset(Dataset): # no eos; supervised a/r labels for the last token
     # 2nd head labels: 1 until the first symbol that implies rejection, 0 until the end.
 
-    def __init__(self, files, in_vocab, out_vocab, name="", specific_length=None):
+    def __init__(self, files, config, name="", specific_length=None):
         """ files is a list of paths, each (<*_data_dir>/fix_d_{d}.json) is a json file with the format:
         {
             "pos": {
@@ -194,11 +197,14 @@ class S2a_Dataset(Dataset): # no eos; supervised a/r labels for the last token
         }
         """
         self.name = name
-        self.in_vocab = in_vocab
-        self.in_v2i = {v: i for i, v in enumerate(in_vocab)}
+        self.in_vocab = config.in_vocab
+        self.in_v2i = {v: i for i, v in enumerate(self.in_vocab)}
 
-        self.out_vocab = out_vocab
-        self.out_v2i = {v: i for i, v in enumerate(out_vocab)}
+        self.out_vocab = config.out_vocab
+        self.out_v2i = {v: i for i, v in enumerate(self.out_vocab)}
+
+        self.out_S2_vocab = config.out_S2_vocab
+        self.out_S2_v2i = {v: i for i, v in enumerate(self.out_S2_vocab)}
 
         # process all json files, create a list of [([token_ids], [labels]), ...]
         self.data = []
@@ -215,11 +221,11 @@ class S2a_Dataset(Dataset): # no eos; supervised a/r labels for the last token
                 self.data.append(({
                     "input": list(map(self.in_v2i.get, s)), 
                     "labels": [-1]*(len(s) - 1) + [self.out_v2i.get("a")],
-                    "S2_labels": ["1"]*len(s),
+                    "S2_labels": [self.out_S2_v2i.get("1")]*len(s),
                 }))
             for s in neg_samples:
                 S2_idx = get_S2_idx(s)
-                S2_labels = ["1"]*S2_idx + ["0"]*(len(s) - S2_idx)
+                S2_labels = [self.out_S2_v2i.get("1")]*S2_idx + [self.out_S2_v2i.get("0")]*(len(s) - S2_idx)
                 self.data.append(({
                     "input": list(map(self.in_v2i.get, s)), 
                     "labels": [-1]*(len(s) - 1) + [self.out_v2i.get("r")],
@@ -255,7 +261,7 @@ def get_S3_labels(s):
 class S3Dataset(Dataset): 
     # Supervise current_depth on every symbol of s
 
-    def __init__(self, files, in_vocab, out_vocab, name="", specific_length=None):
+    def __init__(self, files, config, name="", specific_length=None):
         """ files is a list of paths, each (<*_data_dir>/fix_d_{d}.json) is a json file with the format:
         {
             "pos": {
@@ -267,12 +273,15 @@ class S3Dataset(Dataset):
         }
         """
         self.name = name
-        self.in_vocab = in_vocab
-        self.in_v2i = {v: i for i, v in enumerate(in_vocab)}
+        self.in_vocab = config.in_vocab
+        self.in_v2i = {v: i for i, v in enumerate(self.in_vocab)}
         self.eos_token_id = self.in_v2i.get("<eos>")
 
-        self.out_vocab = out_vocab
-        self.out_v2i = {v: i for i, v in enumerate(out_vocab)}
+        self.out_vocab = config.out_vocab
+        self.out_v2i = {v: i for i, v in enumerate(self.out_vocab)}
+
+        self.out_S3_vocab = config.out_S3_vocab
+        self.out_S3_v2i = {v: i for i, v in enumerate(self.out_S3_vocab)}
 
         # process all json files, create a list of [([token_ids], [labels]), ...]
         self.data = []
@@ -286,14 +295,14 @@ class S3Dataset(Dataset):
                 pos_samples = [s for l in J["pos"] for s in J["pos"][l]]
                 neg_samples = [s for l in J["neg"] for s in J["neg"][l]]
             for s in pos_samples:
-                S3_labels = get_S3_labels(s) + [-1] # don't supervise depth on eos
+                S3_labels = list(map(self.out_S3_v2i.get, get_S3_labels(s))) + [-1] # don't supervise depth on eos
                 self.data.append(({
                     "input": list(map(self.in_v2i.get, s)) + [self.eos_token_id], 
                     "labels": [-1]*len(s) + [self.out_v2i.get("a")],
                     "S3_labels": S3_labels,
                 }))
             for s in neg_samples:
-                S3_labels = get_S3_labels(s) + [-1] # don't supervise depth on eos
+                S3_labels = list(map(self.out_S3_v2i.get, get_S3_labels(s))) + [-1] # don't supervise depth on eos
                 self.data.append(({
                     "input": list(map(self.in_v2i.get, s)) + [self.eos_token_id],  
                     "labels": [-1]*len(s) + [self.out_v2i.get("r")], 
@@ -312,7 +321,7 @@ class S3Dataset(Dataset):
 class S3a_Dataset(Dataset): # no eos; supervised a/r labels for the last token
     # Supervise current_depth on every symbol of s
 
-    def __init__(self, files, in_vocab, out_vocab, name="", specific_length=None):
+    def __init__(self, files, config, name="", specific_length=None):
         """ files is a list of paths, each (<*_data_dir>/fix_d_{d}.json) is a json file with the format:
         {
             "pos": {
@@ -324,11 +333,14 @@ class S3a_Dataset(Dataset): # no eos; supervised a/r labels for the last token
         }
         """
         self.name = name
-        self.in_vocab = in_vocab
-        self.in_v2i = {v: i for i, v in enumerate(in_vocab)}
+        self.in_vocab = config.in_vocab
+        self.in_v2i = {v: i for i, v in enumerate(self.in_vocab)}
 
-        self.out_vocab = out_vocab
-        self.out_v2i = {v: i for i, v in enumerate(out_vocab)}
+        self.out_vocab = config.out_vocab
+        self.out_v2i = {v: i for i, v in enumerate(self.out_vocab)}
+
+        self.out_S3_vocab = config.out_S3_vocab
+        self.out_S3_v2i = {v: i for i, v in enumerate(self.out_S3_vocab)}
 
         # process all json files, create a list of [([token_ids], [labels]), ...]
         self.data = []
@@ -342,14 +354,14 @@ class S3a_Dataset(Dataset): # no eos; supervised a/r labels for the last token
                 pos_samples = [s for l in J["pos"] for s in J["pos"][l]]
                 neg_samples = [s for l in J["neg"] for s in J["neg"][l]]
             for s in pos_samples:
-                S3_labels = get_S3_labels(s)
+                S3_labels = list(map(self.out_S3_v2i.get, get_S3_labels(s)))
                 self.data.append(({
                     "input": list(map(self.in_v2i.get, s)), 
                     "labels": [-1]*(len(s) - 1) + [self.out_v2i.get("a")],
                     "S3_labels": S3_labels,
                 }))
             for s in neg_samples:
-                S3_labels = get_S3_labels(s)
+                S3_labels = list(map(self.out_S3_v2i.get, get_S3_labels(s)))
                 self.data.append(({
                     "input": list(map(self.in_v2i.get, s)), 
                     "labels": [-1]*(len(s) - 1) + [self.out_v2i.get("r")],

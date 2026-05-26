@@ -68,9 +68,9 @@ optimizer = torch.optim.AdamW(
 Print("\n------------- Preparing data -------------")
 
 DATASET_CLASS = eval(f"{config.dataset}Dataset")
-train_dataset = DATASET_CLASS(config.train_files, config.in_vocab, config.out_vocab)
-val_datasets = [DATASET_CLASS([f[0]], config.in_vocab, config.out_vocab, name=f[1]) for f in config.val_files]
-test_datasets = [DATASET_CLASS([f[0]], config.in_vocab, config.out_vocab, name=f[1], specific_length=f[2]) for f in config.test_files]
+train_dataset = DATASET_CLASS(config.train_files, config)
+val_datasets = [DATASET_CLASS([f[0]], config, name=f[1]) for f in config.val_files]
+test_datasets = [DATASET_CLASS([f[0]], config, name=f[1], specific_length=f[2]) for f in config.test_files]
 
 collator = partial(sequences_collator, 
                     in_vocab=config.in_vocab,
@@ -133,30 +133,48 @@ for epoch in range(global_epoch, config.num_epochs):
         # the equivalent intent is "disable FlashAttention, allow the other SDPA backends."
         with accelerator.autocast(), sdpa_kernel([SDPBackend.MATH, SDPBackend.EFFICIENT_ATTENTION]):
             optimizer.zero_grad()
+            combined_loss = 0
                         
-            logits = model(
-                batch['input_id'].to(accelerator.device),
+            forward_result = model(
+                batch['input_ids'].to(accelerator.device),
             )
 
+            logits = forward_result['logits']
             loss = F.cross_entropy(
                 logits.view(-1, logits.size(-1)), # bs*seq_len, vocab_size
-                batch['label'].to(accelerator.device).view(-1),
+                batch['labels'].to(accelerator.device).view(-1),
                 ignore_index=-1,
                 reduction="mean",
             )
+            logs = {"step": global_step}
+            combined_loss += loss
 
-            accelerator.backward(loss / config.gradient_accumulation_steps)
+            for supervision_tag in ["S2", "S3"]:
+                if supervision_tag in config.task:
+                    assert f"{supervision_tag}_labels" in batch, f"{supervision_tag}_labels is required for {supervision_tag} head"
+                    assert f"{supervision_tag}_logits" in forward_result, f"{supervision_tag}_logits is required in model output for {supervision_tag} head"
+                    supervision_logits = forward_result.get(f"{supervision_tag}_logits")
+                    supervision_ce = F.cross_entropy(
+                        supervision_logits.view(-1, supervision_logits.size(-1)),
+                        batch[f"{supervision_tag}_labels"].to(accelerator.device).view(-1),
+                        ignore_index=-1,
+                        reduction="mean"
+                    )
+                    logs.update({f"{supervision_tag}_loss": supervision_ce.detach().item()})
+                    combined_loss += supervision_ce * getattr(config, f"{supervision_tag}_loss_weight", 1.0)
+
+            accelerator.backward(combined_loss / config.gradient_accumulation_steps)
 
             if (global_step+1) % config.gradient_accumulation_steps == 0:
                 accelerator.clip_grad_norm_(model.parameters(), 1.0)
                 optimizer.step()
                 #lr_scheduler.step() # Currently disable lr_scheduler
             
-        logs = {"loss": loss.detach().item(), "step": global_step}
+        logs.update({"loss": loss.detach().item(), "combined_loss": combined_loss.detach().item()})
         accelerator.log(logs, step=global_step)
         global_step += 1
 
-        if global_step % config.logging_steps == 0: progress_bar.set_postfix(**logs)
+        if global_step % config.logging_steps == 0: progress_bar.set_postfix(logs)
         progress_bar.update(1)
         
     
@@ -191,6 +209,14 @@ for epoch in range(global_epoch, config.num_epochs):
             if more_eval:
                 Print(f"\nEpoch {epoch} Step {global_step} Metrics on Testing Sets:\n")
                 num_test_samples, total_test_correct = 0, 0
+                more_stats = {}
+                for supervision_tag in ["S2", "S3"]:
+                    if supervision_tag in config.task:
+                        more_stats[supervision_tag] = {
+                            "total_test_correct": 0,
+                            "total_test_numel": 0,
+                        }
+                
                 for test_dataloader in test_dataloaders:
                     metrics = inference(
                         model_to_eval,
@@ -202,7 +228,22 @@ for epoch in range(global_epoch, config.num_epochs):
                     Print(metrics)
                     num_test_samples += metrics["num_samples"]
                     total_test_correct += metrics["num_samples"] * metrics["acc"]
-                Print(f"\nOverall Testing Accuracy: {round(total_test_correct/num_test_samples, 2)}\n")
+                    for supervision_tag in ["S2", "S3"]:
+                        if supervision_tag in config.task:
+                            more_stats[supervision_tag]["total_test_correct"] += metrics.get(f"{supervision_tag}_numel", 0) * metrics.get(f"{supervision_tag}_acc", 0)
+                            more_stats[supervision_tag]["total_test_numel"] += metrics.get(f"{supervision_tag}_numel", 0)
+                
+                overall_testing_metrics = {
+                    **{
+                        f"{supervision_tag}_acc": round(more_stats[supervision_tag]["total_test_correct"] / more_stats[supervision_tag]["total_test_numel"], 2) if more_stats[supervision_tag]["total_test_numel"] > 0 else -1
+                        for supervision_tag in ["S2", "S3"]
+                        if supervision_tag in config.task
+                    },
+                    "acc": round(total_test_correct / num_test_samples, 2),
+                }
+                Print(f"\nOverall Testing Accuracy: ")
+                Print(overall_testing_metrics)
+                Print("\n")
 
             model_to_eval.train()
     accelerator.wait_for_everyone()

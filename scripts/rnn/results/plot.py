@@ -1,13 +1,19 @@
-import random, os, pytz, json, re
+import random, os, pytz, json, re, argparse
 from tqdm import tqdm, trange
 from datetime import datetime
 timezone = pytz.timezone('America/New_York') 
 from matplotlib import pyplot as plt
 import numpy as np
 
-task_suite = "S1a_d_trulyleq[2-8]_C"
-output_dir = f"/home/yingshac/workspace/tmlr/scripts/rnn/output/{task_suite}/"
-figure_dir = f"./{task_suite}/"
+args = argparse.ArgumentParser()
+args.add_argument("--task_suite", type=str)
+args.add_argument("--output_dir", type=str)
+args.add_argument("--figure_dir", type=str)
+args = args.parse_args()
+
+task_suite = args.task_suite
+output_dir = args.output_dir
+figure_dir = args.figure_dir
 
 # extract range of d as a tuple (i1, i2) from output_dir name: matching "[\d-\d]_"
 match = re.search(r"(\d)-(\d)", output_dir)
@@ -15,8 +21,6 @@ i1, i2 = int(match.group(1)), int(match.group(2))
 RANGE = (i1, i2+1)
 print(f"range of d: [{i1}, {i2}]")
 
-# create figure_dir if not exist
-os.makedirs(figure_dir, exist_ok=True)
 """
     Process each terminal.txt file in <output_dir>/<task_suite>/<handle>/
     The terminal.txt file contains the training log, so ignore them. 
@@ -172,7 +176,9 @@ for d in range(*RANGE):
         y.append(np.mean(val_d_to_acc[d][val_d]))
         y_err.append(np.std(val_d_to_acc[d][val_d]))
     plt.plot(x, y, label=f"train d={d}", color=colors[d-2])
-    plt.fill_between(x, np.array(y)-np.array(y_err), np.array(y)+np.array(y_err), color=colors[d-2], alpha=0.2)
+    upper = np.minimum(np.array(y)+np.array(y_err), 1.0)
+    plt.fill_between(x, np.array(y)-np.array(y_err), upper, color=colors[d-2], alpha=0.2)
+    plt.scatter(d, np.mean(val_d_to_acc[d][d]), color=colors[d-2], s=20, zorder=5) # draw a dot on val_d = train_d
 plt.xlabel("test d")
 plt.ylabel("acc")
 plt.title("Acc on greater depth")
@@ -189,7 +195,9 @@ for d in range(*RANGE):
         y.append(np.mean(val_d_to_loss[d][val_d]))
         y_err.append(np.std(val_d_to_loss[d][val_d]))
     plt.plot(x, y, label=f"train d={d}", color=colors[d-2])
-    plt.fill_between(x, np.array(y)-np.array(y_err), np.array(y)+np.array(y_err), color=colors[d-2], alpha=0.2)
+    lower = np.maximum(np.array(y)-np.array(y_err), 0.0)
+    plt.fill_between(x, lower, np.array(y)+np.array(y_err), color=colors[d-2], alpha=0.2)
+    plt.scatter(d, np.mean(val_d_to_loss[d][d]), color=colors[d-2], s=20, zorder=5) # draw a dot on val_d = train_d
 plt.xlabel("test d")
 plt.ylabel("loss")
 plt.title("Loss on greater depth")
@@ -209,8 +217,8 @@ plt.close()
     color: sample i2-i1+1 colors from 'autumn' colormap
 """
 print("Plot Testing Metrics...")
-plt.figure(figsize=(12, 5))
-plt.subplot(1, 2, 1)
+plt.figure(figsize=(14, 12))
+plt.subplot(2, 2, 1)
 colors = plt.cm.autumn(np.linspace(0, 1, i2-i1+1))
 for d in range(*RANGE):
     x = []
@@ -222,13 +230,14 @@ for d in range(*RANGE):
         y.append(np.mean(test_l_to_acc[d][test_l]))
         y_err.append(np.std(test_l_to_acc[d][test_l]))
     plt.plot(x, y, label=f"train d={d}", color=colors[d-2])
-    plt.fill_between(x, np.array(y)-np.array(y_err), np.array(y)+np.array(y_err), color=colors[d-2], alpha=0.2)
+    upper = np.minimum(np.array(y)+np.array(y_err), 1.0)
+    plt.fill_between(x, np.array(y)-np.array(y_err), upper, color=colors[d-2], alpha=0.2)
 plt.xlabel("test l")
 plt.ylabel("acc")
 plt.title("Acc on greater length")
 plt.legend()
 
-plt.subplot(1, 2, 2)
+plt.subplot(2, 2, 2)
 for d in range(*RANGE):
     x = []
     y = []
@@ -239,10 +248,80 @@ for d in range(*RANGE):
         y.append(np.mean(test_l_to_loss[d][test_l]))
         y_err.append(np.std(test_l_to_loss[d][test_l]))
     plt.plot(x, y, label=f"train d={d}", color=colors[d-2])
-    plt.fill_between(x, np.array(y)-np.array(y_err), np.array(y)+np.array(y_err), color=colors[d-2], alpha=0.2)
+    lower = np.maximum(np.array(y)-np.array(y_err), 0.0)
+    plt.fill_between(x, lower, np.array(y)+np.array(y_err), color=colors[d-2], alpha=0.2)
 plt.xlabel("test l")
 plt.ylabel("loss")
 plt.title("Loss on greater length")
+plt.legend()
+
+# Plot Testing Metrics (smoothed) ...
+BIN = 10
+plt.subplot(2, 2, 3)
+colors = plt.cm.autumn(np.linspace(0, 1, i2-i1+1))
+for d in range(*RANGE):
+    x = []
+    y = []
+    y_err = []
+    TEST_L_RANGE = (min(test_l_to_acc[d].keys()), max(test_l_to_acc[d].keys())+1)
+    start = TEST_L_RANGE[0]
+    while start < TEST_L_RANGE[1]:
+        end = start + BIN - 1
+        y_values = []
+        for test_l in range(start, end + 1):
+            if test_l in test_l_to_acc[d]:
+                y_values.extend(test_l_to_acc[d][test_l])
+        if len(y_values) > 0:
+            x.append((start + end) / 2)       # bin center
+            y.append(np.mean(y_values))
+            y_err.append(np.std(y_values))
+
+        start += BIN
+
+    x = np.array(x)
+    y = np.array(y)
+    y_err = np.array(y_err)
+    upper = np.minimum(y + y_err, 1.0)
+
+    plt.plot(x, y, label=f"train d={d}", color=colors[d - 2])
+    plt.fill_between(x, y - y_err, upper, color=colors[d - 2], alpha=0.1)
+plt.xlabel("test l")
+plt.xlim(TEST_L_RANGE[0]-1, TEST_L_RANGE[1])
+plt.ylabel("acc")
+plt.title("Acc on greater length (smoothed)")
+plt.legend()
+
+plt.subplot(2, 2, 4)
+for d in range(*RANGE):
+    x = []
+    y = []
+    y_err = []
+    TEST_L_RANGE = (min(test_l_to_loss[d].keys()), max(test_l_to_loss[d].keys())+1)
+    start = TEST_L_RANGE[0]
+    while start < TEST_L_RANGE[1]:
+        end = start + BIN - 1
+        y_values = []
+        for test_l in range(start, end + 1):
+            if test_l in test_l_to_loss[d]:
+                y_values.extend(test_l_to_loss[d][test_l])
+        if len(y_values) > 0:
+            x.append((start + end) / 2)       # bin center
+            y.append(np.mean(y_values))
+            y_err.append(np.std(y_values))
+
+        start += BIN
+
+    x = np.array(x)
+    y = np.array(y)
+    y_err = np.array(y_err)
+    lower = np.maximum(y - y_err, 0.0) 
+
+    plt.plot(x, y, label=f"train d={d}", color=colors[d - 2])
+    plt.fill_between(x, lower, y + y_err, color=colors[d - 2], alpha=0.1)
+plt.xlabel("test l")
+plt.xlim(TEST_L_RANGE[0]-1, TEST_L_RANGE[1])
+plt.ylabel("loss")
+plt.title("Loss on greater length (smoothed)")
 plt.legend()
 
 plt.tight_layout()
