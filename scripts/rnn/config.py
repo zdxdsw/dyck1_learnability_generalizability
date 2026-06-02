@@ -22,7 +22,7 @@ class Basic_Config:
     learning_rate = 0.0001
     weight_decay = 0.01
     initializer_range = 0.02
-    output_dir = "output/S3a_d_[2-8]_A/"
+    output_dir = "output/S1a_d_[2-8]_H/"
     ckpt_dir = "/data/yingshac/tmlr/ckpts"
     load_from_dir = None
     init_from_ckpt = None

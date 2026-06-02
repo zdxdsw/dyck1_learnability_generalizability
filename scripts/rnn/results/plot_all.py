@@ -1,6 +1,6 @@
 import sys, os
 
-task_suite = "S1a_d_trulyleq[2-8]_F"
+task_suite = "S1_d_[2-8]_C"
 output_dir = f"/home/yingshac/workspace/tmlr/scripts/rnn/output/{task_suite}/"
 figure_dir = f"./{task_suite}/"
 
