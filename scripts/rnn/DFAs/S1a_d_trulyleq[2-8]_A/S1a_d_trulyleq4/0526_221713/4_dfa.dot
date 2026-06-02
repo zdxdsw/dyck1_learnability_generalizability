@@ -1,0 +1,34 @@
+digraph "4_dfa" {
+s0 [label="s0", shape=doublecircle];
+s1 [label="s1"];
+s2 [label="s2", shape=doublecircle];
+s3 [label="s3", shape=doublecircle];
+s4 [label="s4", shape=doublecircle];
+s5 [label="s5"];
+s6 [label="s6", shape=doublecircle];
+s7 [label="s7"];
+s8 [label="s8", shape=doublecircle];
+s9 [label="s9"];
+s0 -> s2 [label="("];
+s0 -> s1 [label=")"];
+s1 -> s6 [label="("];
+s1 -> s7 [label=")"];
+s2 -> s3 [label="("];
+s2 -> s8 [label=")"];
+s3 -> s6 [label="("];
+s3 -> s4 [label=")"];
+s4 -> s3 [label="("];
+s4 -> s5 [label=")"];
+s5 -> s4 [label="("];
+s5 -> s4 [label=")"];
+s6 -> s6 [label="("];
+s6 -> s3 [label=")"];
+s7 -> s4 [label="("];
+s7 -> s9 [label=")"];
+s8 -> s4 [label="("];
+s8 -> s4 [label=")"];
+s9 -> s3 [label="("];
+s9 -> s7 [label=")"];
+__start0 [shape=none, label=""];
+__start0 -> s0 [label=""];
+}

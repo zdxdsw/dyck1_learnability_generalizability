@@ -1,0 +1,4 @@
+Cython==0.29.37
+-e git+https://github.com/clab/dynet.git@22b44958476731af4d1fdbc553626eca3a27e808#egg=dyNET
+numpy==1.23.5
+packaging==26.2
