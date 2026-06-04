@@ -47,15 +47,16 @@ class RotaryPE(nn.Module):
         self.register_buffer("inv_freq", inv_freq, persistent=False)
 
     @torch.no_grad()
-    def forward(self, position_ids, device_type, dtype):
+    def forward(self, q, k, position_ids, device_type, dtype):
         """
+            q, k: [batch, heads, seq_len, head_dim]
             position_ids: [batch, seq_len]
             returns: cos, sin: [batch, seq_len, head_dim]
             
             head_dim is inferred from the size of self.inv_freq.
             frequencies are computed in float32, then cast back to q/k dtype.
         """
-        device = device_type if isinstance(device_type, str) and device_type != "mps" else "cpu"
+        device_type = device_type if isinstance(device_type, str) and device_type != "mps" else "cpu"
         
         # Force float32 computation for RoPE frequencies.
         with torch.autocast(device_type=device_type, enabled=False):
@@ -65,21 +66,9 @@ class RotaryPE(nn.Module):
             freqs = torch.einsum("bs,d->bsd", pos, inv_freq)
             
             emb = torch.cat([freqs, freqs], dim=-1)
-            cos = emb.cos()
-            sin = emb.sin()
+            cos = emb.cos().to(dtype=dtype)
+            sin = emb.sin().to(dtype=dtype)
 
-        return cos.to(dtype=dtype), sin.to(dtype=dtype)
-
-    def apply_rotary_to_qk(self, q, k, position_ids):
-        """
-            q, k: [batch, heads, seq_len, head_dim]
-            position_ids: [batch, seq_len]
-        """
-        cos, sin = self.forward(
-            position_ids=position_ids,
-            dtype=q.dtype,
-            device_type=q.device.type,
-        )
         cos = cos[:, None, :, :].to(q.device)
         sin = sin[:, None, :, :].to(q.device)
         q = (q * cos) + (self._rotate_half(q) * sin)
@@ -289,7 +278,7 @@ class PositionalEncoding(nn.Module):
     def apply_to_qk(self, q, k, position_ids):
         if self.pe_type != "rotary": 
             return q, k
-        return self.rotary.apply_rotary_to_qk(q, k, position_ids)
+        return self.rotary(q, k, position_ids, q.device.type, q.dtype)
     
     def make_position_bias(self, position_ids, dtype):
         if self.pe_type == "alibi":
@@ -323,6 +312,7 @@ class Attention(nn.Module):
         self.pe = pe
         self.qkv_proj = nn.Linear(self.hidden_size, 3 * self.hidden_size)
         self.out_proj = nn.Linear(self.hidden_size, self.hidden_size)
+        self.out_proj.RESIDUAL_SCALED_INIT = True
         self.resid_dropout = nn.Dropout(config.resid_pdrop)
     
     def merge_heads(self, x):
@@ -572,6 +562,7 @@ class MLP(nn.Module):
             nn.Linear(mlp_inner_dim, hidden_size),
             nn.Dropout(config.resid_pdrop),
         )
+        self.net[2].weight.RESIDUAL_SCALED_INIT = True # final linear layer of MLP should also be scaled by 1/sqrt(2L) per GPT-2 paper.
 
     def forward(self, x):
         return self.net(x)
@@ -580,15 +571,21 @@ class MLP(nn.Module):
 class Transformer(nn.Module):
     def __init__(self, config):
         super().__init__()
-
         self.config = config
+        
         self.hidden_size = config.hidden_size
         self.vocab_size = len(config.vocab)
-        self.wte = nn.Embedding(self.vocab_size, self.hidden_size)
+        self.padding_idx = config.vocab.index("<pad>") if "<pad>" in config.vocab else None # config.vocab is a list. Find the index of "<pad>"
+        
+        self.we = nn.Embedding(self.vocab_size, self.hidden_size, padding_idx=self.padding_idx)
         self.pe = PositionalEncoding(config)
         
         self.drop = nn.Dropout(config.embd_pdrop)
-        self.h = nn.ModuleList([Block(config, self.pe) for _ in range(config.num_hidden_layers)])
+        
+        self.blocks = nn.ModuleList([
+            Block(config, self.pe) 
+            for _ in range(config.num_hidden_layers)
+        ])
         self.ln_f = nn.LayerNorm(self.hidden_size, eps=config.layer_norm_epsilon)
         self.lm_head = nn.Linear(config.hidden_size, self.vocab_size, bias=False)
 
@@ -597,31 +594,25 @@ class Transformer(nn.Module):
         
 
     def _init_weights(self, module):
-        """Initialize the weights."""
         if isinstance(module, (nn.Linear)):
-            # Slightly different from the TF version which uses truncated_normal for initialization
-            # cf https://github.com/pytorch/pytorch/pull/5617
-            module.weight.data.normal_(mean=0.0, std=self.config.initializer_range)
-            if module.bias is not None:
+            std = self.config.initializer_range
+
+            if getattr(module, "RESIDUAL_SCALED_INIT", False): # default is False
+                std = std / math.sqrt(2 * self.config.num_hidden_layers)
+            
+            module.weight.data.normal_(mean=0.0, std=std)
+            
+            if module.bias is not None: 
                 module.bias.data.zero_()
+        
         elif isinstance(module, nn.Embedding):
             module.weight.data.normal_(mean=0.0, std=self.config.initializer_range)
             if module.padding_idx is not None:
                 module.weight.data[module.padding_idx].zero_()
+        
         elif isinstance(module, nn.LayerNorm):
             module.bias.data.zero_()
             module.weight.data.fill_(1.0)
-
-         # Reinitialize selected weights subject to the OpenAI GPT-2 Paper Scheme:
-        #   > A modified initialization which accounts for the accumulation on the residual path with model depth. Scale
-        #   > the weights of residual layers at initialization by a factor of 1/√N where N is the # of residual layers.
-        #   >   -- GPT-2 :: https://openai.com/blog/better-language-models/
-        #
-        # Reference (Megatron-LM): https://github.com/NVIDIA/Megatron-LM/blob/main/megatron/model/gpt_model.py
-        for name, p in module.named_parameters():
-            if name == "out_proj.weight":
-                # Special Scaled Initialization --> There are 2 Layer Norms per Transformer Block
-                p.data.normal_(mean=0.0, std=(self.config.initializer_range / math.sqrt(2 * self.config.num_hidden_layers)))
 
     def forward(
         self,
@@ -631,16 +622,13 @@ class Transformer(nn.Module):
         expose_attn_weights=False,
     ):
 
-        input_shape = input_ids.size() # bs, seq_len
-        input_ids = input_ids.view(-1, input_shape[-1])
-
-        hidden_states = self.wte(input_ids)
+        hidden_states = self.we(input_ids)
         hidden_states = self.pe.apply_to_embeddings(hidden_states, position_ids)
         hidden_states = self.drop(hidden_states)
 
         # collect per-layer attn_weights
         attn_weights_list = [] # a list of [batch, heads, seq_len, seq_len] tensors
-        for block in self.h:
+        for block in self.blocks:
             if expose_attn_weights:
                 hidden_states, attn_weights = block(hidden_states, binary_mask, position_ids, expose_attn_weights)
                 attn_weights_list.append(attn_weights)
