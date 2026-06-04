@@ -1,138 +1,315 @@
 import os, math
-from typing import Optional, Tuple, Union
+from typing import Optional, Tuple, Union, Literal
+import numpy as np
 import torch
 import torch.nn as nn
 from torch.cuda.amp import autocast
 import torch.nn.functional as F
-from transformers.activations import ACT2FN
 torch.set_printoptions(profile="full")
 
-"""
-ACT2CLS = {
-    "gelu": GELUActivation,
-    "gelu_10": (ClippedGELUActivation, {"min": -10, "max": 10}),
-    "gelu_fast": FastGELUActivation,
-    "gelu_new": NewGELUActivation,
-    "gelu_python": (GELUActivation, {"use_gelu_python": True}),
-    "gelu_pytorch_tanh": GELUTanh,
-    "gelu_python_tanh": (GELUTanh, {"use_gelu_tanh_python": True}),
-    "gelu_accurate": AccurateGELUActivation,
-    "hardswish": nn.Hardswish,
-    "laplace": LaplaceActivation,
-    "leaky_relu": nn.LeakyReLU,
-    "linear": LinearActivation,
-    "mish": MishActivation,
-    "quick_gelu": QuickGELUActivation,
-    "relu": nn.ReLU,
-    "relu2": ReLUSquaredActivation,
-    "relu6": nn.ReLU6,
-    "sigmoid": nn.Sigmoid,
-    "silu": SiLUActivation,
-    "sqrtsoftplus": SqrtSoftplusActivation,
-    "swish": nn.SiLU,
-    "tanh": nn.Tanh,
-    "prelu": nn.PReLU,
-    "xielu": XIELUActivation,
-}
-ACT2FN = ClassInstantier(ACT2CLS)
-"""
+class GELUNew(nn.Module):
+    def forward(self, x):
+        return F.gelu(x, approximate="tanh")
 
-class RotaryEmbedding(nn.Module):
-    """
-    References:
-    https://github.com/huggingface/transformers/blob/v4.39.3/src/transformers/models/llama/modeling_llama.py#L96 
-    """
-    def __init__(self, dim, max_position_embeddings, base=10000, device=None, scaling_factor=1.0):
+def get_activation_module(name: str) -> nn.Module:
+    name = name.lower()
+    if name == "gelu": return nn.GELU()
+    if name == "gelu_new": return GELUNew()
+    if name in {"silu", "swish"}: return nn.SiLU()
+    if name == "relu": return nn.ReLU()
+    if name == "tanh": return nn.Tanh()
+    raise ValueError(f"Unknown activation function: {name}")
+
+PE_TYPE = Literal[
+    "none",
+    "absolute", 
+    "sinusoidal",
+    "rotary",
+    "scaler",
+    "alibi",
+    "relative",
+]
+
+class RotaryPE(nn.Module):
+    def __init__(self, head_dim, max_position_embeddings, base=10000, scaling_factor=1.0):
         super().__init__()
-        self.scaling_factor = scaling_factor
-        self.dim = dim
+        
+        if head_dim % 2 != 0: raise ValueError(f"Rotary head_dim must be even, got {head_dim}.")
+        self.head_dim = head_dim
         self.max_position_embeddings = max_position_embeddings
+        self.scaling_factor = scaling_factor
         self.base = base
-        inv_freq = 1.0 / (self.base ** (torch.arange(0, self.dim, 2, dtype=torch.int64).float().to(device) / self.dim))
+        
+        inv_freq = 1.0 / (
+            self.base ** (torch.arange(0, self.head_dim, 2, dtype=torch.float32) / self.head_dim)
+        )
+        
         self.register_buffer("inv_freq", inv_freq, persistent=False)
-        # For BC we register cos and sin cached
-        self.max_seq_len_cached = max_position_embeddings
-        t = torch.arange(self.max_seq_len_cached, device=device, dtype=torch.int64).type_as(self.inv_freq)
-        t = t / self.scaling_factor
-        freqs = torch.outer(t, self.inv_freq)
-        # Different from paper, but it uses a different permutation in order to obtain the same calculation
-        emb = torch.cat((freqs, freqs), dim=-1)
-        self.register_buffer("_cos_cached", emb.cos().to(torch.get_default_dtype()), persistent=False)
-        self.register_buffer("_sin_cached", emb.sin().to(torch.get_default_dtype()), persistent=False)
 
     @torch.no_grad()
-    def forward(self, x, position_ids):
-        # x: [bs, num_heads, seq_len, head_dim]
-        inv_freq_expanded = self.inv_freq[None, :, None].float().expand(position_ids.shape[0], -1, 1)
-        position_ids_expanded = position_ids[:, None, :].float()
-        # Force float32 since bfloat16 loses precision on long contexts
-        # See https://github.com/huggingface/transformers/pull/29285
-        device_type = x.device.type
-        device_type = device_type if isinstance(device_type, str) and device_type != "mps" else "cpu"
+    def forward(self, position_ids, device_type, dtype):
+        """
+            position_ids: [batch, seq_len]
+            returns: cos, sin: [batch, seq_len, head_dim]
+            
+            head_dim is inferred from the size of self.inv_freq.
+            frequencies are computed in float32, then cast back to q/k dtype.
+        """
+        device = device_type if isinstance(device_type, str) and device_type != "mps" else "cpu"
+        
+        # Force float32 computation for RoPE frequencies.
         with torch.autocast(device_type=device_type, enabled=False):
-            freqs = (inv_freq_expanded.float() @ position_ids_expanded.float()).transpose(1, 2)
-            emb = torch.cat((freqs, freqs), dim=-1)
+            pos = position_ids.float() / self.scaling_factor
+            inv_freq = self.inv_freq.float()
+            # outer product
+            freqs = torch.einsum("bs,d->bsd", pos, inv_freq)
+            
+            emb = torch.cat([freqs, freqs], dim=-1)
             cos = emb.cos()
             sin = emb.sin()
-        return cos.to(dtype=x.dtype), sin.to(dtype=x.dtype)
 
+        return cos.to(dtype=dtype), sin.to(dtype=dtype)
 
-def rotate_half(x):
-    """Rotates half the hidden dims of the input."""
-    x1 = x[..., : x.shape[-1] // 2]
-    x2 = x[..., x.shape[-1] // 2 :]
-    return torch.cat((-x2, x1), dim=-1)
-def apply_rotary_pos_emb(q, k, cos, sin, unsqueeze_dim=1):
-    cos = cos.unsqueeze(unsqueeze_dim)
-    sin = sin.unsqueeze(unsqueeze_dim)
+    def apply_rotary_to_qk(self, q, k, position_ids):
+        """
+            q, k: [batch, heads, seq_len, head_dim]
+            position_ids: [batch, seq_len]
+        """
+        cos, sin = self.forward(
+            position_ids=position_ids,
+            dtype=q.dtype,
+            device_type=q.device.type,
+        )
+        cos = cos[:, None, :, :].to(q.device)
+        sin = sin[:, None, :, :].to(q.device)
+        q = (q * cos) + (self._rotate_half(q) * sin)
+        k = (k * cos) + (self._rotate_half(k) * sin)
+
+        return q, k
     
-    q_embed = (q * cos) + (rotate_half(q) * sin)
-    k_embed = (k * cos) + (rotate_half(k) * sin)
-    return q_embed, k_embed
+    @staticmethod
+    def _rotate_half(x):
+        """Rotates half the hidden dims of the input."""
+        x1 = x[..., : x.shape[-1] // 2]
+        x2 = x[..., x.shape[-1] // 2 :]
+        return torch.cat((-x2, x1), dim=-1)
 
-class SinusoidalEmbedding(nn.Module):
-    """
-    Reference: https://github.com/butsugiri/shape/blob/main/onmt/modules/embeddings.py
-    """
 
-    def __init__(self, dim, max_position_embeddings):
+class SinusoidalPE(nn.Module):
+    def __init__(self, hidden_size, max_position_embeddings):
+        super().__init__()
+        lookup = torch.zeros(max_position_embeddings, hidden_size)
+        position = torch.arange(
+            0, 
+            max_position_embeddings,
+            dtype=torch.float,
+        ).unsqueeze(1)
+
+        div_term = torch.exp(
+            (torch.arange(0, hidden_size, 2, dtype=torch.float)
+            * -(math.log(10000.0) / hidden_size))
+        )
         
-        pe = torch.zeros(max_position_embeddings, dim)
-        position = torch.arange(0, max_position_embeddings).unsqueeze(1)
-        div_term = torch.exp((torch.arange(0, dim, 2, dtype=torch.float) *
-                             -(math.log(10000.0) / dim)))
-        
-        pe[:, 0::2] = torch.sin(position.float() * div_term)
-        pe[:, 1::2] = torch.cos(position.float() * div_term)
-        #pe = pe.unsqueeze(1)
-        super(SinusoidalEmbedding, self).__init__()
-        self.register_buffer('pe', pe)
+        lookup[:, 0::2] = torch.sin(position * div_term)
+        lookup[:, 1::2] = torch.cos(position * div_term[: lookup[:, 1::2].shape[1]]) # handles odd hidden_size
+        self.register_buffer('lookup', lookup, persistent=False)
 
     def forward(self, x):
-        # x: position_ids (bs, seq_len)
-        pe = torch.stack([self.pe[_x] for _x in x])
-        #print(pe.size())
-        #print(pe[:5, :30, 6])
-        return pe
-    
-"""
-References:
-https://github.com/huggingface/transformers/blob/v4.5.0/src/transformers/models/gpt2/modeling_gpt2.py#L125
+        return self.lookup[x] # x is already in index tensor
 
-"""
+
+class ALiBiPE(nn.Module):
+    def __init__(self, num_attn_heads):
+        super().__init__()
+
+        slopes = self._get_alibi_slopes(num_attn_heads)
+        self.register_buffer("slopes", slopes, persistent=False)
+
+    def forward(self, position_ids, dtype):
+        """
+            position_ids: [batch, seq_len]
+            returns: [batch, num_heads, seq_len, seq_len]
+        """
+        q_pos = position_ids[:, :, None]
+        k_pos = position_ids[:, None, :]
+        distance = (q_pos - k_pos).abs().float()[:, None, :, :] # [batch, 1, seq_len, seq_len]
+        slopes = self.slopes[None, :, None, None].to(device=position_ids.device) # [1, num_heads, 1, 1]
+        bias = -slopes * distance # [batch, num_heads, seq_len, seq_len]
+        return bias.to(dtype=dtype)
+
+    @staticmethod
+    def _get_alibi_slopes(num_attn_heads):
+        """
+            paper: https://arxiv.org/pdf/2108.12409
+            Static, non-learned bias: softmax(qK^T + m x [-(i-1), ..., -2, -1, 0]).
+            m is a head-specific slope. 
+            To extend it to non-causal, bias[head_idx, i, j] = - m_{head_idx} x |i-j|.
+
+            In general, for n heads, our set of slopes is the geometric sequence that starts
+            at 2^{-8/n} and uses that same value as its ratio.
+        """
+        # get slopes
+        ratio = 2 ** (-8 / num_attn_heads)
+        slopes = np.array([ratio ** (i + 1) for i in range(num_attn_heads)])
+        return torch.from_numpy(slopes).float()
+
+class T5RelativePE(nn.Module):
+    """
+        Each relative distance bucket ges a **learned**, **scalar** bias per head.
+        It modifies attention logits as:
+            scores[b, h, i, j] += bias[h, bucket(position_j - position_i)]
+        Unlike Shaw/Huang/Transformer-XL relative PE, this does NOT depend on q_i
+            and therefore can be cleanly implemented as an additive attention bias.
+    """
+    def __init__(
+        self,
+        num_attn_heads,
+        num_buckets,
+        max_distance,
+        causal: bool,
+    ):
+        super().__init__()
+
+        self.num_attn_heads = num_attn_heads
+        self.num_buckets = num_buckets
+        self.max_distance = max_distance
+        self.causal = causal
+
+        self.lookup = nn.Embedding(num_buckets, num_attn_heads)
+
+    def forward(self, position_ids, dtype):
+        """
+            position_ids: [batch, seq_len]
+            returns: [batch, num_heads, seq_len, seq_len]
+        """
+        q_pos = position_ids[:, :, None]
+        k_pos = position_ids[:, None, :]
+        distance = k_pos - q_pos # [batch, seq_len, seq_len]
+
+        # bucket the relative distances
+        buckets = self._get_relative_position_buckets(
+            distance,
+            causal=self.causal,
+            num_buckets=self.num_buckets,
+            max_distance=self.max_distance,
+        )
+
+        # get bias from embedding
+        bias = self.lookup(buckets) # [batch, seq_len, seq_len, num_heads]
+        bias = bias.permute(0, 3, 1, 2) # [batch, num_heads, seq_len, seq_len]
+
+        return bias.to(dtype=dtype)
+
+    @staticmethod
+    def _get_relative_position_buckets(
+        distance, 
+        causal, 
+        num_buckets, # B
+        max_distance, # D
+    ):
+        """
+        For causal=True:
+            future positions are mapped as if they are distance 0, since they
+            should already be removed by the causal mask. Past positions are
+            bucketed by distance.
+        For causal=False:
+            half the buckets are used for negative relative positions and half
+            for positive relative positions.
+        """
+        result = torch.zeros_like(distance, dtype=torch.long)
+
+        if causal:
+            # distance = j-i <= 0
+            distance = torch.clamp(distance, max=0) # future positions are mapped as if they are distance 0
+            distance = -distance
+        else:
+            num_buckets //= 2
+            result += (distance > 0).long() * num_buckets # future positions get a head start of B//2
+            distance = distance.abs()
+        
+        # Now distance is non-negative.
+        max_exact = num_buckets // 2 # M
+        is_small = distance < max_exact
+
+        # large distances are bucketed logarithmically
+        distance_if_large = max_exact + (
+            torch.log(distance.float() / max_exact + 1e-6)
+            / math.log(max_distance / max_exact)
+            * (num_buckets - max_exact)
+        ).long()
+        distance_if_large = torch.clamp(distance_if_large, max=num_buckets-1)
+        
+        result += torch.where(is_small, distance.long(), distance_if_large)
+
+        return result
+
+    
+class PositionalEncoding(nn.Module):
+    def __init__(self, config):
+        super().__init__()
+        self.config = config
+        self.pe_type = config.pe_type
+        self.hidden_size = config.hidden_size
+        self.num_attn_heads = config.num_attn_heads
+        self.head_dim = self.hidden_size // self.num_attn_heads
+
+        if self.pe_type not in {"none", "absolute", "sinusoidal", "rotary", "scaler", "alibi", "relative"}:
+            raise ValueError(f"Unknown pe_type: {self.pe_type}. \nMust be one of 'none', 'absolute', 'sinusoidal', 'rotary', 'scaler', 'alibi', or 'relative'.")
+
+        if self.pe_type == "absolute":
+            self.absolute = nn.Embedding(config.max_position_embeddings, config.hidden_size)
+        elif self.pe_type == "sinusoidal":
+            self.sinusoidal = SinusoidalPE(self.hidden_size, config.max_position_embeddings)
+        elif self.pe_type == "rotary":
+            self.rotary = RotaryPE(self.head_dim, config.max_position_embeddings)
+        elif self.pe_type == "scaler":
+            self.scaler = nn.Linear(1, self.hidden_size) # Better than concatenating raw position_ids directly.
+        elif self.pe_type == "alibi":
+            self.alibi = ALiBiPE(config.num_attn_heads)
+        elif self.pe_type == "relative":
+            self.relative = T5RelativePE(
+                num_attn_heads=config.num_attn_heads,
+                num_buckets=config.relative_pe_num_buckets,
+                max_distance=config.relative_pe_max_distance,
+                causal=getattr(config, "causal"),
+            )
+    
+    def apply_to_embeddings(self, x, position_ids):
+        if self.pe_type == "absolute":
+            return x + self.absolute(position_ids)
+        elif self.pe_type == "sinusoidal":
+            return x * math.sqrt(self.hidden_size) + self.sinusoidal(position_ids)
+        elif self.pe_type == "scaler":
+            # normalize position_ids to [0,1]
+            y = position_ids.float().unsqueeze(-1) / self.config.max_position_embeddings
+            return x + self.scaler(y)
+        else:
+            return x # for rotary, alibi, and relative, this step is a no-op.
+
+    def apply_to_qk(self, q, k, position_ids):
+        if self.pe_type != "rotary": 
+            return q, k
+        return self.rotary.apply_rotary_to_qk(q, k, position_ids)
+    
+    def make_position_bias(self, position_ids, dtype):
+        if self.pe_type == "alibi":
+            return self.alibi(position_ids, dtype)
+        elif self.pe_type == "relative":
+            return self.relative(position_ids, dtype)
+        else:
+            return None # for absolute, sinusoidal, rotary, and scaler, there is no separate bias term.
+
+    
 class Attention(nn.Module):
     def __init__(
         self,
         config,
-        # log_activations=False,
+        pe: PositionalEncoding,
     ):
 
         super().__init__()
 
         self.config = config
-        # self.max_seq_len = config.max_seq_len
-        # self.log_activations = log_activations
-
         self.hidden_size = config.hidden_size
         self.num_attn_heads = config.num_attn_heads
         self.head_dim = self.hidden_size // self.num_attn_heads
@@ -143,22 +320,10 @@ class Attention(nn.Module):
                 f" {self.num_attn_heads})."
             )
 
-        
+        self.pe = pe
         self.qkv_proj = nn.Linear(self.hidden_size, 3 * self.hidden_size)
         self.out_proj = nn.Linear(self.hidden_size, self.hidden_size)
         self.resid_dropout = nn.Dropout(config.resid_pdrop)
-        
-        # if self.log_activations:
-        #     self.activation_stats = {
-        #         "attentiscon_weight_max": None,
-        #         "attention_weight_min": None,
-        #     }
-
-        if self.config.rotary_PE:
-            self.rotary_emb = RotaryEmbedding(
-                self.head_dim,
-                max_position_embeddings=self.config.max_position_embeddings,
-            )
     
     def merge_heads(self, x):
         batch_size, num_heads, seq_len, head_dim = x.shape
@@ -170,7 +335,7 @@ class Attention(nn.Module):
         x = x.view(batch_size, seq_len, self.num_attn_heads, self.head_dim)
         return x.transpose(1, 2)  # (batch, num_attn_heads, seq_length, head_dim)
 
-    def _mask_padding_mask(self, binary_mask, device, dtype):
+    def _make_padding_mask(self, binary_mask, device, dtype):
         """
         sequence_collator() should create the padding mask
         This function converts the collator's padding mask into the numerical form that attention needs.
@@ -190,9 +355,9 @@ class Attention(nn.Module):
                 f"Got shape {tuple(binary_mask.shape)}."
             )
         """
-        attention_scores will have shape [batch_size, num_heads, query_len, key_len]
+        attention_scores will have shape [batch_size, num_heads, seq_len, seq_len]
         padding mask only depends on the key position, not on head or query position.
-        batch_size, 1, 1, key_len] will be broadcasted to [batch_size, num_heads, query_len, key_len]
+        batch_size, 1, 1, seq_len] will be broadcasted to [batch_size, num_heads, seq_len, seq_len]
         """
         result = 1.0 - binary_mask[:, None, None, :].to(dtype=dtype) # adds singleton dimensions for broadcasting
         result = result * self._mask_value(dtype)
@@ -224,14 +389,6 @@ class Attention(nn.Module):
 
         return result[None, None, :, :]
     
-    def _make_alibi_bias(self, seq_len, device, dtype):
-        # Expected shape: [1, num_heads, query_len, key_len]
-        raise NotImplementedError("ALiBi is not implemented yet.")
-    
-    def _make_relative_position_bias(self, seq_len, device, dtype):
-        # Expected shape: [1, num_heads, query_len, key_len]
-        raise NotImplementedError("Relative Position is not implemented yet.")
-    
     def _mask_value(self, dtype):
         return -1e4 if dtype == torch.float16 else torch.finfo(dtype).min
     
@@ -245,13 +402,12 @@ class Attention(nn.Module):
     def _build_attn_mask(
         self,
         binary_mask, # padding mask
-        query_len,
-        key_len,
+        seq_len,
         device,
         dtype,
     ):
         """ Returns an additive attention bias broadcastable to:
-            [batch, num_heads, query_len, key_len]
+            [batch, num_heads, seq_len, seq_len]
 
             values: 0.0 -- attention; large negative value -- masked
         """
@@ -259,23 +415,17 @@ class Attention(nn.Module):
 
         # A. Padding mask.
         if binary_mask is not None:
-            padding_mask = self._mask_padding_mask(binary_mask, device, dtype)
+            padding_mask = self._make_padding_mask(binary_mask, device, dtype)
             result = self._add_bias(result, padding_mask)
 
         # B. Causal mask.
         if getattr(self.config, "causal", True):
-            causal_mask = self._make_causal_mask(key_len, device, dtype)
+            causal_mask = self._make_causal_mask(seq_len, device, dtype)
             result = self._add_bias(result, causal_mask)
 
-        # C. ALiBi bias.
-        if getattr(self.config, "alibi_PE", False):
-            alibi_bias = self._make_alibi_bias(key_len, device, dtype)
-            result = self._add_bias(result, alibi_bias)
-
-        # D. Relative Position bias.
-        if getattr(self.config, "relative_PE", False):
-            relative_position_bias = self._make_relative_position_bias(key_len, device, dtype)
-            result = self._add_bias(result, relative_position_bias)
+        # C. Positional attention bias, e.g. ALiBi or T5Relative. Otherwise, no-op.
+        position_bias = self.pe.make_position_bias(position_ids=None, dtype=dtype)
+        result = self._add_bias(result, position_bias)
 
         return result
     
@@ -308,18 +458,13 @@ class Attention(nn.Module):
         key = self.split_heads(key)
         value = self.split_heads(value)
 
-        # 3. Rotary PE modifies q/k before attention
-        if getattr(self.config, "rotary_PE", False):
-            if position_ids is None:
-                raise ValueError("position_ids must be provided when using rotary positional embeddings.")
-            cos, sin = self.rotary_emb(value, position_ids)
-            query, key = apply_rotary_pos_emb(query, key, cos, sin)
+        # 3. Positional encoding may modify Q/K, e.g. Rotary. Otherwise, no-op.
+        query, key = self.pe.apply_to_qk(query, key, position_ids)
         
         # 4. Build attention mask.
         additive_mask = self._build_attn_mask(
             binary_mask=binary_mask,
-            query_len=seq_len,
-            key_len=seq_len,
+            seq_len=seq_len,
             device=hidden_states.device,
             dtype=hidden_states.dtype,
         )
@@ -357,11 +502,11 @@ class Attention(nn.Module):
         query, key, value: [batch, heads, seq_len, head_dim]
 
         additive_mask (already additive, so post self._build_attn_mask): 
-            [batch or 1, heads or 1, query_len, key_len]
+            [batch or 1, heads or 1, seq_len, seq_len]
 
         Returns:
-            attn_output:  [batch, heads, query_len, head_dim]
-            attn_weights: [batch, heads, query_len, key_len]
+            attn_output:  [batch, heads, seq_len, head_dim]
+            attn_weights: [batch, heads, seq_len, seq_len]
         """
 
         scale = 1.0 / math.sqrt(query.size(-1))
@@ -381,78 +526,70 @@ class Attention(nn.Module):
 
 
 class Block(nn.Module):
-    def __init__(self, config):
+    def __init__(
+        self, 
+        config,
+        pe: PositionalEncoding
+    ):
         super().__init__()
         hidden_size = config.hidden_size
-        mlp_inner_dim = config.mlp_dim_multipler * hidden_size
         self.ln_1 = nn.LayerNorm(hidden_size, eps=config.layer_norm_epsilon)
-        self.attn = Attention(config)
+        self.attn = Attention(config, pe)
         self.ln_2 = nn.LayerNorm(hidden_size, eps=config.layer_norm_epsilon)
-        
-        self.mlp = MLP(mlp_inner_dim, config)
+        self.mlp = MLP(config)
 
     def forward(
         self, 
-        hidden_states, 
+        x, 
         binary_mask=None, 
         position_ids=None,
         expose_attn_weights=False,
     ):
         if expose_attn_weights:
-            attn_output, attn_weights = self.attn(self.ln_1(hidden_states), binary_mask, position_ids, expose_attn_weights)
+            attn_output, attn_weights = self.attn(self.ln_1(x), binary_mask, position_ids, expose_attn_weights)
         else:
-            attn_output = self.attn(self.ln_1(hidden_states), binary_mask, position_ids, expose_attn_weights)
-        hidden_states = attn_output + hidden_states # residual connection
-
-        feed_forward_hidden_states = self.mlp(self.ln_2(hidden_states))
-        hidden_states = hidden_states + feed_forward_hidden_states # residual connection
+            attn_output = self.attn(self.ln_1(x), binary_mask, position_ids, expose_attn_weights)
+        
+        x = x + attn_output # residual connection
+        x = x + self.mlp(self.ln_2(x))
 
         if expose_attn_weights:
-            return hidden_states, attn_weights
+            return x, attn_weights
         else:
-            return hidden_states  
+            return x  
 
 
 class MLP(nn.Module):
-    def __init__(self, mlp_inner_dim, config):  # in MLP: n_state=3072 (4 * n_embd)
+    def __init__(self, config):
         super().__init__()
-        embed_dim = config.hidden_size
-        self.in_proj = nn.Linear(embed_dim, mlp_inner_dim)
-        self.out_proj = nn.Linear(mlp_inner_dim, embed_dim)
-        self.act = ACT2FN[config.activation_function]
-        self.dropout = nn.Dropout(config.resid_pdrop)
+        
+        hidden_size = config.hidden_size
+        mlp_inner_dim = config.mlp_dim_multipler * hidden_size
+        
+        self.net = nn.Sequential(
+            nn.Linear(hidden_size, mlp_inner_dim),
+            get_activation_module(config.activation_function),
+            nn.Linear(mlp_inner_dim, hidden_size),
+            nn.Dropout(config.resid_pdrop),
+        )
 
     def forward(self, x):
-        h = self.act(self.in_proj(x))
-        h2 = self.out_proj(h)
-        return self.dropout(h2)
+        return self.net(x)
 
 
-class Causal_Transformer(nn.Module):
+class Transformer(nn.Module):
     def __init__(self, config):
         super().__init__()
 
         self.config = config
-        self.embed_dim = config.hidden_size
+        self.hidden_size = config.hidden_size
         self.vocab_size = len(config.vocab)
-
-        eye = torch.eye(self.config.max_seq_len).unsqueeze(0)
-        self.register_buffer("eye", eye, persistent=False)
-
-        num_embeddings = self.embed_dim-1 if config.scaler_posemb else self.embed_dim
-        self.wte = nn.Embedding(self.vocab_size, num_embeddings)
-
-        if self.config.absolute_posemb: 
-            self.wpe = nn.Embedding(config.max_position_embeddings, self.embed_dim)
-            if self.config.absolute_posemb_freeze: self.wpe.weight.requires_grad = False
-            if self.config.absolute_posemb_initfromsine: 
-                self.wpe.weight.data = SinusoidalEmbedding(self.embed_dim, config.max_position_embeddings).pe
-        if self.config.sinusoidal_posemb: self.sine = SinusoidalEmbedding(self.embed_dim, config.max_position_embeddings)
-
+        self.wte = nn.Embedding(self.vocab_size, self.hidden_size)
+        self.pe = PositionalEncoding(config)
         
         self.drop = nn.Dropout(config.embd_pdrop)
-        self.h = nn.ModuleList([Block(config) for _ in range(config.num_hidden_layers)])
-        self.ln_f = nn.LayerNorm(self.embed_dim, eps=config.layer_norm_epsilon)
+        self.h = nn.ModuleList([Block(config, self.pe) for _ in range(config.num_hidden_layers)])
+        self.ln_f = nn.LayerNorm(self.hidden_size, eps=config.layer_norm_epsilon)
         self.lm_head = nn.Linear(config.hidden_size, self.vocab_size, bias=False)
 
         # Initialize weights
@@ -461,7 +598,7 @@ class Causal_Transformer(nn.Module):
 
     def _init_weights(self, module):
         """Initialize the weights."""
-        if isinstance(module, (nn.Linear, Conv1D)):
+        if isinstance(module, (nn.Linear)):
             # Slightly different from the TF version which uses truncated_normal for initialization
             # cf https://github.com/pytorch/pytorch/pull/5617
             module.weight.data.normal_(mean=0.0, std=self.config.initializer_range)
@@ -486,64 +623,31 @@ class Causal_Transformer(nn.Module):
                 # Special Scaled Initialization --> There are 2 Layer Norms per Transformer Block
                 p.data.normal_(mean=0.0, std=(self.config.initializer_range / math.sqrt(2 * self.config.num_hidden_layers)))
 
-
-
     def forward(
         self,
         input_ids,
+        position_ids,
         binary_mask=None, 
-        position_ids=None,
         expose_attn_weights=False,
     ):
 
         input_shape = input_ids.size() # bs, seq_len
         input_ids = input_ids.view(-1, input_shape[-1])
-        device = input_ids.device
 
-        inputs_embeds = self.wte(input_ids)
-        hidden_states = inputs_embeds
-
-        position_ids = position_ids.view(-1, input_shape[-1])
-        
-        # past_length = 0        
-        # noshift_position_ids = torch.arange(past_length, input_shape[-1] + past_length, dtype=torch.long, device=device)
-        # noshift_position_ids = noshift_position_ids.unsqueeze(0).view(-1, input_shape[-1])
-        
-        if self.config.absolute_posemb:
-            #_ = position_ids if self.config.absolute_posemb_shift else noshift_position_ids
-            #position_embeds = self.wpe(_)
-            position_embeds = self.wpe(position_ids)
-            hidden_states = inputs_embeds + position_embeds
-
-        if self.config.rotary_posemb:
-            position_ids_for_rotary = position_ids #if self.config.rotary_posemb_shift else noshift_position_ids
-        else:
-            position_ids_for_rotary = None
-
-        if self.config.scaler_posemb:
-            hidden_states = torch.cat([hidden_states, position_ids.unsqueeze(-1)], dim=-1)
-
-        if self.config.sinusoidal_posemb:
-            position_embeds = self.sine(position_ids)
-            hidden_states = hidden_states * math.sqrt(self.embed_dim) + position_embeds
-            #print(position_embeds[:5, :30, 6])
-        
+        hidden_states = self.wte(input_ids)
+        hidden_states = self.pe.apply_to_embeddings(hidden_states, position_ids)
         hidden_states = self.drop(hidden_states)
 
-        output_shape = input_shape + (hidden_states.size(-1),) # bs, seq_len, hidden_size
-
         # collect per-layer attn_weights
-        attn_weights_list = [] # a list of [batch, heads, query_len, key_len] tensors
+        attn_weights_list = [] # a list of [batch, heads, seq_len, seq_len] tensors
         for block in self.h:
             if expose_attn_weights:
-                hidden_states, attn_weights = block(hidden_states, binary_mask, position_ids_for_rotary, expose_attn_weights)
+                hidden_states, attn_weights = block(hidden_states, binary_mask, position_ids, expose_attn_weights)
                 attn_weights_list.append(attn_weights)
             else:
-                hidden_states = block(hidden_states, binary_mask, position_ids_for_rotary)
+                hidden_states = block(hidden_states, binary_mask, position_ids)
 
         hidden_states = self.ln_f(hidden_states)
-        hidden_states = hidden_states.view(*output_shape)
-
         lm_logits = self.lm_head(hidden_states) # loss calculated outside
 
         if expose_attn_weights:

@@ -62,7 +62,7 @@ def test_sdpa_matches_manual_attention(
             if seq_len >= 4:
                 binary_mask[0, -2:] = 0
         else:
-            attention_mask = None
+            binary_mask = None
 
         additive_mask = attention_module._build_attn_mask(
             binary_mask=binary_mask,
@@ -86,7 +86,6 @@ def test_sdpa_matches_manual_attention(
             key=key,
             value=value,
             additive_mask=additive_mask,
-            expose_attn_weights=True,
         )
 
         torch.testing.assert_close(
@@ -96,7 +95,7 @@ def test_sdpa_matches_manual_attention(
             rtol=rtol,
         )
 
-        print("✅ SDPA and manual attention outputs match.")
+        print("\n✅ SDPA and manual attention outputs match.")
         print(f"max_abs_diff = {(sdpa_out - manual_out).abs().max().item():.3e}")
         print(f"sdpa_out shape = {tuple(sdpa_out.shape)}")
         print(f"manual_weights shape = {tuple(manual_weights.shape)}")
@@ -181,7 +180,7 @@ def test_attention_forward_sdpa_matches_manual(
         rtol=rtol,
     )
 
-    print("✅ Full Attention.forward SDPA/manual paths match.")
+    print("\n✅ Full Attention.forward SDPA/manual paths match.")
     print(f"max_abs_diff = {(sdpa_out - manual_out).abs().max().item():.3e}")
     print(f"output shape = {tuple(sdpa_out.shape)}")
     print(f"attention weights shape = {tuple(manual_weights.shape)}")
@@ -199,10 +198,10 @@ if __name__ == "__main__":
     """
     Make a tiny config object with only the fields Attention actually needs
     """
-    def make_test_config(hidden_size, num_attention_heads, max_position_embeddings, causal, rotary_PE, alibi_PE, relative_PE):
+    def make_test_config(hidden_size, num_attn_heads, max_position_embeddings, causal, rotary_PE, alibi_PE, relative_PE):
         return SimpleNamespace(
             hidden_size=hidden_size,
-            num_attention_heads=num_attention_heads,
+            num_attn_heads=num_attn_heads,
             resid_pdrop=0.0,
             causal=causal,
             rotary_PE=rotary_PE,
@@ -213,7 +212,7 @@ if __name__ == "__main__":
 
     config = make_test_config(
         hidden_size=64,
-        num_attention_heads=8,
+        num_attn_heads=8,
         max_position_embeddings=122,
         causal=True,
         rotary_PE=False,
@@ -239,3 +238,35 @@ if __name__ == "__main__":
     test_sdpa_matches_manual_attention(attn, device="cuda",dtype=torch.float16, atol=1e-3, rtol=1e-3)
     test_attention_forward_sdpa_matches_manual(attn, device="cuda", dtype=torch.float16, atol=1e-3, rtol=1e-3)
 
+    """
+
+    ✅ SDPA and manual attention outputs match.
+    max_abs_diff = 3.576e-07
+    sdpa_out shape = (2, 8, 8, 8)
+    manual_weights shape = (2, 8, 8, 8)
+    
+    ✅ SDPA and manual attention outputs match.
+    max_abs_diff = 4.768e-07
+    sdpa_out shape = (2, 8, 8, 8)
+    manual_weights shape = (2, 8, 8, 8)
+    
+    ✅ Full Attention.forward SDPA/manual paths match.
+    max_abs_diff = 1.192e-07
+    output shape = (2, 8, 64)
+    attention weights shape = (2, 8, 8, 8)
+    
+    ✅ Full Attention.forward SDPA/manual paths match.
+    max_abs_diff = 1.341e-07
+    output shape = (2, 8, 64)
+    attention weights shape = (2, 8, 8, 8)
+    
+    ✅ SDPA and manual attention outputs match.
+    max_abs_diff = 9.766e-04
+    sdpa_out shape = (2, 8, 8, 8)
+    manual_weights shape = (2, 8, 8, 8)
+    
+    ✅ Full Attention.forward SDPA/manual paths match.
+    max_abs_diff = 4.883e-04
+    output shape = (2, 8, 64)
+    attention weights shape = (2, 8, 8, 8)
+    """
