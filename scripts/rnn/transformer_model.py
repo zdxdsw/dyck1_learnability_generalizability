@@ -536,9 +536,19 @@ class Block(nn.Module):
         expose_attn_weights=False,
     ):
         if expose_attn_weights:
-            attn_output, attn_weights = self.attn(self.ln_1(x), binary_mask, position_ids, expose_attn_weights)
+            attn_output, attn_weights = self.attn(
+                self.ln_1(x), 
+                binary_mask=binary_mask, 
+                position_ids=position_ids, 
+                expose_attn_weights=expose_attn_weights
+            )
         else:
-            attn_output = self.attn(self.ln_1(x), binary_mask, position_ids, expose_attn_weights)
+            attn_output = self.attn(
+                self.ln_1(x), 
+                binary_mask=binary_mask, 
+                position_ids=position_ids, 
+                expose_attn_weights=expose_attn_weights
+            )
         
         x = x + attn_output # residual connection
         x = x + self.mlp(self.ln_2(x))
@@ -568,16 +578,19 @@ class MLP(nn.Module):
         return self.net(x)
 
 
-class Transformer(nn.Module):
+class TransformerModel(nn.Module):
     def __init__(self, config):
         super().__init__()
         self.config = config
         
         self.hidden_size = config.hidden_size
-        self.vocab_size = len(config.vocab)
-        self.padding_idx = config.vocab.index("<pad>") if "<pad>" in config.vocab else None # config.vocab is a list. Find the index of "<pad>"
+        self.padding_idx = config.in_vocab.index("<pad>") if "<pad>" in config.in_vocab else None # config.in_vocab is a list. Find the index of "<pad>"
         
-        self.we = nn.Embedding(self.vocab_size, self.hidden_size, padding_idx=self.padding_idx)
+        self.we = nn.Embedding(
+            num_embeddings=len(config.in_vocab), 
+            embedding_dim=self.hidden_size, 
+            padding_idx=self.padding_idx
+        )
         self.pe = PositionalEncoding(config)
         
         self.drop = nn.Dropout(config.embd_pdrop)
@@ -587,7 +600,7 @@ class Transformer(nn.Module):
             for _ in range(config.num_hidden_layers)
         ])
         self.ln_f = nn.LayerNorm(self.hidden_size, eps=config.layer_norm_epsilon)
-        self.lm_head = nn.Linear(config.hidden_size, self.vocab_size, bias=False)
+        self.lm_head = nn.Linear(config.hidden_size, len(config.out_vocab), bias=False)
 
         # Initialize weights
         self.apply(self._init_weights)
@@ -630,10 +643,20 @@ class Transformer(nn.Module):
         attn_weights_list = [] # a list of [batch, heads, seq_len, seq_len] tensors
         for block in self.blocks:
             if expose_attn_weights:
-                hidden_states, attn_weights = block(hidden_states, binary_mask, position_ids, expose_attn_weights)
+                hidden_states, attn_weights = block(
+                    hidden_states, 
+                    binary_mask=binary_mask, 
+                    position_ids=position_ids, 
+                    expose_attn_weights=expose_attn_weights
+                )
                 attn_weights_list.append(attn_weights)
             else:
-                hidden_states = block(hidden_states, binary_mask, position_ids)
+                hidden_states = block(
+                    hidden_states, 
+                    binary_mask=binary_mask, 
+                    position_ids=position_ids, 
+                    expose_attn_weights=expose_attn_weights
+                )
 
         hidden_states = self.ln_f(hidden_states)
         lm_logits = self.lm_head(hidden_states) # loss calculated outside

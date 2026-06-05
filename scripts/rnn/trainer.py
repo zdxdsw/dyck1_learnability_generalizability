@@ -5,11 +5,12 @@ import torch
 from torch.utils.data import DataLoader
 import torch.nn.functional as F
 from functools import partial
-from model import RNNModel
+from rnn_model import RNNModel
+from transformer_model import TransformerModel
+from configs import *
 from dataset import *
-from config import *
 from utils import sequences_collator, inference
-from config_taskspecific import *
+# from config_taskspecific import *
 from accelerate import Accelerator, DistributedDataParallelKwargs
 from torch.nn.attention import sdpa_kernel, SDPBackend
 
