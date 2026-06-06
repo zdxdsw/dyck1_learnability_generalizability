@@ -1,0 +1,1030 @@
+
+------------- Preparing RNN model -------------
+encoder.weight torch.Size([3, 64]) 192
+model.weight_ih_l0 torch.Size([64, 64]) 4096
+model.weight_hh_l0 torch.Size([64, 64]) 4096
+model.bias_ih_l0 torch.Size([64]) 64
+model.bias_hh_l0 torch.Size([64]) 64
+decoder.weight torch.Size([2, 64]) 128
+Total param count: 8640
+Trainable parameters: 8640
+
+------------- Preparing data -------------
+config.shuffle_training_data =  True
+num train = 84980
+num val (per file) = [200, 18, 200, 200, 200, 200]
+num val total = 1018
+num test (per file) = [50, 350, 50, 350, 50, 350, 50, 350, 50, 350, 50, 350, 50, 350, 50, 350, 50, 350, 50, 350, 50, 350, 50, 350, 50, 350, 50, 350, 50, 350, 50, 350, 50, 350, 50, 350, 50, 350, 50, 350]
+num test total = 8000
+------------ Start job shorterS1a_d_trulyleq5, 0523_223929 ------------
+
+Epoch 4 Step 13280 Metrics on Validation Sets:
+
+Validation set: d_5
+{'num_samples': 200, 'loss': 0.0, 'acc': 1.0}
+Validation set: d_1
+{'num_samples': 18, 'loss': 0.0, 'acc': 1.0}
+Validation set: d_2
+{'num_samples': 200, 'loss': 0.0, 'acc': 1.0}
+Validation set: d_3
+{'num_samples': 200, 'loss': 0.0, 'acc': 1.0}
+Validation set: d_4
+{'num_samples': 200, 'loss': 0.0, 'acc': 1.0}
+Validation set: d_6
+{'num_samples': 200, 'loss': 0.19, 'acc': 0.94}
+
+Epoch 4 Step 13280 Metrics on Testing Sets:
+
+Testing set: d_5_l_21
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_22
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_23
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_24
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_25
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_26
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_27
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_28
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_29
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_30
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_31
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_32
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_33
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_34
+{'num_samples': 350, 'loss': 0.01, 'acc': 1.0}
+Testing set: d_5_l_35
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_36
+{'num_samples': 350, 'loss': 0.01, 'acc': 0.99}
+Testing set: d_5_l_37
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_38
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_39
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_40
+{'num_samples': 350, 'loss': 0.03, 'acc': 0.99}
+Testing set: d_5_l_41
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_42
+{'num_samples': 350, 'loss': 0.13, 'acc': 0.97}
+Testing set: d_5_l_43
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_44
+{'num_samples': 350, 'loss': 0.07, 'acc': 0.97}
+Testing set: d_5_l_45
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_46
+{'num_samples': 350, 'loss': 0.12, 'acc': 0.97}
+Testing set: d_5_l_47
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_48
+{'num_samples': 350, 'loss': 0.17, 'acc': 0.97}
+Testing set: d_5_l_49
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_50
+{'num_samples': 350, 'loss': 0.19, 'acc': 0.96}
+Testing set: d_5_l_51
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_52
+{'num_samples': 350, 'loss': 0.28, 'acc': 0.95}
+Testing set: d_5_l_53
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_54
+{'num_samples': 350, 'loss': 0.25, 'acc': 0.95}
+Testing set: d_5_l_55
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_56
+{'num_samples': 350, 'loss': 0.26, 'acc': 0.95}
+Testing set: d_5_l_57
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_58
+{'num_samples': 350, 'loss': 0.22, 'acc': 0.96}
+Testing set: d_5_l_59
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_60
+{'num_samples': 350, 'loss': 0.27, 'acc': 0.96}
+
+Overall Testing Accuracy: 0.98
+
+
+Epoch 9 Step 26560 Metrics on Validation Sets:
+
+Validation set: d_5
+{'num_samples': 200, 'loss': 0.0, 'acc': 1.0}
+Validation set: d_1
+{'num_samples': 18, 'loss': 0.0, 'acc': 1.0}
+Validation set: d_2
+{'num_samples': 200, 'loss': 0.0, 'acc': 1.0}
+Validation set: d_3
+{'num_samples': 200, 'loss': 0.0, 'acc': 1.0}
+Validation set: d_4
+{'num_samples': 200, 'loss': 0.0, 'acc': 1.0}
+Validation set: d_6
+{'num_samples': 200, 'loss': 0.21, 'acc': 0.94}
+
+Epoch 9 Step 26560 Metrics on Testing Sets:
+
+Testing set: d_5_l_21
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_22
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_23
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_24
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_25
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_26
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_27
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_28
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_29
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_30
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_31
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_32
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_33
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_34
+{'num_samples': 350, 'loss': 0.02, 'acc': 1.0}
+Testing set: d_5_l_35
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_36
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_37
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_38
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_39
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_40
+{'num_samples': 350, 'loss': 0.05, 'acc': 0.99}
+Testing set: d_5_l_41
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_42
+{'num_samples': 350, 'loss': 0.18, 'acc': 0.97}
+Testing set: d_5_l_43
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_44
+{'num_samples': 350, 'loss': 0.12, 'acc': 0.98}
+Testing set: d_5_l_45
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_46
+{'num_samples': 350, 'loss': 0.17, 'acc': 0.98}
+Testing set: d_5_l_47
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_48
+{'num_samples': 350, 'loss': 0.21, 'acc': 0.98}
+Testing set: d_5_l_49
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_50
+{'num_samples': 350, 'loss': 0.26, 'acc': 0.96}
+Testing set: d_5_l_51
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_52
+{'num_samples': 350, 'loss': 0.41, 'acc': 0.96}
+Testing set: d_5_l_53
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_54
+{'num_samples': 350, 'loss': 0.39, 'acc': 0.96}
+Testing set: d_5_l_55
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_56
+{'num_samples': 350, 'loss': 0.3, 'acc': 0.97}
+Testing set: d_5_l_57
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_58
+{'num_samples': 350, 'loss': 0.21, 'acc': 0.97}
+Testing set: d_5_l_59
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_60
+{'num_samples': 350, 'loss': 0.36, 'acc': 0.97}
+
+Overall Testing Accuracy: 0.99
+
+
+Epoch 14 Step 39840 Metrics on Validation Sets:
+
+Validation set: d_5
+{'num_samples': 200, 'loss': 0.0, 'acc': 1.0}
+Validation set: d_1
+{'num_samples': 18, 'loss': 0.0, 'acc': 1.0}
+Validation set: d_2
+{'num_samples': 200, 'loss': 0.0, 'acc': 1.0}
+Validation set: d_3
+{'num_samples': 200, 'loss': 0.0, 'acc': 1.0}
+Validation set: d_4
+{'num_samples': 200, 'loss': 0.0, 'acc': 1.0}
+Validation set: d_6
+{'num_samples': 200, 'loss': 0.3, 'acc': 0.94}
+
+Epoch 14 Step 39840 Metrics on Testing Sets:
+
+Testing set: d_5_l_21
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_22
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_23
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_24
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_25
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_26
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_27
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_28
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_29
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_30
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_31
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_32
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_33
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_34
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_35
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_36
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_37
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_38
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_39
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_40
+{'num_samples': 350, 'loss': 0.04, 'acc': 0.99}
+Testing set: d_5_l_41
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_42
+{'num_samples': 350, 'loss': 0.12, 'acc': 0.99}
+Testing set: d_5_l_43
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_44
+{'num_samples': 350, 'loss': 0.05, 'acc': 0.99}
+Testing set: d_5_l_45
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_46
+{'num_samples': 350, 'loss': 0.07, 'acc': 0.99}
+Testing set: d_5_l_47
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_48
+{'num_samples': 350, 'loss': 0.18, 'acc': 0.98}
+Testing set: d_5_l_49
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_50
+{'num_samples': 350, 'loss': 0.17, 'acc': 0.98}
+Testing set: d_5_l_51
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_52
+{'num_samples': 350, 'loss': 0.35, 'acc': 0.97}
+Testing set: d_5_l_53
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_54
+{'num_samples': 350, 'loss': 0.26, 'acc': 0.97}
+Testing set: d_5_l_55
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_56
+{'num_samples': 350, 'loss': 0.15, 'acc': 0.98}
+Testing set: d_5_l_57
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_58
+{'num_samples': 350, 'loss': 0.05, 'acc': 0.99}
+Testing set: d_5_l_59
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_60
+{'num_samples': 350, 'loss': 0.31, 'acc': 0.97}
+
+Overall Testing Accuracy: 0.99
+
+
+Epoch 19 Step 53120 Metrics on Validation Sets:
+
+Validation set: d_5
+{'num_samples': 200, 'loss': 0.0, 'acc': 1.0}
+Validation set: d_1
+{'num_samples': 18, 'loss': 0.0, 'acc': 1.0}
+Validation set: d_2
+{'num_samples': 200, 'loss': 0.0, 'acc': 1.0}
+Validation set: d_3
+{'num_samples': 200, 'loss': 0.0, 'acc': 1.0}
+Validation set: d_4
+{'num_samples': 200, 'loss': 0.0, 'acc': 1.0}
+Validation set: d_6
+{'num_samples': 200, 'loss': 0.09, 'acc': 0.97}
+
+Epoch 19 Step 53120 Metrics on Testing Sets:
+
+Testing set: d_5_l_21
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_22
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_23
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_24
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_25
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_26
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_27
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_28
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_29
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_30
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_31
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_32
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_33
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_34
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_35
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_36
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_37
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_38
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_39
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_40
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_41
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_42
+{'num_samples': 350, 'loss': 0.01, 'acc': 0.99}
+Testing set: d_5_l_43
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_44
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_45
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_46
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_47
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_48
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_49
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_50
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_51
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_52
+{'num_samples': 350, 'loss': 0.07, 'acc': 0.99}
+Testing set: d_5_l_53
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_54
+{'num_samples': 350, 'loss': 0.02, 'acc': 0.99}
+Testing set: d_5_l_55
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_56
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_57
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_58
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_59
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_60
+{'num_samples': 350, 'loss': 0.07, 'acc': 0.99}
+
+Overall Testing Accuracy: 1.0
+
+
+Epoch 24 Step 66400 Metrics on Validation Sets:
+
+Validation set: d_5
+{'num_samples': 200, 'loss': 0.0, 'acc': 1.0}
+Validation set: d_1
+{'num_samples': 18, 'loss': 0.0, 'acc': 1.0}
+Validation set: d_2
+{'num_samples': 200, 'loss': 0.0, 'acc': 1.0}
+Validation set: d_3
+{'num_samples': 200, 'loss': 0.0, 'acc': 1.0}
+Validation set: d_4
+{'num_samples': 200, 'loss': 0.0, 'acc': 1.0}
+Validation set: d_6
+{'num_samples': 200, 'loss': 0.0, 'acc': 1.0}
+
+Epoch 24 Step 66400 Metrics on Testing Sets:
+
+Testing set: d_5_l_21
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_22
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_23
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_24
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_25
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_26
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_27
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_28
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_29
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_30
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_31
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_32
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_33
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_34
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_35
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_36
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_37
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_38
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_39
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_40
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_41
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_42
+{'num_samples': 350, 'loss': 0.01, 'acc': 1.0}
+Testing set: d_5_l_43
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_44
+{'num_samples': 350, 'loss': 0.01, 'acc': 0.99}
+Testing set: d_5_l_45
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_46
+{'num_samples': 350, 'loss': 0.01, 'acc': 1.0}
+Testing set: d_5_l_47
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_48
+{'num_samples': 350, 'loss': 0.03, 'acc': 1.0}
+Testing set: d_5_l_49
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_50
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_51
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_52
+{'num_samples': 350, 'loss': 0.04, 'acc': 0.99}
+Testing set: d_5_l_53
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_54
+{'num_samples': 350, 'loss': 0.08, 'acc': 0.99}
+Testing set: d_5_l_55
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_56
+{'num_samples': 350, 'loss': 0.02, 'acc': 1.0}
+Testing set: d_5_l_57
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_58
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_59
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_60
+{'num_samples': 350, 'loss': 0.08, 'acc': 0.99}
+
+Overall Testing Accuracy: 1.0
+
+
+Epoch 29 Step 79680 Metrics on Validation Sets:
+
+Validation set: d_5
+{'num_samples': 200, 'loss': 0.0, 'acc': 1.0}
+Validation set: d_1
+{'num_samples': 18, 'loss': 0.0, 'acc': 1.0}
+Validation set: d_2
+{'num_samples': 200, 'loss': 0.0, 'acc': 1.0}
+Validation set: d_3
+{'num_samples': 200, 'loss': 0.0, 'acc': 1.0}
+Validation set: d_4
+{'num_samples': 200, 'loss': 0.0, 'acc': 1.0}
+Validation set: d_6
+{'num_samples': 200, 'loss': 0.03, 'acc': 0.98}
+
+Epoch 29 Step 79680 Metrics on Testing Sets:
+
+Testing set: d_5_l_21
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_22
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_23
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_24
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_25
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_26
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_27
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_28
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_29
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_30
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_31
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_32
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_33
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_34
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_35
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_36
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_37
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_38
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_39
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_40
+{'num_samples': 350, 'loss': 0.01, 'acc': 1.0}
+Testing set: d_5_l_41
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_42
+{'num_samples': 350, 'loss': 0.04, 'acc': 0.99}
+Testing set: d_5_l_43
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_44
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_45
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_46
+{'num_samples': 350, 'loss': 0.04, 'acc': 0.99}
+Testing set: d_5_l_47
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_48
+{'num_samples': 350, 'loss': 0.06, 'acc': 0.99}
+Testing set: d_5_l_49
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_50
+{'num_samples': 350, 'loss': 0.02, 'acc': 1.0}
+Testing set: d_5_l_51
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_52
+{'num_samples': 350, 'loss': 0.14, 'acc': 0.99}
+Testing set: d_5_l_53
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_54
+{'num_samples': 350, 'loss': 0.15, 'acc': 0.98}
+Testing set: d_5_l_55
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_56
+{'num_samples': 350, 'loss': 0.07, 'acc': 0.99}
+Testing set: d_5_l_57
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_58
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_59
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_60
+{'num_samples': 350, 'loss': 0.15, 'acc': 0.99}
+
+Overall Testing Accuracy: 1.0
+
+
+Epoch 34 Step 92960 Metrics on Validation Sets:
+
+Validation set: d_5
+{'num_samples': 200, 'loss': 0.0, 'acc': 1.0}
+Validation set: d_1
+{'num_samples': 18, 'loss': 0.0, 'acc': 1.0}
+Validation set: d_2
+{'num_samples': 200, 'loss': 0.0, 'acc': 1.0}
+Validation set: d_3
+{'num_samples': 200, 'loss': 0.0, 'acc': 1.0}
+Validation set: d_4
+{'num_samples': 200, 'loss': 0.0, 'acc': 1.0}
+Validation set: d_6
+{'num_samples': 200, 'loss': 0.0, 'acc': 1.0}
+
+Epoch 34 Step 92960 Metrics on Testing Sets:
+
+Testing set: d_5_l_21
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_22
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_23
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_24
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_25
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_26
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_27
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_28
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_29
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_30
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_31
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_32
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_33
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_34
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_35
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_36
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_37
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_38
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_39
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_40
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_41
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_42
+{'num_samples': 350, 'loss': 0.03, 'acc': 0.99}
+Testing set: d_5_l_43
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_44
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_45
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_46
+{'num_samples': 350, 'loss': 0.02, 'acc': 1.0}
+Testing set: d_5_l_47
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_48
+{'num_samples': 350, 'loss': 0.04, 'acc': 0.99}
+Testing set: d_5_l_49
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_50
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_51
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_52
+{'num_samples': 350, 'loss': 0.16, 'acc': 0.99}
+Testing set: d_5_l_53
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_54
+{'num_samples': 350, 'loss': 0.09, 'acc': 0.99}
+Testing set: d_5_l_55
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_56
+{'num_samples': 350, 'loss': 0.12, 'acc': 0.99}
+Testing set: d_5_l_57
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_58
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_59
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_60
+{'num_samples': 350, 'loss': 0.14, 'acc': 0.99}
+
+Overall Testing Accuracy: 1.0
+
+
+Epoch 39 Step 106240 Metrics on Validation Sets:
+
+Validation set: d_5
+{'num_samples': 200, 'loss': 0.0, 'acc': 1.0}
+Validation set: d_1
+{'num_samples': 18, 'loss': 0.0, 'acc': 1.0}
+Validation set: d_2
+{'num_samples': 200, 'loss': 0.0, 'acc': 1.0}
+Validation set: d_3
+{'num_samples': 200, 'loss': 0.0, 'acc': 1.0}
+Validation set: d_4
+{'num_samples': 200, 'loss': 0.0, 'acc': 1.0}
+Validation set: d_6
+{'num_samples': 200, 'loss': 0.0, 'acc': 1.0}
+
+Epoch 39 Step 106240 Metrics on Testing Sets:
+
+Testing set: d_5_l_21
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_22
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_23
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_24
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_25
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_26
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_27
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_28
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_29
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_30
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_31
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_32
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_33
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_34
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_35
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_36
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_37
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_38
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_39
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_40
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_41
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_42
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_43
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_44
+{'num_samples': 350, 'loss': 0.04, 'acc': 0.99}
+Testing set: d_5_l_45
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_46
+{'num_samples': 350, 'loss': 0.01, 'acc': 0.99}
+Testing set: d_5_l_47
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_48
+{'num_samples': 350, 'loss': 0.09, 'acc': 0.99}
+Testing set: d_5_l_49
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_50
+{'num_samples': 350, 'loss': 0.03, 'acc': 0.99}
+Testing set: d_5_l_51
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_52
+{'num_samples': 350, 'loss': 0.01, 'acc': 1.0}
+Testing set: d_5_l_53
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_54
+{'num_samples': 350, 'loss': 0.12, 'acc': 0.99}
+Testing set: d_5_l_55
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_56
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_57
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_58
+{'num_samples': 350, 'loss': 0.02, 'acc': 0.99}
+Testing set: d_5_l_59
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_60
+{'num_samples': 350, 'loss': 0.07, 'acc': 0.99}
+
+Overall Testing Accuracy: 1.0
+
+
+Epoch 44 Step 119520 Metrics on Validation Sets:
+
+Validation set: d_5
+{'num_samples': 200, 'loss': 0.0, 'acc': 1.0}
+Validation set: d_1
+{'num_samples': 18, 'loss': 0.0, 'acc': 1.0}
+Validation set: d_2
+{'num_samples': 200, 'loss': 0.0, 'acc': 1.0}
+Validation set: d_3
+{'num_samples': 200, 'loss': 0.0, 'acc': 1.0}
+Validation set: d_4
+{'num_samples': 200, 'loss': 0.0, 'acc': 1.0}
+Validation set: d_6
+{'num_samples': 200, 'loss': 0.0, 'acc': 1.0}
+
+Epoch 44 Step 119520 Metrics on Testing Sets:
+
+Testing set: d_5_l_21
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_22
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_23
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_24
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_25
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_26
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_27
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_28
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_29
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_30
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_31
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_32
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_33
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_34
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_35
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_36
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_37
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_38
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_39
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_40
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_41
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_42
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_43
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_44
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_45
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_46
+{'num_samples': 350, 'loss': 0.01, 'acc': 1.0}
+Testing set: d_5_l_47
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_48
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_49
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_50
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_51
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_52
+{'num_samples': 350, 'loss': 0.02, 'acc': 0.99}
+Testing set: d_5_l_53
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_54
+{'num_samples': 350, 'loss': 0.01, 'acc': 1.0}
+Testing set: d_5_l_55
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_56
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_57
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_58
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_59
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_60
+{'num_samples': 350, 'loss': 0.05, 'acc': 1.0}
+
+Overall Testing Accuracy: 1.0
+
+
+Epoch 49 Step 132800 Metrics on Validation Sets:
+
+Validation set: d_5
+{'num_samples': 200, 'loss': 0.0, 'acc': 1.0}
+Validation set: d_1
+{'num_samples': 18, 'loss': 0.0, 'acc': 1.0}
+Validation set: d_2
+{'num_samples': 200, 'loss': 0.0, 'acc': 1.0}
+Validation set: d_3
+{'num_samples': 200, 'loss': 0.0, 'acc': 1.0}
+Validation set: d_4
+{'num_samples': 200, 'loss': 0.0, 'acc': 1.0}
+Validation set: d_6
+{'num_samples': 200, 'loss': 0.0, 'acc': 1.0}
+
+Epoch 49 Step 132800 Metrics on Testing Sets:
+
+Testing set: d_5_l_21
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_22
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_23
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_24
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_25
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_26
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_27
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_28
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_29
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_30
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_31
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_32
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_33
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_34
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_35
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_36
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_37
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_38
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_39
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_40
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_41
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_42
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_43
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_44
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_45
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_46
+{'num_samples': 350, 'loss': 0.01, 'acc': 1.0}
+Testing set: d_5_l_47
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_48
+{'num_samples': 350, 'loss': 0.01, 'acc': 1.0}
+Testing set: d_5_l_49
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_50
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_51
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_52
+{'num_samples': 350, 'loss': 0.01, 'acc': 1.0}
+Testing set: d_5_l_53
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_54
+{'num_samples': 350, 'loss': 0.02, 'acc': 0.99}
+Testing set: d_5_l_55
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_56
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_57
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_58
+{'num_samples': 350, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_59
+{'num_samples': 50, 'loss': 0.0, 'acc': 1.0}
+Testing set: d_5_l_60
+{'num_samples': 350, 'loss': 0.03, 'acc': 1.0}
+
+Overall Testing Accuracy: 1.0
+
+Finish!!! 0523_223929

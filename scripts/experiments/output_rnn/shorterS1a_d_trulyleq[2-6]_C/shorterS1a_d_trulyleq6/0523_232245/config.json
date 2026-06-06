@@ -1,0 +1,279 @@
+{
+  "ckpt_dir": "/data/yingshac/tmlr/ckpts/shorterS1a_d_trulyleq6",
+  "dataset": "S1a_",
+  "date": "0523_232245",
+  "dropout": 0.1,
+  "eval_accumulation_steps": 1,
+  "gradient_accumulation_steps": 1,
+  "hf_cache_dir": "/data/yingshac/hf_cache",
+  "hidden_size": 64,
+  "in_vocab": [
+    "(",
+    ")",
+    "<pad>"
+  ],
+  "init_from_ckpt": null,
+  "initializer_range": 0.02,
+  "learning_rate": 0.001,
+  "load_from_dir": null,
+  "logging_steps": 200,
+  "max_seq_len": 21,
+  "model": "RNN",
+  "more_eval_th_by_epoch": 1,
+  "more_eval_th_by_val_acc": -1,
+  "num_epochs": 30,
+  "num_hidden_layers": 1,
+  "out_vocab": [
+    "a",
+    "r"
+  ],
+  "output_dir": "output/shorterS1a_d_trulyleq[2-6]_C/shorterS1a_d_trulyleq6",
+  "per_device_eval_batch_size": 64,
+  "per_device_train_batch_size": 32,
+  "seed": 91,
+  "shuffle_training_data": true,
+  "task": "shorterS1a_d_trulyleq6",
+  "test_files": [
+    [
+      "/data/yingshac/tmlr/shorter/test/fix_d_6.json",
+      "d_6_l_21",
+      21
+    ],
+    [
+      "/data/yingshac/tmlr/shorter/test/fix_d_6.json",
+      "d_6_l_22",
+      22
+    ],
+    [
+      "/data/yingshac/tmlr/shorter/test/fix_d_6.json",
+      "d_6_l_23",
+      23
+    ],
+    [
+      "/data/yingshac/tmlr/shorter/test/fix_d_6.json",
+      "d_6_l_24",
+      24
+    ],
+    [
+      "/data/yingshac/tmlr/shorter/test/fix_d_6.json",
+      "d_6_l_25",
+      25
+    ],
+    [
+      "/data/yingshac/tmlr/shorter/test/fix_d_6.json",
+      "d_6_l_26",
+      26
+    ],
+    [
+      "/data/yingshac/tmlr/shorter/test/fix_d_6.json",
+      "d_6_l_27",
+      27
+    ],
+    [
+      "/data/yingshac/tmlr/shorter/test/fix_d_6.json",
+      "d_6_l_28",
+      28
+    ],
+    [
+      "/data/yingshac/tmlr/shorter/test/fix_d_6.json",
+      "d_6_l_29",
+      29
+    ],
+    [
+      "/data/yingshac/tmlr/shorter/test/fix_d_6.json",
+      "d_6_l_30",
+      30
+    ],
+    [
+      "/data/yingshac/tmlr/shorter/test/fix_d_6.json",
+      "d_6_l_31",
+      31
+    ],
+    [
+      "/data/yingshac/tmlr/shorter/test/fix_d_6.json",
+      "d_6_l_32",
+      32
+    ],
+    [
+      "/data/yingshac/tmlr/shorter/test/fix_d_6.json",
+      "d_6_l_33",
+      33
+    ],
+    [
+      "/data/yingshac/tmlr/shorter/test/fix_d_6.json",
+      "d_6_l_34",
+      34
+    ],
+    [
+      "/data/yingshac/tmlr/shorter/test/fix_d_6.json",
+      "d_6_l_35",
+      35
+    ],
+    [
+      "/data/yingshac/tmlr/shorter/test/fix_d_6.json",
+      "d_6_l_36",
+      36
+    ],
+    [
+      "/data/yingshac/tmlr/shorter/test/fix_d_6.json",
+      "d_6_l_37",
+      37
+    ],
+    [
+      "/data/yingshac/tmlr/shorter/test/fix_d_6.json",
+      "d_6_l_38",
+      38
+    ],
+    [
+      "/data/yingshac/tmlr/shorter/test/fix_d_6.json",
+      "d_6_l_39",
+      39
+    ],
+    [
+      "/data/yingshac/tmlr/shorter/test/fix_d_6.json",
+      "d_6_l_40",
+      40
+    ],
+    [
+      "/data/yingshac/tmlr/shorter/test/fix_d_6.json",
+      "d_6_l_41",
+      41
+    ],
+    [
+      "/data/yingshac/tmlr/shorter/test/fix_d_6.json",
+      "d_6_l_42",
+      42
+    ],
+    [
+      "/data/yingshac/tmlr/shorter/test/fix_d_6.json",
+      "d_6_l_43",
+      43
+    ],
+    [
+      "/data/yingshac/tmlr/shorter/test/fix_d_6.json",
+      "d_6_l_44",
+      44
+    ],
+    [
+      "/data/yingshac/tmlr/shorter/test/fix_d_6.json",
+      "d_6_l_45",
+      45
+    ],
+    [
+      "/data/yingshac/tmlr/shorter/test/fix_d_6.json",
+      "d_6_l_46",
+      46
+    ],
+    [
+      "/data/yingshac/tmlr/shorter/test/fix_d_6.json",
+      "d_6_l_47",
+      47
+    ],
+    [
+      "/data/yingshac/tmlr/shorter/test/fix_d_6.json",
+      "d_6_l_48",
+      48
+    ],
+    [
+      "/data/yingshac/tmlr/shorter/test/fix_d_6.json",
+      "d_6_l_49",
+      49
+    ],
+    [
+      "/data/yingshac/tmlr/shorter/test/fix_d_6.json",
+      "d_6_l_50",
+      50
+    ],
+    [
+      "/data/yingshac/tmlr/shorter/test/fix_d_6.json",
+      "d_6_l_51",
+      51
+    ],
+    [
+      "/data/yingshac/tmlr/shorter/test/fix_d_6.json",
+      "d_6_l_52",
+      52
+    ],
+    [
+      "/data/yingshac/tmlr/shorter/test/fix_d_6.json",
+      "d_6_l_53",
+      53
+    ],
+    [
+      "/data/yingshac/tmlr/shorter/test/fix_d_6.json",
+      "d_6_l_54",
+      54
+    ],
+    [
+      "/data/yingshac/tmlr/shorter/test/fix_d_6.json",
+      "d_6_l_55",
+      55
+    ],
+    [
+      "/data/yingshac/tmlr/shorter/test/fix_d_6.json",
+      "d_6_l_56",
+      56
+    ],
+    [
+      "/data/yingshac/tmlr/shorter/test/fix_d_6.json",
+      "d_6_l_57",
+      57
+    ],
+    [
+      "/data/yingshac/tmlr/shorter/test/fix_d_6.json",
+      "d_6_l_58",
+      58
+    ],
+    [
+      "/data/yingshac/tmlr/shorter/test/fix_d_6.json",
+      "d_6_l_59",
+      59
+    ],
+    [
+      "/data/yingshac/tmlr/shorter/test/fix_d_6.json",
+      "d_6_l_60",
+      60
+    ]
+  ],
+  "train_files": [
+    "/data/yingshac/tmlr/shorter/train/fix_d_1.json",
+    "/data/yingshac/tmlr/shorter/train/fix_d_2.json",
+    "/data/yingshac/tmlr/shorter/train/fix_d_3.json",
+    "/data/yingshac/tmlr/shorter/train/fix_d_4.json",
+    "/data/yingshac/tmlr/shorter/train/fix_d_5.json",
+    "/data/yingshac/tmlr/shorter/train/fix_d_6.json"
+  ],
+  "val_files": [
+    [
+      "/data/yingshac/tmlr/shorter/validation/fix_d_6.json",
+      "d_6",
+      null
+    ],
+    [
+      "/data/yingshac/tmlr/shorter/validation/fix_d_1.json",
+      "d_1",
+      null
+    ],
+    [
+      "/data/yingshac/tmlr/shorter/validation/fix_d_2.json",
+      "d_2",
+      null
+    ],
+    [
+      "/data/yingshac/tmlr/shorter/validation/fix_d_3.json",
+      "d_3",
+      null
+    ],
+    [
+      "/data/yingshac/tmlr/shorter/validation/fix_d_4.json",
+      "d_4",
+      null
+    ],
+    [
+      "/data/yingshac/tmlr/shorter/validation/fix_d_5.json",
+      "d_5",
+      null
+    ]
+  ],
+  "weight_decay": 0.01
+}
