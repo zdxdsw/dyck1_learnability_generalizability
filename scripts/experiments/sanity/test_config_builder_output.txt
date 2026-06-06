@@ -60,11 +60,11 @@ class FlatEverythingConfig:
     causal = True
     mlp_dim_multiplier = 4
     activation_function = 'gelu'
-    position_encoding = {'max_position_embeddings': 128,
-     'pe_aug_type': 'none',
-     'pe_type': 'none',
-     'relative_pe_max_distance': 128,
-     'relative_pe_num_buckets': 32}
+    pe_type = 'none'
+    pe_aug_type = 'none'
+    max_position_embeddings = 128
+    relative_pe_num_buckets = 32
+    relative_pe_max_distance = 128
     train_files = [
      '/data/yingshac/tmlr/train/fix_d_1.json',
      '/data/yingshac/tmlr/train/fix_d_2.json',
