@@ -566,7 +566,7 @@ class MLP(nn.Module):
         super().__init__()
         
         hidden_size = config.hidden_size
-        mlp_inner_dim = config.mlp_dim_multipler * hidden_size
+        mlp_inner_dim = config.mlp_dim_multiplier * hidden_size
         
         self.net = nn.Sequential(
             nn.Linear(hidden_size, mlp_inner_dim),
@@ -664,6 +664,7 @@ class TransformerModel(nn.Module):
         lm_logits = self.lm_head(hidden_states) # loss calculated outside
 
         if expose_attn_weights:
-            return lm_logits, attn_weights_list
+            result = {'logits': lm_logits, 'attn_weights': attn_weights_list}
         else:
-            return lm_logits
+            result = {'logits': lm_logits}
+        return result

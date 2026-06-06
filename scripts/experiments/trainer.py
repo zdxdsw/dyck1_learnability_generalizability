@@ -9,7 +9,7 @@ from functools import partial
 from rnn_model import RNNModel
 from transformer_model import TransformerModel
 from dataset import *
-from utils import sequence_collator_builder, inference
+from utils import sequence_collator_builder, inference, prepare_forward_inputs
 from accelerate import Accelerator, DistributedDataParallelKwargs
 from torch.nn.attention import sdpa_kernel, SDPBackend
 
@@ -128,7 +128,11 @@ for epoch in range(global_epoch, config.num_epochs):
             combined_loss = 0
                         
             forward_result = model(
-                batch['input_ids'].to(accelerator.device),
+                **prepare_forward_inputs(
+                    batch=batch, 
+                    config=config, 
+                    device=accelerator.device
+                )
             )
 
             logits = forward_result['logits']

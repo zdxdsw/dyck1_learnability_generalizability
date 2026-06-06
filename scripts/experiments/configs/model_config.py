@@ -19,8 +19,8 @@ class RNNConfig:
 
 @dataclass
 class PositionEncodingConfig:
-    pe_type: str = "none"
-    pe_aug_type: PEAugType = "none"
+    pe_type: str = "rotary"
+    pe_aug_type: PEAugType = "shifted"
     max_position_embeddings: int = 128
     relative_pe_num_buckets: int = 32
     relative_pe_max_distance: int = 128
@@ -30,7 +30,7 @@ class PositionEncodingConfig:
 class TransformerConfig:
     num_hidden_layers: int = 4
     hidden_size: int = 64
-    num_attn_heads: int = 4
+    num_attn_heads: int = 8
     initializer_range: float = 0.02
 
     embd_pdrop: float = 0.1

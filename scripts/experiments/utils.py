@@ -16,9 +16,11 @@ class PositionIdBuilder:
         if self.pe_aug_type == "none":
             return torch.arange(seq_len, dtype=torch.long)
         elif self.pe_aug_type == "shifted":
+            # torch.randint is exclusive of the upper bound.
             offset = torch.randint(0, self.max_position_embeddings - seq_len + 1, (1,)).item()
             return torch.arange(offset, offset + seq_len, dtype=torch.long)
         elif self.pe_aug_type == "randomized":
+            # torch.randperm(n) randomly permutes integers from 0 to n - 1
             return torch.randperm(self.max_position_embeddings)[:seq_len].sort().values
         else:
             raise ValueError(f"Unknown pe_aug_type: {self.pe_aug_type}")
@@ -123,6 +125,32 @@ def get_acc(logits, labels, ignore_index):
     return correct, demo 
 
 
+""" Prepare model-specific batched input since different model.forward() require different input keys """
+
+MODEL_INPUT_KEYS = {
+    "RNN": {
+        "input_ids",
+    },
+
+    "Transformer": {
+        "input_ids",
+        "position_ids",
+        "binary_padding_mask",
+        "expose_attn_weights",
+    },
+}
+def prepare_forward_inputs(batch, config, device):
+    accepted_input_keys = MODEL_INPUT_KEYS[config.model]
+
+    result = {}
+    for k in batch:
+        if k in accepted_input_keys:
+            v = batch[k]
+            if torch.is_tensor(v):
+                v = v.to(device)
+            result[k] = v
+    return result
+
 def inference(model_to_eval, dataloader, device, config):
     
     correct, demo = 0, 0
@@ -139,7 +167,13 @@ def inference(model_to_eval, dataloader, device, config):
     # testing_output = {}
     # k = 0
     for i, batch in enumerate(dataloader):
-        forward_result = model_to_eval(batch['input_ids'].to(device),)
+        forward_result = model_to_eval(
+            **prepare_forward_inputs(
+                batch=batch, 
+                config=config, 
+                device=device
+            )
+        )
         
         logits = forward_result['logits']
         ce = F.cross_entropy(
@@ -208,7 +242,7 @@ def inference(model_to_eval, dataloader, device, config):
 
 import os
 
-
+""" Prepare output_dir and ckpt_dir with suffixes that denote model name """
 def add_suffix_to_outermost_dir(path: str, suffix: str) -> str:
     """
     Add suffix to the first directory component.

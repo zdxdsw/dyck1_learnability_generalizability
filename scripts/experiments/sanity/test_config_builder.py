@@ -6,7 +6,7 @@ from configs import flat_everything_config_builder
 from contextlib import redirect_stdout
 
 # Change this manually when testing.
-TASK = "S3_d_trulyleq5"
+TASK = "S1_d_trulyleq8"
 
 # Long fields to print at the end.
 LONG_FIELDS = {

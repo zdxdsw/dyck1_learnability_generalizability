@@ -2,6 +2,6 @@ venv/
 *.tar.gz
 __pycache__
 __pycache__/
-scripts/rnn/output
-scripts/rnn_with_head/outputscripts/extraction/dynet/
+/scripts/experiments/output_transformer/
+/scripts/experiments/output_rnn/
 /scripts/extraction/dynet/
