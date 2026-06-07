@@ -94,6 +94,7 @@ val_d_to_loss = {d: {} for d in range(*RANGE)}
         ...
     }
 """
+
 # assume we do not know the range of test_l in advance
 test_l_to_acc = {d: {} for d in range(*RANGE)}
 test_l_to_loss = {d: {} for d in range(*RANGE)}
@@ -101,24 +102,44 @@ test_l_to_loss = {d: {} for d in range(*RANGE)}
 print("Extracting metrics from terminal.txt files...")
 task_suite_prefix = os.listdir(f"{output_dir}/")[0][:-1]
 for d in trange(*RANGE):
+    if not os.path.exists(f"{output_dir}/{task_suite_prefix}{d}"): continue
     for handle in os.listdir(f"{output_dir}/{task_suite_prefix}{d}"):
         with open(f"{output_dir}/{task_suite_prefix}{d}/{handle}/terminal.txt", "r") as f:
             lines = f.readlines()
         
-        # iterate from the last line and go backwards, 
-        # find the last line idx that satisfies:         
-        # line.startswith("Epoch") and "Metrics on Validation Sets" in line
-        last_val_line_idx = -1
-        for i in range(len(lines)-1, -1, -1):
+        # iterate from the first line; go through every line that satisfies: 
+        # line.startswith("Epoch") and "Metrics on Validation Sets" in line -> temporarily store line idx as epoch_line_idx
+        # for every Epoch,
+        # extract the metrics written in the next line of "Validation set: d_{d}", which looks like:
+        # {'num_samples': 10000, 'loss': 0.0, 'acc': 1.0}"
+        # create a map from epoch_line_idx to 'loss'
+        # eventually obtain the epoch_line_idx with smallest loss; if there is a tie, choose the one with the largest epoch_lind_idx
+        best_epoch_line_idx, best_epoch_id = -1, -1
+        smallest_same_d_val_loss = float("inf")
+        for i in range(len(lines)):
             line = lines[i]
             if line.startswith("Epoch") and "Metrics on Validation Sets" in line:
-                last_val_line_idx = i
-                break
-        if last_val_line_idx == -1:
+                epoch_line_idx = i
+                epoch_id = int(line.strip().split("Epoch ")[1].split(" Step")[0])
+                # extract the metrics for each validation set
+                for j in range(epoch_line_idx+1, len(lines)):
+                    line = lines[j]
+                    if line.startswith("Epoch") and "Metrics on Validation Sets" in line:
+                        break
+                    if line.startswith("Validation set: d_"):
+                        val_d = int(line.strip().split("Validation set: d_")[1])
+                        if val_d != d: continue
+                        metrics = eval(lines[j+1].strip())
+                        if metrics["loss"] <= smallest_same_d_val_loss:
+                            smallest_same_d_val_loss = metrics["loss"]
+                            best_epoch_line_idx = epoch_line_idx
+                            best_epoch_id = epoch_id
+
+        if best_epoch_line_idx == -1:
             print(f"Cannot find Validation Metrics in {task_suite_prefix}{d}/{handle}")
             continue
         # extract the metrics for each validation set
-        for j in range(last_val_line_idx+1, len(lines)):
+        for j in range(best_epoch_line_idx+1, len(lines)):
             line = lines[j]
             if line.startswith("Epoch") and "Metrics on Testing Sets" in line:
                 break
@@ -130,21 +151,23 @@ for d in trange(*RANGE):
                 val_d_to_acc[d][val_d].append(metrics["acc"])
                 val_d_to_loss[d][val_d].append(metrics["loss"])
 
-        # iterate from the last line and go backwards, 
-        # find the last line idx that satisfies:         
-        # line.startswith("Epoch") and "Metrics on Testing Sets" in line
-        last_test_line_idx = -1
-        for i in range(len(lines)-1, -1, -1):
+        # extract lengthy test metrics for Epoch = best_epoch_id
+        best_test_epoch_line_idx = -1
+        for i in range(len(lines)):
             line = lines[i]
             if line.startswith("Epoch") and "Metrics on Testing Sets" in line:
-                last_test_line_idx = i
-                break
-        if last_test_line_idx == -1:
+                tmp = int(line.strip().split("Epoch ")[1].split(" Step")[0])
+                if tmp == best_epoch_id:
+                    best_test_epoch_line_idx = i
+                    break
+        if best_test_epoch_line_idx == -1:
             print(f"Cannot find Testing Metrics in {task_suite_prefix}{d}/{handle}")
             continue
         # extract the metrics for each testing set
-        for j in range(last_test_line_idx+1, len(lines)):
+        for j in range(best_test_epoch_line_idx+1, len(lines)):
             line = lines[j]
+            if line.startswith("Overall Testing Accuracy:"): 
+                break
             if line.startswith("Testing set: d_"):
                 test_l = int(line.strip().split("Testing set: d_")[1].split("_l_")[1])
                 metrics = eval(lines[j+1].strip())
@@ -167,6 +190,7 @@ plt.figure(figsize=(12, 5))
 plt.subplot(1, 2, 1)
 colors = plt.cm.winter(np.linspace(0, 1, i2-i1+1))
 for d in range(*RANGE):
+    if not val_d_to_acc[d]: continue
     x = []
     y = []
     y_err = []
@@ -186,6 +210,7 @@ plt.legend()
 
 plt.subplot(1, 2, 2)
 for d in range(*RANGE):
+    if not val_d_to_loss[d]: continue
     x = []
     y = []
     y_err = []
@@ -204,7 +229,7 @@ plt.title("Loss on greater depth")
 plt.legend()
 
 plt.tight_layout()
-plt.savefig(f"{figure_dir}greater_depth.png", dpi=250, bbox_inches='tight')
+plt.savefig(os.path.join(figure_dir, "bve_greater_depth.png"), dpi=250, bbox_inches='tight') # bve = Best same d Val Epoch
 plt.close()
 
 """
@@ -221,9 +246,11 @@ plt.figure(figsize=(14, 12))
 plt.subplot(2, 2, 1)
 colors = plt.cm.autumn(np.linspace(0, 1, i2-i1+1))
 for d in range(*RANGE):
+    if not test_l_to_acc[d]: continue
     x = []
     y = []
     y_err = []
+    # extract range of test_l as a tuple (l1, l2) from test_l_to_acc[d].keys()
     TEST_L_RANGE = (min(test_l_to_acc[d].keys()), max(test_l_to_acc[d].keys())+1)
     for test_l in range(*TEST_L_RANGE):
         x.append(test_l)
@@ -239,10 +266,10 @@ plt.legend()
 
 plt.subplot(2, 2, 2)
 for d in range(*RANGE):
+    if not test_l_to_loss[d]: continue
     x = []
     y = []
     y_err = []
-    TEST_L_RANGE = (min(test_l_to_loss[d].keys()), max(test_l_to_loss[d].keys())+1)
     for test_l in range(*TEST_L_RANGE):
         x.append(test_l)
         y.append(np.mean(test_l_to_loss[d][test_l]))
@@ -260,6 +287,7 @@ BIN = 10
 plt.subplot(2, 2, 3)
 colors = plt.cm.autumn(np.linspace(0, 1, i2-i1+1))
 for d in range(*RANGE):
+    if not test_l_to_acc[d]: continue
     x = []
     y = []
     y_err = []
@@ -293,6 +321,7 @@ plt.legend()
 
 plt.subplot(2, 2, 4)
 for d in range(*RANGE):
+    if not test_l_to_loss[d]: continue
     x = []
     y = []
     y_err = []
@@ -325,5 +354,5 @@ plt.title("Loss on greater length (smoothed)")
 plt.legend()
 
 plt.tight_layout()
-plt.savefig(f"{figure_dir}greater_length.png", dpi=250, bbox_inches='tight')
+plt.savefig(os.path.join(figure_dir, "bve_greater_length.png"), dpi=250, bbox_inches='tight') # bve = Best same d Val Epoch
 plt.close()

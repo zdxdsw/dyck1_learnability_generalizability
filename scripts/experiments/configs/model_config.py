@@ -28,7 +28,7 @@ class PositionEncodingConfig:
 
 @dataclass
 class TransformerConfig:
-    num_hidden_layers: int = 4
+    num_hidden_layers: int = 2
     hidden_size: int = 64
     num_attn_heads: int = 8
     initializer_range: float = 0.02

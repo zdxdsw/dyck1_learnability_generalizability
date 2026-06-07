@@ -1,4 +1,4 @@
-import os, sys, json, random, io, pytz, argparse, pytz
+import os, sys, json, random, io, pytz, argparse, pytz, socket
 from types import SimpleNamespace
 import numpy as np
 from tqdm import tqdm
@@ -16,6 +16,7 @@ from torch.nn.attention import sdpa_kernel, SDPBackend
 def Print(s):
    if not Accelerator().process_index: print(s)
 
+Print(f"===== Machine name: {socket.gethostname().split('.')[0]} =====")
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--date', type=str, default="debug")
