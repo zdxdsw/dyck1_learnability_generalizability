@@ -105,7 +105,10 @@ for d in trange(*RANGE):
     for handle in os.listdir(f"{output_dir}/{task_suite_prefix}{d}"):
         with open(f"{output_dir}/{task_suite_prefix}{d}/{handle}/terminal.txt", "r") as f:
             lines = f.readlines()
-        
+        # the last non-empty line should print f"Finish!!! {hangle}", so we can check if the job is finished
+        if not lines[-1].startswith(f"Finish!!! {handle}"):
+            print(f"Job {task_suite_prefix}{d}/{handle} is not finished, skip...")
+            continue
         # iterate from the last line and go backwards, 
         # find the last line idx that satisfies:         
         # line.startswith("Epoch") and "Metrics on Validation Sets" in line

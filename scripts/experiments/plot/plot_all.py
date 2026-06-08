@@ -1,21 +1,30 @@
-import sys, os
+import os
 
-task_suite = "S1_d_trulyleq[2-8]_B"
+TASK_SUITE = [
+    "S1_d_[2-8]_4D",
+    "S1_d_[2-8]_4E",
+    "S1_d_[2-8]_4G",
+    "S1_d_trulyleq[2-8]_4D", 
+    "S1_d_trulyleq[2-8]_4E", 
+    "S1_d_trulyleq[2-8]_4G",
+]
 model = "transformer"
-output_dir = f"/home/yingshac/workspace/tmlr/scripts/experiments/output_{model}/{task_suite}/"
-figure_dir = f"../results_{model}/{task_suite}/"
 
-# create figure_dir if not exist
-os.makedirs(figure_dir, exist_ok=True)
+if isinstance(TASK_SUITE, str): TASK_SUITE = [TASK_SUITE]
+for task_suite in TASK_SUITE:
+    output_dir = f"/home/yingshac/workspace/tmlr/scripts/experiments/output_{model}/{task_suite}/"
+    figure_dir = f"../results_{model}/{task_suite}/"
 
-os.system("python plot.py --task_suite {} --output_dir {} --figure_dir {}".format(
-    task_suite,
-    output_dir,
-    figure_dir,
-))
+    os.makedirs(figure_dir, exist_ok=True)
 
-os.system("python plot_best_same_d_val_epc.py --task_suite {} --output_dir {} --figure_dir {}".format(
-    task_suite,
-    output_dir,
-    figure_dir,
-))
+    os.system("python plot.py --task_suite {} --output_dir {} --figure_dir {}".format(
+        task_suite,
+        output_dir,
+        figure_dir,
+    ))
+
+    os.system("python plot_best_same_d_val_epc.py --task_suite {} --output_dir {} --figure_dir {}".format(
+        task_suite,
+        output_dir,
+        figure_dir,
+    ))

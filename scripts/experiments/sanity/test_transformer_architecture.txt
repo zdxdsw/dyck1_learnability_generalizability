@@ -1,0 +1,322 @@
+Architecture sanity check
+Output file: /home/yingshac/workspace/tmlr/scripts/experiments/sanity/test_transformer_architecture.txt
+
+====================================================================================================
+PE type: none
+====================================================================================================
+Total parameters:     100,480
+Trainable parameters: 100,480
+
+Named parameters:
+we.weight                        shape=(4, 64)     numel=     256 requires_grad=True
+blocks.0.ln_1.weight             shape=(64,)       numel=      64 requires_grad=True
+blocks.0.ln_1.bias               shape=(64,)       numel=      64 requires_grad=True
+blocks.0.attn.qkv_proj.weight    shape=(192, 64)   numel=  12,288 requires_grad=True
+blocks.0.attn.qkv_proj.bias      shape=(192,)      numel=     192 requires_grad=True
+blocks.0.attn.out_proj.weight    shape=(64, 64)    numel=   4,096 requires_grad=True
+blocks.0.attn.out_proj.bias      shape=(64,)       numel=      64 requires_grad=True
+blocks.0.ln_2.weight             shape=(64,)       numel=      64 requires_grad=True
+blocks.0.ln_2.bias               shape=(64,)       numel=      64 requires_grad=True
+blocks.0.mlp.net.0.weight        shape=(256, 64)   numel=  16,384 requires_grad=True
+blocks.0.mlp.net.0.bias          shape=(256,)      numel=     256 requires_grad=True
+blocks.0.mlp.net.2.weight        shape=(64, 256)   numel=  16,384 requires_grad=True
+blocks.0.mlp.net.2.bias          shape=(64,)       numel=      64 requires_grad=True
+blocks.1.ln_1.weight             shape=(64,)       numel=      64 requires_grad=True
+blocks.1.ln_1.bias               shape=(64,)       numel=      64 requires_grad=True
+blocks.1.attn.qkv_proj.weight    shape=(192, 64)   numel=  12,288 requires_grad=True
+blocks.1.attn.qkv_proj.bias      shape=(192,)      numel=     192 requires_grad=True
+blocks.1.attn.out_proj.weight    shape=(64, 64)    numel=   4,096 requires_grad=True
+blocks.1.attn.out_proj.bias      shape=(64,)       numel=      64 requires_grad=True
+blocks.1.ln_2.weight             shape=(64,)       numel=      64 requires_grad=True
+blocks.1.ln_2.bias               shape=(64,)       numel=      64 requires_grad=True
+blocks.1.mlp.net.0.weight        shape=(256, 64)   numel=  16,384 requires_grad=True
+blocks.1.mlp.net.0.bias          shape=(256,)      numel=     256 requires_grad=True
+blocks.1.mlp.net.2.weight        shape=(64, 256)   numel=  16,384 requires_grad=True
+blocks.1.mlp.net.2.bias          shape=(64,)       numel=      64 requires_grad=True
+ln_f.weight                      shape=(64,)       numel=      64 requires_grad=True
+ln_f.bias                        shape=(64,)       numel=      64 requires_grad=True
+lm_head.weight                   shape=(2, 64)     numel=     128 requires_grad=True
+
+Named buffers:
+(none)
+
+Forward pass sanity check:
+logits shape: (32, 41, 2)
+num attention layers returned: 2
+attn_weights[0] shape: (32, 8, 41, 41)
+attn_weights[1] shape: (32, 8, 41, 41)
+
+====================================================================================================
+PE type: absolute
+====================================================================================================
+Total parameters:     108,672
+Trainable parameters: 108,672
+
+Named parameters:
+we.weight                        shape=(4, 64)     numel=     256 requires_grad=True
+pe.absolute.weight               shape=(128, 64)   numel=   8,192 requires_grad=True
+blocks.0.ln_1.weight             shape=(64,)       numel=      64 requires_grad=True
+blocks.0.ln_1.bias               shape=(64,)       numel=      64 requires_grad=True
+blocks.0.attn.qkv_proj.weight    shape=(192, 64)   numel=  12,288 requires_grad=True
+blocks.0.attn.qkv_proj.bias      shape=(192,)      numel=     192 requires_grad=True
+blocks.0.attn.out_proj.weight    shape=(64, 64)    numel=   4,096 requires_grad=True
+blocks.0.attn.out_proj.bias      shape=(64,)       numel=      64 requires_grad=True
+blocks.0.ln_2.weight             shape=(64,)       numel=      64 requires_grad=True
+blocks.0.ln_2.bias               shape=(64,)       numel=      64 requires_grad=True
+blocks.0.mlp.net.0.weight        shape=(256, 64)   numel=  16,384 requires_grad=True
+blocks.0.mlp.net.0.bias          shape=(256,)      numel=     256 requires_grad=True
+blocks.0.mlp.net.2.weight        shape=(64, 256)   numel=  16,384 requires_grad=True
+blocks.0.mlp.net.2.bias          shape=(64,)       numel=      64 requires_grad=True
+blocks.1.ln_1.weight             shape=(64,)       numel=      64 requires_grad=True
+blocks.1.ln_1.bias               shape=(64,)       numel=      64 requires_grad=True
+blocks.1.attn.qkv_proj.weight    shape=(192, 64)   numel=  12,288 requires_grad=True
+blocks.1.attn.qkv_proj.bias      shape=(192,)      numel=     192 requires_grad=True
+blocks.1.attn.out_proj.weight    shape=(64, 64)    numel=   4,096 requires_grad=True
+blocks.1.attn.out_proj.bias      shape=(64,)       numel=      64 requires_grad=True
+blocks.1.ln_2.weight             shape=(64,)       numel=      64 requires_grad=True
+blocks.1.ln_2.bias               shape=(64,)       numel=      64 requires_grad=True
+blocks.1.mlp.net.0.weight        shape=(256, 64)   numel=  16,384 requires_grad=True
+blocks.1.mlp.net.0.bias          shape=(256,)      numel=     256 requires_grad=True
+blocks.1.mlp.net.2.weight        shape=(64, 256)   numel=  16,384 requires_grad=True
+blocks.1.mlp.net.2.bias          shape=(64,)       numel=      64 requires_grad=True
+ln_f.weight                      shape=(64,)       numel=      64 requires_grad=True
+ln_f.bias                        shape=(64,)       numel=      64 requires_grad=True
+lm_head.weight                   shape=(2, 64)     numel=     128 requires_grad=True
+
+Named buffers:
+(none)
+
+Forward pass sanity check:
+logits shape: (32, 41, 2)
+num attention layers returned: 2
+attn_weights[0] shape: (32, 8, 41, 41)
+attn_weights[1] shape: (32, 8, 41, 41)
+
+====================================================================================================
+PE type: sinusoidal
+====================================================================================================
+Total parameters:     100,480
+Trainable parameters: 100,480
+
+Named parameters:
+we.weight                        shape=(4, 64)     numel=     256 requires_grad=True
+blocks.0.ln_1.weight             shape=(64,)       numel=      64 requires_grad=True
+blocks.0.ln_1.bias               shape=(64,)       numel=      64 requires_grad=True
+blocks.0.attn.qkv_proj.weight    shape=(192, 64)   numel=  12,288 requires_grad=True
+blocks.0.attn.qkv_proj.bias      shape=(192,)      numel=     192 requires_grad=True
+blocks.0.attn.out_proj.weight    shape=(64, 64)    numel=   4,096 requires_grad=True
+blocks.0.attn.out_proj.bias      shape=(64,)       numel=      64 requires_grad=True
+blocks.0.ln_2.weight             shape=(64,)       numel=      64 requires_grad=True
+blocks.0.ln_2.bias               shape=(64,)       numel=      64 requires_grad=True
+blocks.0.mlp.net.0.weight        shape=(256, 64)   numel=  16,384 requires_grad=True
+blocks.0.mlp.net.0.bias          shape=(256,)      numel=     256 requires_grad=True
+blocks.0.mlp.net.2.weight        shape=(64, 256)   numel=  16,384 requires_grad=True
+blocks.0.mlp.net.2.bias          shape=(64,)       numel=      64 requires_grad=True
+blocks.1.ln_1.weight             shape=(64,)       numel=      64 requires_grad=True
+blocks.1.ln_1.bias               shape=(64,)       numel=      64 requires_grad=True
+blocks.1.attn.qkv_proj.weight    shape=(192, 64)   numel=  12,288 requires_grad=True
+blocks.1.attn.qkv_proj.bias      shape=(192,)      numel=     192 requires_grad=True
+blocks.1.attn.out_proj.weight    shape=(64, 64)    numel=   4,096 requires_grad=True
+blocks.1.attn.out_proj.bias      shape=(64,)       numel=      64 requires_grad=True
+blocks.1.ln_2.weight             shape=(64,)       numel=      64 requires_grad=True
+blocks.1.ln_2.bias               shape=(64,)       numel=      64 requires_grad=True
+blocks.1.mlp.net.0.weight        shape=(256, 64)   numel=  16,384 requires_grad=True
+blocks.1.mlp.net.0.bias          shape=(256,)      numel=     256 requires_grad=True
+blocks.1.mlp.net.2.weight        shape=(64, 256)   numel=  16,384 requires_grad=True
+blocks.1.mlp.net.2.bias          shape=(64,)       numel=      64 requires_grad=True
+ln_f.weight                      shape=(64,)       numel=      64 requires_grad=True
+ln_f.bias                        shape=(64,)       numel=      64 requires_grad=True
+lm_head.weight                   shape=(2, 64)     numel=     128 requires_grad=True
+
+Named buffers:
+pe.sinusoidal.lookup             shape=(128, 64)   numel=   8,192 dtype=torch.float32
+
+Forward pass sanity check:
+logits shape: (32, 41, 2)
+num attention layers returned: 2
+attn_weights[0] shape: (32, 8, 41, 41)
+attn_weights[1] shape: (32, 8, 41, 41)
+
+====================================================================================================
+PE type: rotary
+====================================================================================================
+Total parameters:     100,480
+Trainable parameters: 100,480
+
+Named parameters:
+we.weight                        shape=(4, 64)     numel=     256 requires_grad=True
+blocks.0.ln_1.weight             shape=(64,)       numel=      64 requires_grad=True
+blocks.0.ln_1.bias               shape=(64,)       numel=      64 requires_grad=True
+blocks.0.attn.qkv_proj.weight    shape=(192, 64)   numel=  12,288 requires_grad=True
+blocks.0.attn.qkv_proj.bias      shape=(192,)      numel=     192 requires_grad=True
+blocks.0.attn.out_proj.weight    shape=(64, 64)    numel=   4,096 requires_grad=True
+blocks.0.attn.out_proj.bias      shape=(64,)       numel=      64 requires_grad=True
+blocks.0.ln_2.weight             shape=(64,)       numel=      64 requires_grad=True
+blocks.0.ln_2.bias               shape=(64,)       numel=      64 requires_grad=True
+blocks.0.mlp.net.0.weight        shape=(256, 64)   numel=  16,384 requires_grad=True
+blocks.0.mlp.net.0.bias          shape=(256,)      numel=     256 requires_grad=True
+blocks.0.mlp.net.2.weight        shape=(64, 256)   numel=  16,384 requires_grad=True
+blocks.0.mlp.net.2.bias          shape=(64,)       numel=      64 requires_grad=True
+blocks.1.ln_1.weight             shape=(64,)       numel=      64 requires_grad=True
+blocks.1.ln_1.bias               shape=(64,)       numel=      64 requires_grad=True
+blocks.1.attn.qkv_proj.weight    shape=(192, 64)   numel=  12,288 requires_grad=True
+blocks.1.attn.qkv_proj.bias      shape=(192,)      numel=     192 requires_grad=True
+blocks.1.attn.out_proj.weight    shape=(64, 64)    numel=   4,096 requires_grad=True
+blocks.1.attn.out_proj.bias      shape=(64,)       numel=      64 requires_grad=True
+blocks.1.ln_2.weight             shape=(64,)       numel=      64 requires_grad=True
+blocks.1.ln_2.bias               shape=(64,)       numel=      64 requires_grad=True
+blocks.1.mlp.net.0.weight        shape=(256, 64)   numel=  16,384 requires_grad=True
+blocks.1.mlp.net.0.bias          shape=(256,)      numel=     256 requires_grad=True
+blocks.1.mlp.net.2.weight        shape=(64, 256)   numel=  16,384 requires_grad=True
+blocks.1.mlp.net.2.bias          shape=(64,)       numel=      64 requires_grad=True
+ln_f.weight                      shape=(64,)       numel=      64 requires_grad=True
+ln_f.bias                        shape=(64,)       numel=      64 requires_grad=True
+lm_head.weight                   shape=(2, 64)     numel=     128 requires_grad=True
+
+Named buffers:
+pe.rotary.inv_freq               shape=(4,)        numel=       4 dtype=torch.float32
+
+Forward pass sanity check:
+logits shape: (32, 41, 2)
+num attention layers returned: 2
+attn_weights[0] shape: (32, 8, 41, 41)
+attn_weights[1] shape: (32, 8, 41, 41)
+
+====================================================================================================
+PE type: scaler
+====================================================================================================
+Total parameters:     100,608
+Trainable parameters: 100,608
+
+Named parameters:
+we.weight                        shape=(4, 64)     numel=     256 requires_grad=True
+pe.scaler.weight                 shape=(64, 1)     numel=      64 requires_grad=True
+pe.scaler.bias                   shape=(64,)       numel=      64 requires_grad=True
+blocks.0.ln_1.weight             shape=(64,)       numel=      64 requires_grad=True
+blocks.0.ln_1.bias               shape=(64,)       numel=      64 requires_grad=True
+blocks.0.attn.qkv_proj.weight    shape=(192, 64)   numel=  12,288 requires_grad=True
+blocks.0.attn.qkv_proj.bias      shape=(192,)      numel=     192 requires_grad=True
+blocks.0.attn.out_proj.weight    shape=(64, 64)    numel=   4,096 requires_grad=True
+blocks.0.attn.out_proj.bias      shape=(64,)       numel=      64 requires_grad=True
+blocks.0.ln_2.weight             shape=(64,)       numel=      64 requires_grad=True
+blocks.0.ln_2.bias               shape=(64,)       numel=      64 requires_grad=True
+blocks.0.mlp.net.0.weight        shape=(256, 64)   numel=  16,384 requires_grad=True
+blocks.0.mlp.net.0.bias          shape=(256,)      numel=     256 requires_grad=True
+blocks.0.mlp.net.2.weight        shape=(64, 256)   numel=  16,384 requires_grad=True
+blocks.0.mlp.net.2.bias          shape=(64,)       numel=      64 requires_grad=True
+blocks.1.ln_1.weight             shape=(64,)       numel=      64 requires_grad=True
+blocks.1.ln_1.bias               shape=(64,)       numel=      64 requires_grad=True
+blocks.1.attn.qkv_proj.weight    shape=(192, 64)   numel=  12,288 requires_grad=True
+blocks.1.attn.qkv_proj.bias      shape=(192,)      numel=     192 requires_grad=True
+blocks.1.attn.out_proj.weight    shape=(64, 64)    numel=   4,096 requires_grad=True
+blocks.1.attn.out_proj.bias      shape=(64,)       numel=      64 requires_grad=True
+blocks.1.ln_2.weight             shape=(64,)       numel=      64 requires_grad=True
+blocks.1.ln_2.bias               shape=(64,)       numel=      64 requires_grad=True
+blocks.1.mlp.net.0.weight        shape=(256, 64)   numel=  16,384 requires_grad=True
+blocks.1.mlp.net.0.bias          shape=(256,)      numel=     256 requires_grad=True
+blocks.1.mlp.net.2.weight        shape=(64, 256)   numel=  16,384 requires_grad=True
+blocks.1.mlp.net.2.bias          shape=(64,)       numel=      64 requires_grad=True
+ln_f.weight                      shape=(64,)       numel=      64 requires_grad=True
+ln_f.bias                        shape=(64,)       numel=      64 requires_grad=True
+lm_head.weight                   shape=(2, 64)     numel=     128 requires_grad=True
+
+Named buffers:
+(none)
+
+Forward pass sanity check:
+logits shape: (32, 41, 2)
+num attention layers returned: 2
+attn_weights[0] shape: (32, 8, 41, 41)
+attn_weights[1] shape: (32, 8, 41, 41)
+
+====================================================================================================
+PE type: alibi
+====================================================================================================
+Total parameters:     100,480
+Trainable parameters: 100,480
+
+Named parameters:
+we.weight                        shape=(4, 64)     numel=     256 requires_grad=True
+blocks.0.ln_1.weight             shape=(64,)       numel=      64 requires_grad=True
+blocks.0.ln_1.bias               shape=(64,)       numel=      64 requires_grad=True
+blocks.0.attn.qkv_proj.weight    shape=(192, 64)   numel=  12,288 requires_grad=True
+blocks.0.attn.qkv_proj.bias      shape=(192,)      numel=     192 requires_grad=True
+blocks.0.attn.out_proj.weight    shape=(64, 64)    numel=   4,096 requires_grad=True
+blocks.0.attn.out_proj.bias      shape=(64,)       numel=      64 requires_grad=True
+blocks.0.ln_2.weight             shape=(64,)       numel=      64 requires_grad=True
+blocks.0.ln_2.bias               shape=(64,)       numel=      64 requires_grad=True
+blocks.0.mlp.net.0.weight        shape=(256, 64)   numel=  16,384 requires_grad=True
+blocks.0.mlp.net.0.bias          shape=(256,)      numel=     256 requires_grad=True
+blocks.0.mlp.net.2.weight        shape=(64, 256)   numel=  16,384 requires_grad=True
+blocks.0.mlp.net.2.bias          shape=(64,)       numel=      64 requires_grad=True
+blocks.1.ln_1.weight             shape=(64,)       numel=      64 requires_grad=True
+blocks.1.ln_1.bias               shape=(64,)       numel=      64 requires_grad=True
+blocks.1.attn.qkv_proj.weight    shape=(192, 64)   numel=  12,288 requires_grad=True
+blocks.1.attn.qkv_proj.bias      shape=(192,)      numel=     192 requires_grad=True
+blocks.1.attn.out_proj.weight    shape=(64, 64)    numel=   4,096 requires_grad=True
+blocks.1.attn.out_proj.bias      shape=(64,)       numel=      64 requires_grad=True
+blocks.1.ln_2.weight             shape=(64,)       numel=      64 requires_grad=True
+blocks.1.ln_2.bias               shape=(64,)       numel=      64 requires_grad=True
+blocks.1.mlp.net.0.weight        shape=(256, 64)   numel=  16,384 requires_grad=True
+blocks.1.mlp.net.0.bias          shape=(256,)      numel=     256 requires_grad=True
+blocks.1.mlp.net.2.weight        shape=(64, 256)   numel=  16,384 requires_grad=True
+blocks.1.mlp.net.2.bias          shape=(64,)       numel=      64 requires_grad=True
+ln_f.weight                      shape=(64,)       numel=      64 requires_grad=True
+ln_f.bias                        shape=(64,)       numel=      64 requires_grad=True
+lm_head.weight                   shape=(2, 64)     numel=     128 requires_grad=True
+
+Named buffers:
+pe.alibi.slopes                  shape=(8,)        numel=       8 dtype=torch.float32
+
+Forward pass sanity check:
+logits shape: (32, 41, 2)
+num attention layers returned: 2
+attn_weights[0] shape: (32, 8, 41, 41)
+attn_weights[1] shape: (32, 8, 41, 41)
+
+====================================================================================================
+PE type: relative
+====================================================================================================
+Total parameters:     100,736
+Trainable parameters: 100,736
+
+Named parameters:
+we.weight                        shape=(4, 64)     numel=     256 requires_grad=True
+pe.relative.lookup.weight        shape=(32, 8)     numel=     256 requires_grad=True
+blocks.0.ln_1.weight             shape=(64,)       numel=      64 requires_grad=True
+blocks.0.ln_1.bias               shape=(64,)       numel=      64 requires_grad=True
+blocks.0.attn.qkv_proj.weight    shape=(192, 64)   numel=  12,288 requires_grad=True
+blocks.0.attn.qkv_proj.bias      shape=(192,)      numel=     192 requires_grad=True
+blocks.0.attn.out_proj.weight    shape=(64, 64)    numel=   4,096 requires_grad=True
+blocks.0.attn.out_proj.bias      shape=(64,)       numel=      64 requires_grad=True
+blocks.0.ln_2.weight             shape=(64,)       numel=      64 requires_grad=True
+blocks.0.ln_2.bias               shape=(64,)       numel=      64 requires_grad=True
+blocks.0.mlp.net.0.weight        shape=(256, 64)   numel=  16,384 requires_grad=True
+blocks.0.mlp.net.0.bias          shape=(256,)      numel=     256 requires_grad=True
+blocks.0.mlp.net.2.weight        shape=(64, 256)   numel=  16,384 requires_grad=True
+blocks.0.mlp.net.2.bias          shape=(64,)       numel=      64 requires_grad=True
+blocks.1.ln_1.weight             shape=(64,)       numel=      64 requires_grad=True
+blocks.1.ln_1.bias               shape=(64,)       numel=      64 requires_grad=True
+blocks.1.attn.qkv_proj.weight    shape=(192, 64)   numel=  12,288 requires_grad=True
+blocks.1.attn.qkv_proj.bias      shape=(192,)      numel=     192 requires_grad=True
+blocks.1.attn.out_proj.weight    shape=(64, 64)    numel=   4,096 requires_grad=True
+blocks.1.attn.out_proj.bias      shape=(64,)       numel=      64 requires_grad=True
+blocks.1.ln_2.weight             shape=(64,)       numel=      64 requires_grad=True
+blocks.1.ln_2.bias               shape=(64,)       numel=      64 requires_grad=True
+blocks.1.mlp.net.0.weight        shape=(256, 64)   numel=  16,384 requires_grad=True
+blocks.1.mlp.net.0.bias          shape=(256,)      numel=     256 requires_grad=True
+blocks.1.mlp.net.2.weight        shape=(64, 256)   numel=  16,384 requires_grad=True
+blocks.1.mlp.net.2.bias          shape=(64,)       numel=      64 requires_grad=True
+ln_f.weight                      shape=(64,)       numel=      64 requires_grad=True
+ln_f.bias                        shape=(64,)       numel=      64 requires_grad=True
+lm_head.weight                   shape=(2, 64)     numel=     128 requires_grad=True
+
+Named buffers:
+(none)
+
+Forward pass sanity check:
+logits shape: (32, 41, 2)
+num attention layers returned: 2
+attn_weights[0] shape: (32, 8, 41, 41)
+attn_weights[1] shape: (32, 8, 41, 41)
+
