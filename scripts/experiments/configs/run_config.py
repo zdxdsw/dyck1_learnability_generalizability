@@ -9,7 +9,7 @@ class RunConfig:
     date: str = ""
 
     hf_cache_dir: str = "/data/yingshac/hf_cache"
-    output_dir: str = "output/S1_d_trulyleq[2-8]_2G/"
+    output_dir: str = "output/S1_d_trulyleq[2-8]_2F/"
     ckpt_dir: str = "/data/yingshac/tmlr/ckpts"
     load_from_dir: str | None = None
     init_from_ckpt: str | None = None

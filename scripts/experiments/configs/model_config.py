@@ -19,7 +19,7 @@ class RNNConfig:
 
 @dataclass
 class PositionEncodingConfig:
-    pe_type: str = "none"
+    pe_type: str = "relative"
     pe_aug_type: PEAugType = "shifted"
     max_position_embeddings: int = 128
     relative_pe_num_buckets: int = 32
