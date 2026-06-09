@@ -107,7 +107,7 @@ for d in trange(*RANGE):
             lines = f.readlines()
         # the last non-empty line should print f"Finish!!! {hangle}", so we can check if the job is finished
         if not lines[-1].startswith(f"Finish!!! {handle}"):
-            print(f"Job {task_suite_prefix}{d}/{handle} is not finished, skip...")
+            print(f"Job {task_suite}{task_suite_prefix}{d}/{handle} is not finished, skip...")
             continue
         # iterate from the last line and go backwards, 
         # find the last line idx that satisfies:         
@@ -119,7 +119,7 @@ for d in trange(*RANGE):
                 last_val_line_idx = i
                 break
         if last_val_line_idx == -1:
-            print(f"Cannot find Validation Metrics in {task_suite_prefix}{d}/{handle}")
+            print(f"Cannot find Validation Metrics in {task_suite}{task_suite_prefix}{d}/{handle}")
             continue
         # extract the metrics for each validation set
         for j in range(last_val_line_idx+1, len(lines)):
@@ -144,7 +144,7 @@ for d in trange(*RANGE):
                 last_test_line_idx = i
                 break
         if last_test_line_idx == -1:
-            print(f"Cannot find Testing Metrics in {task_suite_prefix}{d}/{handle}")
+            print(f"Cannot find Testing Metrics in {task_suite}{task_suite_prefix}{d}/{handle}")
             continue
         # extract the metrics for each testing set
         for j in range(last_test_line_idx+1, len(lines)):

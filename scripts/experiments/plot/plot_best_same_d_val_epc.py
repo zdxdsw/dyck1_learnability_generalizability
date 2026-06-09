@@ -108,7 +108,7 @@ for d in trange(*RANGE):
             lines = f.readlines()
         # the last non-empty line should print f"Finish!!! {hangle}", so we can check if the job is finished
         if not lines[-1].startswith(f"Finish!!! {handle}"):
-            print(f"Job {task_suite_prefix}{d}/{handle} is not finished, skip...")
+            print(f"Job {task_suite}{task_suite_prefix}{d}/{handle} is not finished, skip...")
             continue
         # iterate from the first line; go through every line that satisfies: 
         # line.startswith("Epoch") and "Metrics on Validation Sets" in line -> temporarily store line idx as epoch_line_idx
@@ -139,7 +139,7 @@ for d in trange(*RANGE):
                             best_epoch_id = epoch_id
 
         if best_epoch_line_idx == -1:
-            print(f"Cannot find Validation Metrics in {task_suite_prefix}{d}/{handle}")
+            print(f"Cannot find Validation Metrics in {task_suite}{task_suite_prefix}{d}/{handle}")
             continue
         # extract the metrics for each validation set
         for j in range(best_epoch_line_idx+1, len(lines)):
@@ -164,7 +164,7 @@ for d in trange(*RANGE):
                     best_test_epoch_line_idx = i
                     break
         if best_test_epoch_line_idx == -1:
-            print(f"Cannot find Testing Metrics in {task_suite_prefix}{d}/{handle}")
+            print(f"Cannot find Testing Metrics in {task_suite}{task_suite_prefix}{d}/{handle}")
             continue
         # extract the metrics for each testing set
         for j in range(best_test_epoch_line_idx+1, len(lines)):
