@@ -102,7 +102,7 @@ print("Extracting metrics from terminal.txt files...")
 task_suite_prefix = os.listdir(f"{output_dir}/")[0][:-1]
 for d in trange(*RANGE):
     if not os.path.exists(f"{output_dir}/{task_suite_prefix}{d}"): continue
-    for handle in os.listdir(f"{output_dir}/{task_suite_prefix}{d}"):
+    for handle in sorted(os.listdir(f"{output_dir}/{task_suite_prefix}{d}")):
         with open(f"{output_dir}/{task_suite_prefix}{d}/{handle}/terminal.txt", "r") as f:
             lines = f.readlines()
         # the last non-empty line should print f"Finish!!! {hangle}", so we can check if the job is finished
