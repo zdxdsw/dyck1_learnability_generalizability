@@ -13,11 +13,6 @@ from utils import sequence_collator_builder, inference, prepare_forward_inputs
 from accelerate import Accelerator, DistributedDataParallelKwargs
 from torch.nn.attention import sdpa_kernel, SDPBackend
 
-def Print(s):
-   if not Accelerator().process_index: print(s)
-
-Print(f"===== Machine name: {socket.gethostname().split('.')[0]} =====")
-
 parser = argparse.ArgumentParser()
 parser.add_argument('--date', type=str, default="debug")
 parser.add_argument('--task', type=str)
@@ -51,7 +46,9 @@ accelerator.wait_for_everyone()
 if accelerator.is_main_process:
     os.makedirs(os.path.join(config.ckpt_dir, config.date), exist_ok=True)
 
-
+def Print(s):
+   if not Accelerator().process_index: print(s)
+Print(f"===== Machine name: {socket.gethostname().split('.')[0]} =====")
 Print(f"\n------------- Preparing {config.model} model -------------")
 
 model = eval(f"{config.model}Model")(config)
