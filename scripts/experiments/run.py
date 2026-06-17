@@ -22,7 +22,8 @@ if args.cuda: args.cuda = f"CUDA_VISIBLE_DEVICES=\"{args.cuda}\""
 """------------- Preparing configs -------------"""
 base_config = flat_everything_config_builder(args.task)
 base_config.output_dir = add_suffix_to_outermost_dir(base_config.output_dir, f"_{base_config.model.lower()}")
-base_config.ckpt_dir = add_suffix_to_innermost_dir(base_config.ckpt_dir, f"_{base_config.model.lower()}")
+base_config.ckpt_dir = base_config.ckpt_dir.replace("ckpts", f"ckpts_{base_config.model.lower()}")
+# add_suffix_to_innermost_dir(base_config.ckpt_dir, f"_{base_config.model.lower()}")
 base_config.output_dir = os.path.join(base_config.output_dir, base_config.task)
 base_config.ckpt_dir = os.path.join(base_config.ckpt_dir, base_config.task)
 

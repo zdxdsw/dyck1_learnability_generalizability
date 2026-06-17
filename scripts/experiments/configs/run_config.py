@@ -1,5 +1,6 @@
 from dataclasses import dataclass, field
 
+task_suite = "S1_d_[2-8]_2D"
 @dataclass
 class RunConfig:
     # lists are mutable objects, so we use field(default_factory=...) to avoid all instances sharing the same list
@@ -9,7 +10,7 @@ class RunConfig:
     date: str = ""
 
     hf_cache_dir: str = "/data/yingshac/hf_cache"
-    output_dir: str = "output/S1_d_[2-8]_4B/"
-    ckpt_dir: str = "/data/yingshac/tmlr/ckpts"
+    output_dir: str = f"output/{task_suite}/"
+    ckpt_dir: str = f"/data/yingshac/tmlr/ckpts/{task_suite}/"
     load_from_dir: str | None = None
     init_from_ckpt: str | None = None

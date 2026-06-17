@@ -46,8 +46,8 @@ accelerator.wait_for_everyone()
 if accelerator.is_main_process:
     os.makedirs(os.path.join(config.ckpt_dir, config.date), exist_ok=True)
 
-def Print(s):
-   if not Accelerator().process_index: print(s)
+def Print(s, flush=True):
+   if accelerator.is_main_process: print(s, flush=flush)
 Print(f"===== Machine name: {socket.gethostname().split('.')[0]} =====")
 Print(f"\n------------- Preparing {config.model} model -------------")
 
@@ -245,6 +245,7 @@ for epoch in range(global_epoch, config.num_epochs):
     save_path = os.path.join(config.ckpt_dir, config.date, f"{epoch}_{global_step}_{config.model}.pt")
     torch.save(accelerator.unwrap_model(model).state_dict(), save_path)
 
+progress_bar.close()
 accelerator.wait_for_everyone()
 accelerator.end_training()
 accelerator.free_memory()
@@ -254,4 +255,7 @@ accelerator.free_memory()
 #     infr_command = "python tester.py --handle {} --test_files \"{}\"".format(config.date, " ".join(["val"]+config.test_files))
 #     os.system(infr_command)
 Print(f"Finish!!! {config.date}")
-os._exit(0)
+# os._exit(0) # can bypass flushing and cleanup. use sys.exit(0) instead.
+sys.stdout.flush()
+sys.stderr.flush()
+sys.exit(0)

@@ -1,15 +1,15 @@
 import os
 
 TASK_SUITE = [
-    "S1_d_trulyleq[2-8]_4F",
-    "S1_d_trulyleq[2-8]_4G",
-    "S1_d_trulyleq[2-8]_2d",
-    "S1_d_trulyleq[2-8]_4f",
-    "S1_d_trulyleq[2-8]_4c",
-    "S1_d_trulyleq[2-8]_2E",
-    "S1_d_trulyleq[2-8]_2b",
+    # "S1_d_trulyleq[2-8]_4F",
+    # "S1_d_trulyleq[2-8]_4G",
+    # "S1_d_trulyleq[2-8]_2d",
+    # "S1_d_trulyleq[2-8]_4f",
+    # "S1_d_trulyleq[2-8]_4c",
+    # "S1_d_trulyleq[2-8]_2E",
+    # "S1_d_trulyleq[2-8]_2b",
     "S1_d_[2-8]_4C",
-    "S1_d_[2-8]_4A",
+    # "S1_d_[2-8]_4A",
 ]
 model = "transformer"
 

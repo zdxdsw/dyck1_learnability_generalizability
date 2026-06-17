@@ -42,14 +42,7 @@ timezone = pytz.timezone('America/New_York')
 
 
 JOBS_NEEDED = """
-Task suite: S1_d_trulyleq[2-8]_4G, Task: S1_d_trulyleq5, Seed: 42
-Task suite: S1_d_trulyleq[2-8]_2d, Task: S1_d_trulyleq5, Seed: 61
-Task suite: S1_d_trulyleq[2-8]_4f, Task: S1_d_trulyleq5, Seed: 49
-Task suite: S1_d_trulyleq[2-8]_4c, Task: S1_d_trulyleq2, Seed: 89
-Task suite: S1_d_trulyleq[2-8]_2E, Task: S1_d_trulyleq2, Seed: 77
-Task suite: S1_d_trulyleq[2-8]_2b, Task: S1_d_trulyleq2, Seed: 89
-Task suite: S1_d_[2-8]_4C, Task: S1_d_3, Seed: 42
-Task suite: S1_d_[2-8]_4A, Task: S1_d_3, Seed: 49
+Task suite: S1_d_[2-8]_4C, Task: S1_d_5, Seed: 91
 """
 
 SUITE_TASK_SEED_LIST = []
@@ -97,12 +90,13 @@ for task_suite, task, seed in SUITE_TASK_SEED_LIST:
         json.dump(config, f, indent=2)
     ### prepare command 
     cuda = f"CUDA_VISIBLE_DEVICES=\"{port%4}\""
-    command = "{} accelerate launch --main_process_port {} --num_processes 1 trainer.py --date {} --task {} --output_dir '{}' | tee '{}'".format(
+    command = "{} accelerate launch --main_process_port {} --num_processes 1 trainer.py --date {} --task {} --output_dir '{}' 2> '{}' | tee '{}'".format(
         cuda,
         port,
         config["date"],
         task,
         config["output_dir"],
+        os.path.join(config["output_dir"], date, "stderr.txt"),
         os.path.join(config["output_dir"], date, "terminal.txt"),
     )
     to_launch.append(command)
