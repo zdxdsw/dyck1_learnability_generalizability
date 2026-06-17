@@ -44,9 +44,7 @@ CKPT_DIR = f"/data/yingshac/tmlr/ckpts_{MODEL.lower()}"
 EVAL_BATCH_SIZE = 1024
 
 TASK_SUITES = [
-    "S1_d_[2-8]_2D",
-    "S1_d_[2-8]_2E",
-    "S1_d_[2-8]_2F",
+    "S1_d_trulyleq[2-8]_4C",
 ]
 
 

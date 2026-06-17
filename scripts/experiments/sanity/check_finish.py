@@ -1,0 +1,58 @@
+import os
+
+MODEL = "transformer"
+OUTPUT_DIR = f"/home/yingshac/workspace/tmlr/scripts/experiments/output_{MODEL}/"
+
+TASK_SUITES = [
+    "S1_d_trulyleq[2-8]_2A",
+    "S1_d_trulyleq[2-8]_2B",
+    "S1_d_trulyleq[2-8]_2C",
+    "S1_d_trulyleq[2-8]_2D",
+    "S1_d_trulyleq[2-8]_2E",
+    "S1_d_trulyleq[2-8]_2F",
+    "S1_d_trulyleq[2-8]_2G",
+]
+
+CHECK_TRAINING_METRICS = True
+if not CHECK_TRAINING_METRICS: print("Haven't checked training metrics.")
+"""
+Iterate through OUTPUT_DIR: task_suite/task/handle
+
+read terminal.txt: if finished, the last non-empty line should contain "Finish!!!"
+    If terminal.txt doesn't exist, print Job Missing: task_suite/task/handle
+    If not finished, print Job Unfinished: task_suite/task/handle
+
+read training_metrics.txt: if finished, the last non-empty line should contain "Finish!!!"
+    If training_metrics.txt doesn't exist, print Training Metrics Missing: task_suite/task/handle
+    If not finished, print Training Metrics Unfinished: task_suite/task/handle
+"""
+
+for task_suite in TASK_SUITES:
+    task_suite_dir = os.path.join(OUTPUT_DIR, task_suite)
+    for task in os.listdir(task_suite_dir):
+        task_dir = os.path.join(task_suite_dir, task)
+        for handle in os.listdir(task_dir):
+            handle_dir = os.path.join(task_dir, handle)
+            terminal_path = os.path.join(handle_dir, "terminal.txt")
+            training_metrics_path = os.path.join(handle_dir, "training_metrics.txt")
+            
+            # Check terminal.txt
+            if not os.path.exists(terminal_path):
+                print(f"Job Missing: {task_suite}/{task}/{handle}")
+            else:
+                with open(terminal_path, "r") as f:
+                    lines = [line.strip() for line in f if line.strip()]
+                    if not lines or "Finish!!!" not in lines[-1]:
+                        print(f"Job Unfinished: {task_suite}/{task}/{handle}")
+            
+            if not CHECK_TRAINING_METRICS: continue
+            # Check training_metrics.txt
+            if not os.path.exists(training_metrics_path):
+                print(f"Training Metrics Missing: {task_suite}/{task}/{handle}")
+            else:
+                with open(training_metrics_path, "r") as f:
+                    lines = [line.strip() for line in f if line.strip()]
+                    if not lines or "Finish!!!" not in lines[-1]:
+                        print(f"Training Metrics Unfinished: {task_suite}/{task}/{handle}")
+
+print("\nDone!!!\n")

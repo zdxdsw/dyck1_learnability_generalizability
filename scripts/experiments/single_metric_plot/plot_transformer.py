@@ -10,10 +10,10 @@ OUTPUT_ROOT = f"/home/yingshac/workspace/tmlr/scripts/experiments/"
 SUPERVISION = "S1" # ["S1", "S2", "S3", "S1a", "S2a", "S3a"]
 MODE = "cumu" # ["non-cumu", "cumu"] will map to ["d", "trulyleqd"]
 LOSS_OR_ACC = "acc" # "loss" or "acc"
-NUM_HIDDEN_LAYERS = 4
-CAUSAL = True
+NUM_HIDDEN_LAYERS = 2
+CAUSAL = False
 
-METRIC = "lg" # ["cvg", "pg", "dg_larger", "dg_smaller", "lg"]
+METRIC = ["cvg", "pg", "dg_larger", "lg"] # ["cvg", "pg", "dg_larger", "dg_smaller", "lg"]
 
 METRIC_SHORTHAND_TO_FULL = {
     "cvg": "Convergence", 
@@ -76,7 +76,7 @@ def get_task_suites(output_dir, supervision, depth_mode, num_hidden_layers, caus
     for task_suite in os.listdir(output_dir):
         if re.match(regex_pattern, task_suite):
             task_suites.append(task_suite)
-    Print(f"Found task_suites: \n{task_suites}\n")
+    Print("="*14 + " Found task_suites: " + "="*14 + f"\n{task_suites}\n")
     return task_suites
 
 """
@@ -88,7 +88,7 @@ def infer_train_d_range(task_suite):
     if match:
         d_min = int(match.group(1))
         d_max = int(match.group(2))
-        print(f"Inferred train_d range: [{d_min}, {d_max}]")
+        Print("="*8 + f" Inferred train_d range: [{d_min}, {d_max}] " + "="*8)
         return d_min, d_max
     else:
         raise ValueError(f"Cannot infer train_d range from task_suite: {task_suite}")
@@ -220,9 +220,11 @@ def compute_auc(x_y_pairs, x_min, x_max):
 
     # filter pairs with x_min <= x <= x_max
     filtered_pairs = [pair for pair in x_y_pairs if x_min <= pair[0] <= x_max]
-    if len(filtered_pairs) < 2:
+    if len(filtered_pairs) < 1:
         Print(f"Func compute_auc(): [skip] Not enough points to compute AUC.")
         return None
+    elif len(filtered_pairs) == 1:
+        return filtered_pairs[0][1]
     
     # compute AUC using trapezoidal rule
     auc = 0.0
@@ -319,7 +321,8 @@ def plot(plot_stats, args, d_min, d_max, figure_name):
     save_stats_path = save_path.replace(".png", ".json")
     with open(save_stats_path, "w") as f: json.dump(plot_stats, f, indent=4)
     
-    Print(f"Saved plot to {save_path}\nSaved stats to {save_stats_path}")
+    Print("\n" + "="*19 + "Saving ..." + "="*19)
+    Print(f"Plot destination: {save_path}\nStats destination: {save_stats_path}\n")
 
 
 # Example of key contents in log files
@@ -435,7 +438,7 @@ def run_all(args):
                     if not line1.startswith(f"{split} set: d_"):
                         Print(f"Func plot(): [skip] Unexpected line format (expecting {split} set: d_x): {line1}")
                         continue
-                    x = int(line1[-1]) # extract x from line1, could be d_{x} for Training/Validation; or d_8_l_{x} for Testing
+                    x = int(line1.split('_')[-1]) # extract x from line1, could be d_{x} for Training/Validation; or d_8_l_{x} for Testing
 
                     line2 = lines[i+1].strip()
                     try:
@@ -447,6 +450,9 @@ def run_all(args):
                         continue
                 
                 ### 4. Get Single Metric for each handle
+                # Print(f"\nBefore get_single_metric(), task={task}, \
+                #       train_d={train_d}, type(train_d)={type(train_d)}\n\
+                #         x_y_pairs: length={len(x_y_pairs)}\n{x_y_pairs}")
                 single_metric = get_single_metric(
                     x_y_pairs, 
                     args.metric, 
@@ -511,7 +517,7 @@ def parse_args():
     )
     parser.add_argument(
         "--metric",
-        type=str,
+        nargs="*",
         default=METRIC,
         help="Metric type"
     )
@@ -540,4 +546,8 @@ if __name__ == "__main__":
     args = parse_args()
     args.output_dir = os.path.join(OUTPUT_ROOT, f"output_{args.model.lower()}")
     args.depth_mode = "d" if args.mode == "non-cumu" else "trulyleqd"
-    run_all(args)
+    if isinstance(args.metric, list):
+        for metric in args.metric:
+            args.metric = metric
+            run_all(args)
+    else: run_all(args)

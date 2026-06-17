@@ -90,7 +90,7 @@ for task_suite, task, seed in SUITE_TASK_SEED_LIST:
         json.dump(config, f, indent=2)
     ### prepare command 
     cuda = f"CUDA_VISIBLE_DEVICES=\"{port%4}\""
-    command = "{} accelerate launch --main_process_port {} --num_processes 1 trainer.py --date {} --task {} --output_dir '{}' 2> '{}' | tee '{}'".format(
+    command = "{} accelerate launch --main_process_port {} --num_processes 1 trainer.py --date {} --task {} --output_dir '{}' 2> '{}' | tee '{}'  >/dev/null &".format(
         cuda,
         port,
         config["date"],
