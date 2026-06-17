@@ -44,21 +44,9 @@ CKPT_DIR = f"/data/yingshac/tmlr/ckpts_{MODEL.lower()}"
 EVAL_BATCH_SIZE = 1024
 
 TASK_SUITES = [
-    # "S1_d_trulyleq[2-8]_4a",
-    # "S1_d_trulyleq[2-8]_4A",
-    # "S1_d_trulyleq[2-8]_4b",
-    # "S1_d_trulyleq[2-8]_4B",
-    # "S1_d_trulyleq[2-8]_4c",
-    # "S1_d_trulyleq[2-8]_4C",
-    # "S1_d_trulyleq[2-8]_4d",
-    # "S1_d_trulyleq[2-8]_4D",
-    # "S1_d_trulyleq[2-8]_4e",
-    # "S1_d_trulyleq[2-8]_4E",
-    # "S1_d_trulyleq[2-8]_4f",
-    "S1_d_trulyleq[2-8]_2E",
-    "S1_d_trulyleq[2-8]_2d",
-    "S1_d_[2-8]_4C",
-    "S1_d_[2-8]_4A",
+    "S1_d_[2-8]_2D",
+    "S1_d_[2-8]_2E",
+    "S1_d_[2-8]_2F",
 ]
 
 
