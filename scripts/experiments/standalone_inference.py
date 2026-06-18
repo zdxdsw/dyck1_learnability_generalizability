@@ -8,6 +8,8 @@ OUTPUT_DIR/
         config.json
         terminal.txt
         training_metrics.txt   # written by this script
+        validation_metrics.txt   # written by this script
+        testing_metrics.txt   # written by this script
 
 CKPT_DIR/
   task_suite/
@@ -42,9 +44,10 @@ MODEL = "Transformer"  # "RNN" or "Transformer"
 OUTPUT_DIR = f"/home/yingshac/workspace/tmlr/scripts/experiments/output_{MODEL.lower()}"
 CKPT_DIR = f"/data/yingshac/tmlr/ckpts_{MODEL.lower()}"
 EVAL_BATCH_SIZE = 1024
+SPLITS = ["Validation", "Testing"] # ["Training", "Validation", "Testing"]
 
 TASK_SUITES = [
-    "S1_d_trulyleq[2-8]_4C",
+    "S1_d_[2-8]_4A",
 ]
 
 
@@ -303,7 +306,7 @@ def run_metrics_for_dataloaders(section_name, model, dataloaders, device, config
         Print(metrics)
 
 
-def run_one_handle(output_dir, ckpt_root, task_suite, task, handle, device):
+def run_one_handle(output_dir, ckpt_root, split, task_suite, task, handle, device):
     handle_output_dir = os.path.join(output_dir, task_suite, task, handle)
     config_path = os.path.join(handle_output_dir, "config.json")
 
@@ -349,18 +352,13 @@ def run_one_handle(output_dir, ckpt_root, task_suite, task, handle, device):
 
     model = load_model_from_ckpt(config, ckpt_path, device)
 
-    train_dataloaders = build_train_dataloaders(config)
-    # val_dataloaders = build_val_dataloaders(config)
-    # test_dataloaders = build_test_dataloaders(config)
+    if split == "Training": dataloaders = build_train_dataloaders(config)
+    elif split == "Validation": dataloaders = build_val_dataloaders(config)
+    elif split == "Testing": dataloaders = build_test_dataloaders(config) 
+    else: raise ValueError(f"Func run_one_handle(): Invalid split: {split}")
 
-    Print(f"\nEpoch {best_epoch_id} Metrics on Training Sets:\n")
-    run_metrics_for_dataloaders("Training set: ", model, train_dataloaders, device, config)
-
-    # Print(f"\nEpoch {best_epoch_id} Metrics on Validation Sets:")
-    # run_metrics_for_dataloaders("Validation set: ", model, val_dataloaders, device, config)
-
-    # Print(f"\nEpoch {best_epoch_id} Metrics on Testing Sets:")
-    # run_metrics_for_dataloaders("Testing set: ", model, test_dataloaders, device, config)
+    Print(f"\nEpoch {best_epoch_id} Metrics on {split} Sets:")
+    run_metrics_for_dataloaders(f"{split} set: ", model, dataloaders, device, config)
 
 
 def collect_handles(output_dir, task_suites):
@@ -399,28 +397,32 @@ def run_all(args):
 
     for task_suite, task, handle in tqdm(handles, file=os.sys.__stderr__): # force tqdm to use the original terminal stream
         handle_output_dir = os.path.join(args.output_dir, task_suite, task, handle)
-        metrics_path = os.path.join(handle_output_dir, "training_metrics.txt")
         os.makedirs(handle_output_dir, exist_ok=True)
 
-        with open(metrics_path, "w") as f:
-            tee = Tee(f)  # <- inner loop output will be written to file only; no console
+        for split in args.splits:
+            
+            metrics_path = os.path.join(handle_output_dir, f"{split.lower()}_metrics.txt")
+            
+            with open(metrics_path, "w") as f:
+                tee = Tee(f)  # <- inner loop output will be written to file only; no console
 
-            with redirect_stdout(tee), redirect_stderr(tee):
-                try:
-                    run_one_handle(
-                        output_dir=args.output_dir,
-                        ckpt_root=args.ckpt_dir,
-                        task_suite=task_suite,
-                        task=task,
-                        handle=handle,
-                        device=device,
-                    )
+                with redirect_stdout(tee), redirect_stderr(tee):
+                    try:
+                        run_one_handle(
+                            output_dir=args.output_dir,
+                            ckpt_root=args.ckpt_dir,
+                            split=split,
+                            task_suite=task_suite,
+                            task=task,
+                            handle=handle,
+                            device=device,
+                        )
 
-                    Print(f"\nFinish!!! {task_suite}/{task}/{handle}")
+                        Print(f"\nFinish!!! {task_suite}/{task}/{handle}")
 
-                except Exception:
-                    Print(f"\n[error] Failed on {task_suite}/{task}/{handle}")
-                    traceback.print_exc()
+                    except Exception:
+                        Print(f"\n[error] Failed on {task_suite}/{task}/{handle}")
+                        traceback.print_exc()
 
 
 def parse_args():
@@ -443,6 +445,7 @@ def parse_args():
     #           argparse will collect them into a Python list.
     # Use: --task_suites 'S1_d_[2-8]_4B' 'S1_d_[2-8]_4C' 'S1_d_[2-8]_4F'
     parser.add_argument("--task_suites", nargs="*", default=TASK_SUITES)
+    parser.add_argument("--splits", nargs="*", default=SPLITS)
 
     return parser.parse_args()
 

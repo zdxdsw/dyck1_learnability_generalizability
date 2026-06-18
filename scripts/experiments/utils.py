@@ -115,14 +115,22 @@ def get_acc(logits, labels, ignore_index):
     pred = logits.argmax(dim=-1)
 
     correct, demo = 0, 0
+    FP, TP, FN, TN = 0, 0, 0, 0
+
+    # labels: 'a' --0; 'r' -- 1.
 
     for _pred, _labels in zip(pred, labels):
         pred = _pred[_labels != ignore_index]
         label = _labels[_labels != ignore_index]
         correct += (pred == label).float().sum().item()
         demo += label.numel()
+        FP += ((pred == 0) & (label == 1)).float().sum().item()
+        TP += ((pred == 0) & (label == 0)).float().sum().item()
+        FN += ((pred == 1) & (label == 0)).float().sum().item()
+        TN += ((pred == 1) & (label == 1)).float().sum().item()
+        
 
-    return correct, demo 
+    return correct, demo, FP, TP, FN, TN
 
 
 """ Prepare model-specific batched input since different model.forward() require different input keys """
@@ -154,6 +162,7 @@ def prepare_forward_inputs(batch, config, device):
 def inference(model_to_eval, dataloader, device, config):
     
     correct, demo = 0, 0
+    FP, TP, FN, TN = 0, 0, 0, 0
     loss, num_samples = 0, 0
     more_stats = {}
     for supervision_tag in ["S2", "S3"]:
@@ -162,6 +171,10 @@ def inference(model_to_eval, dataloader, device, config):
                 "loss": 0,
                 "correct": 0,
                 "demo": 0,
+                "FP": 0,
+                "TP": 0,
+                "FN": 0,
+                "TN": 0,
             }
 
     # testing_output = {}
@@ -185,13 +198,17 @@ def inference(model_to_eval, dataloader, device, config):
         loss += ce.detach().item()
         num_samples += batch['input_ids'].size(0) # batch_size
         
-        _correct, _demo = get_acc(
+        _correct, _demo, _FP, _TP, _FN, _TN = get_acc(
             logits.detach().cpu(), 
             batch['labels'].detach().cpu(), 
             ignore_index=-1,
         )
         correct += _correct
         demo += _demo
+        FP += _FP
+        TP += _TP
+        FN += _FN
+        TN += _TN
 
         for supervision_tag in ["S2", "S3"]:
             if supervision_tag in config.task:
@@ -204,36 +221,42 @@ def inference(model_to_eval, dataloader, device, config):
                 )
                 more_stats[supervision_tag]["loss"] += supervision_ce.detach().item()
 
-                _correct, _demo = get_acc(
+                _correct, _demo, _FP, _TP, _FN, _TN = get_acc(
                     supervision_logits.detach().cpu(),
                     batch[f"{supervision_tag}_labels"].to(device).detach().cpu(),
                     ignore_index=-1,
                 )
                 more_stats[supervision_tag]["correct"] += _correct
                 more_stats[supervision_tag]["demo"] += _demo
-        
-        # for input_id, gth_id, pred_id in zip(batch['input_ids'], batch['labels'], logits.argmax(dim=-1)):
-        #     input_seq = [vocab[i] for i in input_id if vocab[i]!='<pad>']
-        #     gth_seq = [vocab[gth_id[i]] for i in range(len(gth_id)) if gth_id[i]!=-1]
-        #     pred_seq = [vocab[pred_id[i]] for i in range(len(gth_id)) if gth_id[i]!=-1][:len(gth_seq)]
-        #     testing_output[k] = {
-        #         "input": " ".join(input_seq),
-        #         "gth": " ".join(gth_seq),
-        #         "pred": " ".join(pred_seq),
-        #     }
-        #     k+=1
+                more_stats[supervision_tag]["FP"] += _FP
+                more_stats[supervision_tag]["TP"] += _TP
+                more_stats[supervision_tag]["FN"] += _FN
+                more_stats[supervision_tag]["TN"] += _TN
 
     # float numbers to 2 decimal places
     metrics = {"num_samples": num_samples,}
     for supervision_tag in ["S2", "S3"]:
         if supervision_tag in config.task:
+            assert more_stats[supervision_tag]["correct"] + more_stats[supervision_tag]["FP"] + more_stats[supervision_tag]["FN"] == more_stats[supervision_tag]["demo"], f"Failed sanity check for {supervision_tag}: correct + FP + FN == demo; correct={more_stats[supervision_tag]['correct']}, FP={more_stats[supervision_tag]['FP']}, FN={more_stats[supervision_tag]['FN']}, demo={more_stats[supervision_tag]['demo']}"
+            assert more_stats[supervision_tag]["TP"] + more_stats[supervision_tag]["TN"] == more_stats[supervision_tag]["correct"], f"Failed sanity check for {supervision_tag}: TP + TN == correct; TP={more_stats[supervision_tag]['TP']}, TN={more_stats[supervision_tag]['TN']}, correct={more_stats[supervision_tag]['correct']}"
             metrics.update({
+                f"{supervision_tag}_FP": more_stats[supervision_tag]["FP"],
+                f"{supervision_tag}_TP": more_stats[supervision_tag]["TP"],
+                f"{supervision_tag}_FN": more_stats[supervision_tag]["FN"],
+                f"{supervision_tag}_TN": more_stats[supervision_tag]["TN"],
                 f"{supervision_tag}_loss": round(more_stats[supervision_tag]["loss"] / more_stats[supervision_tag]["demo"], 2) if more_stats[supervision_tag]["demo"] > 0 else -1,
                 f"{supervision_tag}_acc": round(more_stats[supervision_tag]["correct"] / more_stats[supervision_tag]["demo"], 2) if more_stats[supervision_tag]["demo"] > 0 else -1,
                 f"{supervision_tag}_numel": more_stats[supervision_tag]["demo"],
             })
+    
+    assert correct + FP + FN == demo, f"Failed sanity check: correct + FP + FN == demo; correct={correct}, FP={FP}, FN={FN}, demo={demo}"
+    assert TP + TN == correct, f"Failed sanity check: TP + TN == correct; TP={TP}, TN={TN}, correct={correct}"
     metrics.update({
         # "demo": demo, # sanity check
+        "FP": round(FP / demo, 2) if demo > 0 else -1,
+        "TP": round(TP / demo, 2) if demo > 0 else -1,
+        "FN": round(FN / demo, 2) if demo > 0 else -1,
+        "TN": round(TN / demo, 2) if demo > 0 else -1,
         "loss": round(loss / num_samples, 2),
         "acc": round(correct / demo, 2) if demo > 0 else -1,
     })

@@ -99,6 +99,7 @@ for d in range(2, 9):
     # divide each cell by 1000, then round to the flooring integer
     row = [row[0]] + [int(round(cell/1000)) for cell in row[1:]]
     table.append(row)
+print("Unit: 1000\n")
 print(tabulate(table, headers=headers, tablefmt="rounded_grid"))
 headers = ["fix_d", "l=42"] + [f"{l}" for l in range(44, 120, 2)] + ["l=120", "total"]
 table = []
