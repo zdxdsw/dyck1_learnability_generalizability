@@ -13,7 +13,20 @@ import argparse, json, re
 from pathlib import Path
 import matplotlib.pyplot as plt
 from matplotlib.ticker import PercentFormatter # help format the y-axis as percentages
+from matplotlib.transforms import offset_copy
 import numpy as np
+from tqdm import tqdm
+
+TRAIN_SOURCES = [
+    {
+        "variant": "ORIGINAL",
+        "root": "/data/yingshac/tmlr/train",
+    },
+    {
+        "variant": "SHORTER",
+        "root": "/data/yingshac/tmlr/shorter/train",
+    },
+]
 
 VALIDATION_SOURCES = [
     {
@@ -209,6 +222,7 @@ def integer_bins(values):
 
 
 def plot_one_hist(ax, values, *, bins, color, alpha, title, xlabel):
+    values = np.asarray(values)
     weights = np.ones(len(values)) / len(values)
     ax.hist(values, bins=bins, weights=weights, color=color, alpha=alpha)
     add_gaussian_curve(
@@ -218,6 +232,68 @@ def plot_one_hist(ax, values, *, bins, color, alpha, title, xlabel):
         color="black",
         linewidth=1.5,
     )
+
+    if "R_" in xlabel:
+        neg_values = values[values < 0]
+        pos_values = values[values > 0]
+
+        # x is in data coordinates; y is in axes coordinates -> put text annotation closer to x=0
+        trans = ax.get_xaxis_transform()
+
+        label_margin = 8  # points away from each vertical line
+        top_row_y = 0.95
+        second_row_y = 0.86
+
+        if len(neg_values) > 0:
+            min_neg = np.min(neg_values)
+            max_neg = np.max(neg_values)
+
+            ax.axvline(max_neg, color="black", linestyle="--", linewidth=1, alpha=0.5)
+            text_trans = offset_copy(trans, fig=ax.figure, x=-label_margin, y=0, units="points")
+            ax.text(
+                max_neg,
+                top_row_y,
+                f"max neg = {max_neg:.3f}",
+                transform=text_trans,
+                ha="right",
+                va="top",
+                fontsize=8,
+            )
+            ax.text(
+                0.02,
+                second_row_y,
+                f"min neg = {min_neg:.3f}",
+                transform=ax.transAxes,
+                ha="left",
+                va="top",
+                fontsize=8,
+            )
+
+        if len(pos_values) > 0:
+            min_pos = np.min(pos_values)
+            max_pos = np.max(pos_values)
+
+            ax.axvline(min_pos, color="black", linestyle="--", linewidth=1, alpha=0.5)
+            text_trans = offset_copy(trans, fig=ax.figure, x=label_margin, y=0, units="points")
+            ax.text(
+                min_pos,
+                top_row_y,
+                f"min pos = {min_pos:.3f}",
+                transform=text_trans,
+                ha="left",
+                va="top",
+                fontsize=8,
+            )
+            ax.text(
+                0.98,
+                second_row_y,
+                f"max pos = {max_pos:.3f}",
+                transform=ax.transAxes,
+                ha="right",
+                va="top",
+                fontsize=8,
+            )
+
     ax.set_title(title, fontsize=10)
     ax.set_xlabel(xlabel)
     ax.set_ylabel("Percentage")
@@ -230,8 +306,9 @@ def make_plot(sources, output_path, dpi=200):
         roots = ", ".join(source["root"] for source in sources)
         raise FileNotFoundError(f"No fix_d_*.json files found under: {roots}")
 
+    ### Calculating statistics
     all_stats = []
-    for row in rows:
+    for row in tqdm(rows, desc="Calculating statistics"):
         strings = load_negative_strings(row["path"])
         stats = compute_stats(strings)
         all_stats.append(stats)
@@ -280,7 +357,7 @@ def make_plot(sources, output_path, dpi=200):
         if has_separator and i == separator_after:
             plot_row += 1
     
-    ###
+    ### Plotting histograms
     col_titles = [
         "even length: $P_{FV}$",
         "odd length: $P_{FV}$",
@@ -290,7 +367,11 @@ def make_plot(sources, output_path, dpi=200):
 
     r_bins = np.linspace(-1.0, 1.0, 41)  # 40 bins over [-1, 1]
 
-    for i, (row, stats) in enumerate(zip(rows, all_stats)):
+    for i, (row, stats) in tqdm(
+        enumerate(zip(rows, all_stats)), 
+        desc="Plotting histograms",
+        total=nrows,
+    ):
         even_p = stats["even"]["p_fv"]
         odd_p = stats["odd"]["p_fv"]
         even_r = stats["even"]["r_fv"]
@@ -360,8 +441,8 @@ def make_plot(sources, output_path, dpi=200):
 
 
 def main():
-    split = "test"
-    sources = VALIDATION_SOURCES if split == "validation" else TEST_SOURCES
+    split = "train"  # "validation", "test", or "train"
+    sources = eval(f"{split.upper()}_SOURCES")
     
     make_plot(
         sources=sources,
