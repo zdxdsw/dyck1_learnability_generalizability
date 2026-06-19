@@ -44,10 +44,13 @@ MODEL = "Transformer"  # "RNN" or "Transformer"
 OUTPUT_DIR = f"/home/yingshac/workspace/tmlr/scripts/experiments/output_{MODEL.lower()}"
 CKPT_DIR = f"/data/yingshac/tmlr/ckpts_{MODEL.lower()}"
 EVAL_BATCH_SIZE = 1024
-SPLITS = ["Validation", "Testing"] # ["Training", "Validation", "Testing"]
+SPLITS = ["Training"] # ["Training", "Validation", "Testing"]
 
 TASK_SUITES = [
-    "S1_d_[2-8]_4A",
+    "S1_d_trulyleq[2-8]_1A",
+    "S1_d_trulyleq[2-8]_1E",
+    "S1_d_trulyleq[2-8]_1F",
+    "S1_d_trulyleq[2-8]_1G",
 ]
 
 

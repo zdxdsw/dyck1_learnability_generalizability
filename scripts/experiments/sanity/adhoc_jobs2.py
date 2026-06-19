@@ -1,18 +1,8 @@
 import os, json, re
 
 JOBS_NEEDED = """
-S1_d_trulyleq[2-8]_4C/S1_d_trulyleq5/0607_004522 is not finished.
-S1_d_trulyleq[2-8]_4C/S1_d_trulyleq8/0607_031115 is not finished.
-
-S1_d_[2-8]_2D/S1_d_6/0616_212234 is not finished, skip...
-S1_d_[2-8]_2D/S1_d_7/0616_223101 is not finished, skip...
-S1_d_[2-8]_2D/S1_d_8/0616_230117 is not finished
-
-S1_d_[2-8]_2E/S1_d_6/0616_220438
-
-S1_d_[2-8]_2F/S1_d_4/0616_224626 is not finished, skip...
-S1_d_[2-8]_2F/S1_d_7/0616_223309 is not finished, skip...
-S1_d_[2-8]_2F/S1_d_7/0616_224925
+Job Unfinished: S1_d_trulyleq[2-8]_1B/S1_d_trulyleq4/0618_180410
+Job Unfinished: S1_d_trulyleq[2-8]_1B/S1_d_trulyleq7/0618_183535
 """
 
 MODEL = "transformer"

@@ -4,16 +4,16 @@ MODEL = "transformer"
 OUTPUT_DIR = f"/home/yingshac/workspace/tmlr/scripts/experiments/output_{MODEL}/"
 
 TASK_SUITES = [
-    "S1_d_trulyleq[2-8]_2A",
-    "S1_d_trulyleq[2-8]_2B",
-    "S1_d_trulyleq[2-8]_2C",
-    "S1_d_trulyleq[2-8]_2D",
-    "S1_d_trulyleq[2-8]_2E",
-    "S1_d_trulyleq[2-8]_2F",
-    "S1_d_trulyleq[2-8]_2G",
+    "S1_d_trulyleq[2-8]_1A",
+    "S1_d_trulyleq[2-8]_1B",
+    "S1_d_trulyleq[2-8]_1C",
+    "S1_d_trulyleq[2-8]_1D",
+    "S1_d_trulyleq[2-8]_1E",
+    "S1_d_trulyleq[2-8]_1F",
+    "S1_d_trulyleq[2-8]_1G",
 ]
 
-CHECK_TRAINING_METRICS = True
+CHECK_TRAINING_METRICS = False
 if not CHECK_TRAINING_METRICS: print("Haven't checked training metrics.")
 """
 Iterate through OUTPUT_DIR: task_suite/task/handle
