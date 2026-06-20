@@ -12,9 +12,13 @@ MODE = "cumu" # ["non-cumu", "cumu"] will map to ["d", "trulyleqd"]
 LOSS_OR_ACC = "acc" # "loss" or "acc"
 NUM_HIDDEN_LAYERS = 2
 CAUSAL = False
+PE_CODE_RANGE = "O-U" # "A-G"
 
 METRIC = ["cvg", "pg", "dg_larger", "lg"] # ["cvg", "pg", "dg_larger", "dg_smaller", "lg"]
 
+# ------------------------------------------------------------------
+# Useful mappings for and plotting
+# ------------------------------------------------------------------
 METRIC_SHORTHAND_TO_FULL = {
     "cvg": "Convergence", 
     "pg": "Permutation Generalization", 
@@ -45,6 +49,13 @@ PE_CODE_TO_NAME = {
 	"E": "alibi",
 	"F": "relative",
 	"G": "none",
+    "O": "rotary",
+	"P": "scaler",
+	"Q": "sinusoidal",
+	"R": "absolute",
+	"S": "alibi",
+	"T": "relative",
+	"U": "none",
 }
 
 PE_NAME_TO_COLOR = {
@@ -60,7 +71,9 @@ PE_NAME_TO_COLOR = {
 def Print(s=""): print(s, flush=True)
 
 """
+# ------------------------------------------------------------------
 1. Get Task Suites
+# ------------------------------------------------------------------
     Use supervision, depth_mode, num_hidden_layers and causal to determine 7 task_suites (7 PEs)
     E.g. S1_d_trulyleq[2-8]_2A, S1_d_trulyleq[2-8]_2B, ... S1_d_trulyleq[2-8]_2G
     task_suites = get_task_suites() <- args
@@ -70,18 +83,30 @@ def Print(s=""): print(s, flush=True)
     pe_codes = [task_suite[-1] for task_suite in task_suites]
     task_suite_full = task_suites[0][:-1] + "".join(pe_codes)
 """
-def get_task_suites(output_dir, supervision, depth_mode, num_hidden_layers, causal):
-    regex_pattern = f"{supervision}_d_{depth_mode[:-1]}\\[\\d+-\\d+\\]_{num_hidden_layers}{'[A-G]' if causal else '[a-g]'}"
+def get_task_suites(output_dir, supervision, depth_mode, num_hidden_layers, pe_code_range):
+    
+    # since this is a regex, use a raw f-string for readability:
+    regex_pattern = (
+        rf"{supervision}_d_{depth_mode[:-1]}"
+        rf"\[\d+-\d+\]_"
+        rf"{num_hidden_layers}[{pe_code_range}]"
+    )
+
     task_suites = []
     for task_suite in os.listdir(output_dir):
         if re.match(regex_pattern, task_suite):
             task_suites.append(task_suite)
+    
     Print("="*14 + " Found task_suites: " + "="*14 + f"\n{task_suites}\n")
+    
     return task_suites
 
 """
+# ------------------------------------------------------------------
 2. Infer range of train_d -> d_min, d_max
-    infer from the first task_suite (inside brackets), which should be the same for all 7 task_suites. 
+# ------------------------------------------------------------------
+    infer from the first task_suite (inside brackets), 
+    which should be the same for all 7 task_suites. 
 """
 def infer_train_d_range(task_suite):
     match = re.search(r"\[(\d+)-(\d+)\]", task_suite)
@@ -94,7 +119,9 @@ def infer_train_d_range(task_suite):
         raise ValueError(f"Cannot infer train_d range from task_suite: {task_suite}")
 
 """
+# ------------------------------------------------------------------
 3. Get Plot Stats
+# ------------------------------------------------------------------
     plot_stats = {
         "<pe_name>": {
             "<train_d>": {
@@ -192,8 +219,10 @@ def locate_best_epoch_lineidx(lines, best_epoch_id, split):
 
 
 """
+# ------------------------------------------------------------------
 4. Flesh Out get_single_metric() 
-    
+# ------------------------------------------------------------------
+ 
     Convergence + non-cumu: 
         single_metric = y at x = train_d
     Convergence + cumu: 
@@ -270,7 +299,9 @@ def get_single_metric(x_y_pairs, metric, mode, train_d):
         return None
 
 """
+# ------------------------------------------------------------------
 5. Plotting
+# ------------------------------------------------------------------
     title: f"{supervision} L={num_hidden_layers}, {'Causal' if causal else 'Non-causal'}"
     x label: f"train_d ({cumu/non-cumu})"
     y label: f"{metric_fullname}"
@@ -334,18 +365,8 @@ Training set: d_1
 {'num_samples': 16720, 'loss': 0.46, 'acc': 0.75}
 Training set: d_2
 {'num_samples': 30000, 'loss': 0.59, 'acc': 0.63}
-Training set: d_3
-{'num_samples': 100000, 'loss': 0.6, 'acc': 0.63}
-Training set: d_4
-{'num_samples': 100000, 'loss': 0.59, 'acc': 0.63}
-Training set: d_5
-{'num_samples': 100000, 'loss': 0.59, 'acc': 0.63}
-Training set: d_6
-{'num_samples': 100000, 'loss': 0.59, 'acc': 0.63}
-Training set: d_7
-{'num_samples': 100000, 'loss': 0.59, 'acc': 0.63}
-Training set: d_8
-{'num_samples': 100000, 'loss': 0.59, 'acc': 0.63}
+...
+...
 
 --------------------------------------------------
 Epoch <best_epoch_id> Step <some_number> Metrics on Validation Sets:
@@ -356,30 +377,8 @@ Validation set: d_1
 {'num_samples': 38, 'loss': 0.52, 'acc': 0.68}
 Validation set: d_2
 {'num_samples': 10000, 'loss': 0.59, 'acc': 0.63}
-Validation set: d_3
-{'num_samples': 10000, 'loss': 0.59, 'acc': 0.63}
-Validation set: d_4
-{'num_samples': 10000, 'loss': 0.59, 'acc': 0.63}
-Validation set: d_5
-{'num_samples': 10000, 'loss': 0.59, 'acc': 0.63}
-Validation set: d_6
-{'num_samples': 10000, 'loss': 0.59, 'acc': 0.63}
-Validation set: d_7
-{'num_samples': 10000, 'loss': 0.59, 'acc': 0.63}
-Validation set: d_9
-{'num_samples': 10000, 'loss': 0.59, 'acc': 0.63}
-Validation set: d_10
-{'num_samples': 10000, 'loss': 0.59, 'acc': 0.63}
-Validation set: d_11
-{'num_samples': 10000, 'loss': 0.6, 'acc': 0.63}
-Validation set: d_12
-{'num_samples': 10000, 'loss': 0.6, 'acc': 0.63}
-Validation set: d_13
-{'num_samples': 8000, 'loss': 0.6, 'acc': 0.62}
-Validation set: d_14
-{'num_samples': 3000, 'loss': 0.59, 'acc': 0.63}
-Validation set: d_15
-{'num_samples': 1000, 'loss': 0.6, 'acc': 0.63}
+...
+...
 Validation set: d_16
 {'num_samples': 320, 'loss': 0.6, 'acc': 0.62}
 
@@ -404,7 +403,7 @@ def run_all(args):
         args.supervision, 
         args.depth_mode, 
         args.num_hidden_layers, 
-        args.causal
+        args.pe_code_range.upper() if args.causal else args.pe_code_range.lower()
     )
     pe_codes = sorted([task_suite[-1] for task_suite in task_suites])
     task_suite_full = task_suites[0][:-1] + "".join(pe_codes)
@@ -430,9 +429,12 @@ def run_all(args):
 
                 best_epoch_lineidx = locate_best_epoch_lineidx(lines, best_epoch_id, split)
                 if best_epoch_lineidx is None: continue
+                if lines[best_epoch_lineidx+1].strip() == "": 
+                    # some <split>_metrics.txt files have an extra empty line after the keyline.
+                    best_epoch_lineidx += 1
 
                 x_y_pairs = []
-                for i in range(best_epoch_lineidx+2, len(lines), 2):
+                for i in range(best_epoch_lineidx+1, len(lines), 2):
                     line1 = lines[i].strip()
                     if line1 == "": break
                     if not line1.startswith(f"{split} set: d_"):
@@ -532,6 +534,12 @@ def parse_args():
         type=bool,
         default=CAUSAL,
         help="Whether the model is causal (applicable for Transformer)"
+    )
+    parser.add_argument(
+        "--pe_code_range",
+        type=str,
+        default=PE_CODE_RANGE,
+        help="Range of PE codes to include: e.g. 'A-G' or 'O-U'"
     )
     parser.add_argument(
         "--dpi",

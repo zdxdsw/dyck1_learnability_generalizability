@@ -7,11 +7,9 @@ OUTPUT_DIR = f"/home/yingshac/workspace/tmlr/scripts/experiments/output_{MODEL}/
 TASK_SUITES = [
     # "S1_d_trulyleq[2-8]_2O",
     # "S1_d_trulyleq[2-8]_2p",
-    # "S1_d_trulyleq[2-8]_1B",
-    # "S1_d_trulyleq[2-8]_1C",
-    # "S1_d_trulyleq[2-8]_1D",
-    "S1_d_trulyleq[2-8]_1E",
-    "S1_d_trulyleq[2-8]_1F",
+    "S1_d_trulyleq[2-8]_1B",
+    "S1_d_trulyleq[2-8]_1C",
+    "S1_d_trulyleq[2-8]_1D",
 ]
 
 CHECK_TRAINING_METRICS = True
