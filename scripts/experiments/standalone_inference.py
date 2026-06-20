@@ -378,7 +378,7 @@ def run_one_handle(config, config_path, output_dir, ckpt_dir, split, task_suite,
 
     model = load_model_from_ckpt(config, ckpt_path, device)
 
-    Print(f"\nEpoch {best_epoch_id} Metrics on {split} Sets:")
+    Print(f"\nEpoch {best_epoch_id} Metrics on {split} Sets:\n")
     run_metrics_for_dataloaders(f"{split} set: ", model, dataloaders, device, config)
 
 

@@ -10,9 +10,9 @@ OUTPUT_ROOT = f"/home/yingshac/workspace/tmlr/scripts/experiments/"
 SUPERVISION = "S1" # ["S1", "S2", "S3", "S1a", "S2a", "S3a"]
 MODE = "cumu" # ["non-cumu", "cumu"] will map to ["d", "trulyleqd"]
 LOSS_OR_ACC = "acc" # "loss" or "acc"
-NUM_HIDDEN_LAYERS = 2
+NUM_HIDDEN_LAYERS = 1
 CAUSAL = False
-PE_CODE_RANGE = "O-U" # "A-G"
+PE_CODE_RANGE =  "A-G" # "O-U" #
 
 METRIC = ["cvg", "pg", "dg_larger", "lg"] # ["cvg", "pg", "dg_larger", "dg_smaller", "lg"]
 

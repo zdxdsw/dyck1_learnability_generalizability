@@ -5,11 +5,13 @@ MODEL = "transformer"
 OUTPUT_DIR = f"/home/yingshac/workspace/tmlr/scripts/experiments/output_{MODEL}/"
 
 TASK_SUITES = [
-    # "S1_d_trulyleq[2-8]_2O",
-    # "S1_d_trulyleq[2-8]_2p",
-    "S1_d_trulyleq[2-8]_1B",
-    "S1_d_trulyleq[2-8]_1C",
-    "S1_d_trulyleq[2-8]_1D",
+    "S1_d_trulyleq[2-8]_1a",
+    "S1_d_trulyleq[2-8]_1b",
+    "S1_d_trulyleq[2-8]_1c",
+    "S1_d_trulyleq[2-8]_1d",
+    "S1_d_trulyleq[2-8]_1e",
+    "S1_d_trulyleq[2-8]_1f",
+    "S1_d_trulyleq[2-8]_1g",
 ]
 
 CHECK_TRAINING_METRICS = True

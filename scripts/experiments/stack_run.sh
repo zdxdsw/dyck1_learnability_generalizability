@@ -10,9 +10,11 @@
 # CUDA_VISIBLE_DEVICES="3" accelerate launch --main_process_port 29501 --num_processes 1 trainer.py --date 0619_172018 --task S1_d_trulyleq3 --output_dir '/home/yingshac/workspace/tmlr/scripts/experiments/output_transformer/S1_d_trulyleq[2-8]_2P/S1_d_trulyleq3' 2> '/home/yingshac/workspace/tmlr/scripts/experiments/output_transformer/S1_d_trulyleq[2-8]_2P/S1_d_trulyleq3/0619_172018/stderr.txt' | tee '/home/yingshac/workspace/tmlr/scripts/experiments/output_transformer/S1_d_trulyleq[2-8]_2P/S1_d_trulyleq3/0619_172018/terminal.txt'  >/dev/null &
 # wait
 
-python standalone_inference.py --cuda 0 --task_suites 'S1_d_trulyleq[2-8]_1B' > /dev/null 2>&1 &
-python standalone_inference.py --cuda 1 --task_suites 'S1_d_trulyleq[2-8]_1C' > /dev/null 2>&1 &
-python standalone_inference.py --cuda 3 --task_suites 'S1_d_trulyleq[2-8]_1D' > /dev/null 2>&1 &
+python standalone_inference.py --cuda 0 --task_suites 'S1_d_trulyleq[2-8]_1a' > /dev/null 2>&1 &
+python standalone_inference.py --cuda 1 --task_suites 'S1_d_trulyleq[2-8]_1b' > /dev/null 2>&1 &
+python standalone_inference.py --cuda 1 --task_suites 'S1_d_trulyleq[2-8]_1c' > /dev/null 2>&1 &
+python standalone_inference.py --cuda 2 --task_suites 'S1_d_trulyleq[2-8]_1d' > /dev/null 2>&1 &
+python standalone_inference.py --cuda 2 --task_suites 'S1_d_trulyleq[2-8]_1e' > /dev/null 2>&1 &
+python standalone_inference.py --cuda 3 --task_suites 'S1_d_trulyleq[2-8]_1f' > /dev/null 2>&1 &
+python standalone_inference.py --cuda 3 --task_suites 'S1_d_trulyleq[2-8]_1g' > /dev/null 2>&1 &
 wait
-
-
