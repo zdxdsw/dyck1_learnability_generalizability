@@ -1,19 +1,20 @@
 import os
+from tqdm import tqdm
 
 MODEL = "transformer"
 OUTPUT_DIR = f"/home/yingshac/workspace/tmlr/scripts/experiments/output_{MODEL}/"
 
 TASK_SUITES = [
-    "S1_d_trulyleq[2-8]_1A",
-    "S1_d_trulyleq[2-8]_1B",
-    "S1_d_trulyleq[2-8]_1C",
-    "S1_d_trulyleq[2-8]_1D",
+    # "S1_d_trulyleq[2-8]_2O",
+    # "S1_d_trulyleq[2-8]_2p",
+    # "S1_d_trulyleq[2-8]_1B",
+    # "S1_d_trulyleq[2-8]_1C",
+    # "S1_d_trulyleq[2-8]_1D",
     "S1_d_trulyleq[2-8]_1E",
     "S1_d_trulyleq[2-8]_1F",
-    "S1_d_trulyleq[2-8]_1G",
 ]
 
-CHECK_TRAINING_METRICS = False
+CHECK_TRAINING_METRICS = True
 if not CHECK_TRAINING_METRICS: print("Haven't checked training metrics.")
 """
 Iterate through OUTPUT_DIR: task_suite/task/handle
@@ -29,7 +30,7 @@ read training_metrics.txt: if finished, the last non-empty line should contain "
 
 for task_suite in TASK_SUITES:
     task_suite_dir = os.path.join(OUTPUT_DIR, task_suite)
-    for task in os.listdir(task_suite_dir):
+    for task in tqdm(os.listdir(task_suite_dir), desc=f"Checking {task_suite}", unit="task"):
         task_dir = os.path.join(task_suite_dir, task)
         for handle in os.listdir(task_dir):
             handle_dir = os.path.join(task_dir, handle)
@@ -38,21 +39,21 @@ for task_suite in TASK_SUITES:
             
             # Check terminal.txt
             if not os.path.exists(terminal_path):
-                print(f"Job Missing: {task_suite}/{task}/{handle}")
+                tqdm.write(f"Job Missing: {task_suite}/{task}/{handle}")
             else:
                 with open(terminal_path, "r") as f:
                     lines = [line.strip() for line in f if line.strip()]
                     if not lines or "Finish!!!" not in lines[-1]:
-                        print(f"Job Unfinished: {task_suite}/{task}/{handle}")
+                        tqdm.write(f"Job Unfinished: {task_suite}/{task}/{handle}")
             
             if not CHECK_TRAINING_METRICS: continue
             # Check training_metrics.txt
             if not os.path.exists(training_metrics_path):
-                print(f"Training Metrics Missing: {task_suite}/{task}/{handle}")
+                tqdm.write(f"Training Metrics Missing: {task_suite}/{task}/{handle}")
             else:
                 with open(training_metrics_path, "r") as f:
                     lines = [line.strip() for line in f if line.strip()]
                     if not lines or "Finish!!!" not in lines[-1]:
-                        print(f"Training Metrics Unfinished: {task_suite}/{task}/{handle}")
+                        tqdm.write(f"Training Metrics Unfinished: {task_suite}/{task}/{handle}")
 
 print("\nDone!!!\n")

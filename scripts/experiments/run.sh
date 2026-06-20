@@ -1,6 +1,6 @@
 #!/bin/bash
 
-start=29508
+start=29500
 
 for i in {0..6}; do
     port=$((start + i))

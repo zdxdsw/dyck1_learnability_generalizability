@@ -43,14 +43,14 @@ from utils import sequence_collator_builder, inference
 MODEL = "Transformer"  # "RNN" or "Transformer"
 OUTPUT_DIR = f"/home/yingshac/workspace/tmlr/scripts/experiments/output_{MODEL.lower()}"
 CKPT_DIR = f"/data/yingshac/tmlr/ckpts_{MODEL.lower()}"
-EVAL_BATCH_SIZE = 1024
+# DATASET_ROOT = "/data/yingshac/tmlr"
+# MIN_TEST_L, MAX_TEST_L = 41, 120
+
+EVAL_BATCH_SIZE = 2048
 SPLITS = ["Training"] # ["Training", "Validation", "Testing"]
 
 TASK_SUITES = [
-    "S1_d_trulyleq[2-8]_1A",
-    "S1_d_trulyleq[2-8]_1E",
-    "S1_d_trulyleq[2-8]_1F",
-    "S1_d_trulyleq[2-8]_1G",
+    "S1_d_trulyleq[2-8]_2u",
 ]
 
 
@@ -104,14 +104,25 @@ def parse_task_d(task):
     raise ValueError(f"Func parse_task_d(): Could not infer d from task name: {task}")
 
 
-def infer_dataset_name_from_train_file(train_file):
+def infer_dataset_name_from_file(file):
     """
     Infer dataset name from filenames like:
         /data/yingshac/tmlr/train/fix_d_2.json -> d_2
     """
     
-    base = os.path.basename(train_file)
-    return base.split(".")[0].split("fix_")[-1] 
+    base = os.path.basename(file)
+    return base.split(".")[0].split("fix_")[-1]
+
+
+def infer_dataset_name_from_datafile_config(datafile_config):
+    """
+    Infer dataset name from data config tuple like:
+        ("/data/yingshac/tmlr/train/fix_d_2.json", "d_2", None) -> d_2
+    """
+    if isinstance(datafile_config, str):
+        assert "train" in datafile_config
+        return infer_dataset_name_from_file(datafile_config)
+    return datafile_config[1] 
 
 
 def get_last_nonempty_line(lines):
@@ -145,7 +156,8 @@ def get_best_epoch_id(output_dir, task_suite, task, handle, same_d):
 
     with open(terminal_path, "r") as f: lines = f.readlines()
     # the last non-empty line should print f"Finish!!! {hangle}", so we can check if the job is finished
-    if not lines[-1].startswith(f"Finish!!! {handle}"):
+    last_line = get_last_nonempty_line(lines)
+    if not last_line.startswith(f"Finish!!! {handle}"):
         Print(f"Func get_best_epoch_id(): [skip] Job {task_suite}/{task}/{handle} is not finished.")
         return None
     
@@ -164,7 +176,7 @@ def get_best_epoch_id(output_dir, task_suite, task, handle, same_d):
                 if line.startswith("Validation set: d_"):
                     val_d = int(line.strip().split("Validation set: d_")[1])
                     if val_d != same_d: continue
-                    metrics = eval(lines[j+1].strip())
+                    metrics = safe_literal_eval_metrics(lines[j+1])
                     if metrics["loss"] <= smallest_same_d_val_loss:
                         smallest_same_d_val_loss = metrics["loss"]
                         best_epoch_id = epoch_id
@@ -220,64 +232,87 @@ def get_model_class(config):
     model_class_name = f"{config.model}Model"
     return globals()[model_class_name]
 
+
 def get_dataset_class(config):
     dataset_class_name = f"{config.dataset}Dataset"
-    return globals()[dataset_class_name]
+    return globals()[dataset_class_name]   
 
 
-def build_eval_dataloader(dataset, config):
+def build_one_dataloader(config, datafile_config_tuple, eval_batch_size, num_workers, persistent_workers):
+    DATASET_CLASS = get_dataset_class(config)
+    dataset = DATASET_CLASS(
+        [datafile_config_tuple[0]], 
+        config, 
+        name=datafile_config_tuple[1], 
+        specific_length=datafile_config_tuple[2]
+    )
     collator = sequence_collator_builder(config)
     return DataLoader(
         dataset,
         shuffle=False,
-        batch_size=args.eval_batch_size, # override training configs
+        batch_size=eval_batch_size, # override training configs
         collate_fn=collator,
         pin_memory=True,
-        num_workers=1,
-        persistent_workers=False,
+        num_workers=num_workers,
+        persistent_workers=persistent_workers if num_workers > 0 else False,
     )
 
 
-def build_train_dataloaders(config):
+def build_split_to_dataloaders(config, splits, eval_batch_size):
     """
-    Unlike trainer.py, this creates one train dataset per train file, with inferred dataset names.
+    split_to_dataloaders = {
+        <split>: {
+            <name>: dataloader,
+            ...
+        }
+    }
     """
-    DATASET_CLASS = get_dataset_class(config)
-    dataloaders = []
-
-    for train_file in config.train_files:
-        name = infer_dataset_name_from_train_file(train_file)
-        dataset = DATASET_CLASS([train_file], config, name=name)
-        dataloaders.append(build_eval_dataloader(dataset, config))
-
-    return dataloaders
-
-
-def build_val_dataloaders(config):
-    DATASET_CLASS = get_dataset_class(config)
-    dataloaders = []
-
-    for f in config.val_files:
-        # following trainer.py:
-        # DATASET_CLASS([f[0]], config, name=f[1])
-        dataset = DATASET_CLASS([f[0]], config, name=f[1])
-        dataloaders.append(build_eval_dataloader(dataset, config))
-
-    return dataloaders
-
-
-def build_test_dataloaders(config):
-    DATASET_CLASS = get_dataset_class(config)
-    dataloaders = []
-
-    for f in config.test_files:
-        # following trainer.py:
-        # DATASET_CLASS([f[0]], config, name=f[1], specific_length=f[2])
-        dataset = DATASET_CLASS([f[0]], config, name=f[1], specific_length=f[2])
-        dataloaders.append(build_eval_dataloader(dataset, config))
-
-    return dataloaders
-
+    split_to_dataloaders = {}
+    for split in splits:
+        split_to_dataloaders[split] = {}
+        if split == "Training":
+            for datafile_config in config.train_files:
+                if isinstance(datafile_config, (tuple, list)): 
+                    path = datafile_config[0]
+                    name = datafile_config[1]
+                    if name is None: name = infer_dataset_name_from_datafile_config(datafile_config)
+                else:
+                    path = datafile_config
+                    name = infer_dataset_name_from_file(path)
+                split_to_dataloaders[split][name] = build_one_dataloader(
+                    config, 
+                    (path, name, None), 
+                    eval_batch_size,
+                    num_workers=1,
+                    persistent_workers=True,
+                )
+        elif split == "Validation":
+            for datafile_config in config.val_files:
+                assert isinstance(datafile_config, (tuple, list)) and len(datafile_config) == 3, f"Validation files should be tuples of (path, name, specific_length), but got: {datafile_config}"
+                path = datafile_config[0]
+                name = datafile_config[1]
+                if name is None: name = infer_dataset_name_from_datafile_config(datafile_config)
+                split_to_dataloaders[split][name] = build_one_dataloader(
+                    config, 
+                    (path, name, None), 
+                    eval_batch_size,
+                    num_workers=1,
+                    persistent_workers=True,
+                )
+        elif split == "Testing":
+            for datafile_config in config.test_files:
+                assert isinstance(datafile_config, (tuple, list)) and len(datafile_config) == 3, f"Test files should be tuples of (path, name, specific_length), but got: {datafile_config}"
+                path = datafile_config[0]
+                name = datafile_config[1]
+                if name is None: name = infer_dataset_name_from_datafile_config(datafile_config)
+                split_to_dataloaders[split][name] = build_one_dataloader(
+                    config, 
+                    (path, name, None), 
+                    eval_batch_size,
+                    num_workers=1,
+                    persistent_workers=False, # keeping persistent workers for dozens of dataloaders could be worse than the overhead of worker setup
+                )
+    return split_to_dataloaders
 
 def load_model_from_ckpt(config, ckpt_path, device):
     MODEL_CLASS = get_model_class(config)
@@ -309,19 +344,7 @@ def run_metrics_for_dataloaders(section_name, model, dataloaders, device, config
         Print(metrics)
 
 
-def run_one_handle(output_dir, ckpt_root, split, task_suite, task, handle, device):
-    handle_output_dir = os.path.join(output_dir, task_suite, task, handle)
-    config_path = os.path.join(handle_output_dir, "config.json")
-
-    if not os.path.exists(config_path):
-        Print(f"Func run_one_handle(): [skip] Missing config.json: {config_path}")
-        return
-
-    config = load_config_from_json(config_path)
-
-    if hasattr(config, "hf_cache_dir") and config.hf_cache_dir is not None:
-        os.environ["HF_HOME"] = config.hf_cache_dir
-
+def run_one_handle(config, config_path, output_dir, ckpt_dir, split, task_suite, task, handle, dataloaders, device):
     # Reproducibility is not crucial for deterministic eval, but keep consistent with trainer.py.
     if hasattr(config, "seed"):
         random.seed(config.seed)
@@ -346,7 +369,7 @@ def run_one_handle(output_dir, ckpt_root, split, task_suite, task, handle, devic
     )
     if best_epoch_id is None: return
 
-    ckpt_dir = os.path.join(ckpt_root, task_suite, task, handle)
+    ckpt_dir = os.path.join(ckpt_dir, task_suite, task, handle)
     ckpt_path = find_ckpt_path(ckpt_dir, best_epoch_id)
     if ckpt_path is None: return
     
@@ -355,17 +378,18 @@ def run_one_handle(output_dir, ckpt_root, split, task_suite, task, handle, devic
 
     model = load_model_from_ckpt(config, ckpt_path, device)
 
-    if split == "Training": dataloaders = build_train_dataloaders(config)
-    elif split == "Validation": dataloaders = build_val_dataloaders(config)
-    elif split == "Testing": dataloaders = build_test_dataloaders(config) 
-    else: raise ValueError(f"Func run_one_handle(): Invalid split: {split}")
-
     Print(f"\nEpoch {best_epoch_id} Metrics on {split} Sets:")
     run_metrics_for_dataloaders(f"{split} set: ", model, dataloaders, device, config)
 
 
 def collect_handles(output_dir, task_suites):
-    handles = []
+    """
+    results = [
+        (task_suite, task, [handle1, ...]),
+        ...
+    ]
+    """
+    results = []
     for task_suite in task_suites:
         task_suite_dir = os.path.join(output_dir, task_suite)
 
@@ -374,19 +398,21 @@ def collect_handles(output_dir, task_suites):
             continue
 
         for task in sorted(os.listdir(task_suite_dir)):
+            
             task_dir = os.path.join(task_suite_dir, task)
             if not os.path.isdir(task_dir):
                 Print(f"Func iter_handles(): [skip] Missing task directory: {task_dir}")
                 continue
-
+            
+            handles = []
             for handle in sorted(os.listdir(task_dir)):
                 handle_dir = os.path.join(task_dir, handle)
-                if not os.path.isdir(handle_dir):
-                    continue
+                if not os.path.isdir(handle_dir): continue
+                handles.append(handle)
+            
+            results.append((task_suite, task, handles))
 
-                handles.append((task_suite, task, handle))
-
-    return handles
+    return results
 
 def run_all(args):
     task_suites = args.task_suites
@@ -395,37 +421,80 @@ def run_all(args):
     Print(f"Using device: {device}")
     if device.type == "cuda": torch.cuda.set_device(device)
 
-    handles = collect_handles(args.output_dir, task_suites)
-    Print(f"Found {len(handles)} handles.")
+    results = collect_handles(args.output_dir, task_suites)
+    Print(f"#task_suites x #tasks = {len(results)}.")
 
-    for task_suite, task, handle in tqdm(handles, file=os.sys.__stderr__): # force tqdm to use the original terminal stream
-        handle_output_dir = os.path.join(args.output_dir, task_suite, task, handle)
-        os.makedirs(handle_output_dir, exist_ok=True)
+    pbar = tqdm(results, file=os.sys.__stderr__) # force tqdm to use the original terminal stream
+    for task_suite, task, handles in pbar:
+        if not handles:
+            Print(f"[skip] No handles found for {task_suite}/{task}")
+            continue
+        pbar.set_description(f"{task_suite}/{task}, processing handles 0/{len(handles)}...")
+        handle_output_dir = os.path.join(args.output_dir, task_suite, task, handles[0]) 
+        # all handles of the same task should share the same config.json (except for date and seed), so we can just pick the first one
+        config_path = os.path.join(handle_output_dir, "config.json")
+        config = load_config_from_json(config_path)
 
-        for split in args.splits:
+        ### Build dataloaders once per task
+        split_to_dataloaders = build_split_to_dataloaders(
+            config, 
+            # args.dataset_root, 
+            # args.min_test_l, 
+            # args.max_test_l, 
+            args.splits, 
+            args.eval_batch_size
+        )
+
+        for progress, handle in enumerate(handles):
+            pbar.set_description(f"{task_suite}/{task}, processing handles {progress}/{len(handles)}...")
+            handle_output_dir = os.path.join(args.output_dir, task_suite, task, handle)
+            config_path = os.path.join(handle_output_dir, "config.json")
+            config = load_config_from_json(config_path)
+            if hasattr(config, "hf_cache_dir") and config.hf_cache_dir is not None:
+                os.environ["HF_HOME"] = config.hf_cache_dir
             
-            metrics_path = os.path.join(handle_output_dir, f"{split.lower()}_metrics.txt")
-            
-            with open(metrics_path, "w") as f:
-                tee = Tee(f)  # <- inner loop output will be written to file only; no console
+            for split in args.splits:
+                dataloaders = []
+                if split == "Training":
+                    for file in config.train_files:
+                        name = file[1] if isinstance(file, (tuple, list)) else infer_dataset_name_from_datafile_config(file)
+                        dataloaders.append(split_to_dataloaders[split][name])
+                elif split == "Validation":
+                    for file in config.val_files:
+                        assert isinstance(file, (tuple, list)) and len(file) == 3, f"Validation files should be tuples of (path, name, specific_length), but got: {file}"
+                        name = file[1]
+                        dataloaders.append(split_to_dataloaders[split][name])
+                elif split == "Testing":
+                    for file in config.test_files:
+                        assert isinstance(file, (tuple, list)) and len(file) == 3, f"Testing files should be tuples of (path, name, specific_length), but got: {file}"
+                        name = file[1]
+                        dataloaders.append(split_to_dataloaders[split][name])
+                
+                metrics_path = os.path.join(handle_output_dir, f"{split.lower()}_metrics.txt")
+                
+                with open(metrics_path, "w") as f:
+                    tee = Tee(f)  # <- inner loop output will be written to file only; no console
 
-                with redirect_stdout(tee), redirect_stderr(tee):
-                    try:
-                        run_one_handle(
-                            output_dir=args.output_dir,
-                            ckpt_root=args.ckpt_dir,
-                            split=split,
-                            task_suite=task_suite,
-                            task=task,
-                            handle=handle,
-                            device=device,
-                        )
+                    with redirect_stdout(tee), redirect_stderr(tee):
+                        try:
+                            run_one_handle(
+                                config=config,
+                                config_path=config_path,
+                                output_dir=args.output_dir,
+                                ckpt_dir=args.ckpt_dir,
+                                split=split,
+                                task_suite=task_suite,
+                                task=task,
+                                handle=handle,
+                                dataloaders=dataloaders,
+                                device=device,
+                            )
 
-                        Print(f"\nFinish!!! {task_suite}/{task}/{handle}")
+                            Print(f"\nFinish!!! {task_suite}/{task}/{handle}")
 
-                    except Exception:
-                        Print(f"\n[error] Failed on {task_suite}/{task}/{handle}")
-                        traceback.print_exc()
+                        except Exception:
+                            Print(f"\n[error] Failed on {task_suite}/{task}/{handle}")
+                            traceback.print_exc()
 
 
 def parse_args():
@@ -444,6 +513,15 @@ def parse_args():
         default=CKPT_DIR,
         help="Root checkpoint directory containing task_suite/task/handle/*.pt.",
     )
+    # parser.add_argument(
+    #     "--dataset_root",
+    #     type=str,
+    #     default=DATASET_ROOT,
+    #     help="Root directory containing train/*.json, validation/*.json and test/*.json.",
+    # )
+    # parser.add_argument("--min_test_l", type=int, default=MIN_TEST_L)
+    # parser.add_argument("--max_test_l", type=int, default=MAX_TEST_L)
+    
     # nargs="*" means that this argument can take zero or more values
     #           argparse will collect them into a Python list.
     # Use: --task_suites 'S1_d_[2-8]_4B' 'S1_d_[2-8]_4C' 'S1_d_[2-8]_4F'

@@ -1,8 +1,8 @@
 import os, json, re
 
 JOBS_NEEDED = """
-Job Unfinished: S1_d_trulyleq[2-8]_1B/S1_d_trulyleq4/0618_180410
-Job Unfinished: S1_d_trulyleq[2-8]_1B/S1_d_trulyleq7/0618_183535
+Job Unfinished: S1_d_trulyleq[2-8]_2P/S1_d_trulyleq8/0619_203905                                           
+Job Unfinished: S1_d_trulyleq[2-8]_2P/S1_d_trulyleq3/0619_172018
 """
 
 MODEL = "transformer"

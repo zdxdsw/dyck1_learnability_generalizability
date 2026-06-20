@@ -29,7 +29,7 @@ class BaseSequenceCollator:
     def __init__(self, config):
         self.in_vocab = config.in_vocab
         self.max_seq_len = config.max_seq_len
-        self.ignore_idx = config.ignore_idx
+        self.ignore_idx = getattr(config, "ignore_index", -1)
         self.in_v2i = {v: i for i, v in enumerate(self.in_vocab)}
         if '<pad>' not in self.in_v2i:
             raise ValueError("'<pad>' must be in config.in_vocab")
@@ -112,25 +112,41 @@ def sequence_collator_builder(config):
         raise ValueError(f"Haven't implemented collator for model type: {config.model}")
 
 def get_acc(logits, labels, ignore_index):
-    pred = logits.argmax(dim=-1)
+    """
+        logits: [batch, seq_len, vocab_size]
+        labels: [batch, seq_len]
+        labels use:
+            0 = accept / 'a'
+            1 = reject / 'r'
+    """
+    pred = logits.argmax(dim=-1) # [batch, seq_len]
 
-    correct, demo = 0, 0
-    FP, TP, FN, TN = 0, 0, 0, 0
+    mask = labels != ignore_index
+    pred = pred[mask]
+    label = labels[mask]
 
-    # labels: 'a' --0; 'r' -- 1.
+    correct = (pred == label).sum()
+    demo = label.numel()
 
-    for _pred, _labels in zip(pred, labels):
-        pred = _pred[_labels != ignore_index]
-        label = _labels[_labels != ignore_index]
-        correct += (pred == label).float().sum().item()
-        demo += label.numel()
-        FP += ((pred == 0) & (label == 1)).float().sum().item()
-        TP += ((pred == 0) & (label == 0)).float().sum().item()
-        FN += ((pred == 1) & (label == 0)).float().sum().item()
-        TN += ((pred == 1) & (label == 1)).float().sum().item()
-        
+    """ Convention:
+        TP: pred 0, label 0
+        FP: pred 0, label 1
+        FN: pred 1, label 0
+        TN: pred 1, label 1
+    """
+    TP = ((pred == 0) & (label == 0)).sum()
+    FP = ((pred == 0) & (label == 1)).sum()
+    FN = ((pred == 1) & (label == 0)).sum()
+    TN = ((pred == 1) & (label == 1)).sum()
 
-    return correct, demo, FP, TP, FN, TN
+    return (
+        correct.item(),
+        demo,
+        FP.item(),
+        TP.item(),
+        FN.item(),
+        TN.item(),
+    )
 
 
 """ Prepare model-specific batched input since different model.forward() require different input keys """
@@ -192,7 +208,7 @@ def inference(model_to_eval, dataloader, device, config):
         ce = F.cross_entropy(
             logits.view(-1, logits.size(-1)), # bs*seq_len, vocab_size
             batch['labels'].to(device).view(-1), # 1, bs*seq_len
-            ignore_index=-1,
+            ignore_index=getattr(config, "ignore_index", -1),
             reduction="sum",
         )
         loss += ce.detach().item()
@@ -201,7 +217,7 @@ def inference(model_to_eval, dataloader, device, config):
         _correct, _demo, _FP, _TP, _FN, _TN = get_acc(
             logits.detach().cpu(), 
             batch['labels'].detach().cpu(), 
-            ignore_index=-1,
+            ignore_index=getattr(config, "ignore_index", -1),
         )
         correct += _correct
         demo += _demo
@@ -216,7 +232,7 @@ def inference(model_to_eval, dataloader, device, config):
                 supervision_ce = F.cross_entropy(
                     supervision_logits.view(-1, supervision_logits.size(-1)),
                     batch[f"{supervision_tag}_labels"].to(device).view(-1),
-                    ignore_index=-1,
+                    ignore_index=getattr(config, "ignore_index", -1),
                     reduction="sum",
                 )
                 more_stats[supervision_tag]["loss"] += supervision_ce.detach().item()
@@ -224,7 +240,7 @@ def inference(model_to_eval, dataloader, device, config):
                 _correct, _demo, _FP, _TP, _FN, _TN = get_acc(
                     supervision_logits.detach().cpu(),
                     batch[f"{supervision_tag}_labels"].to(device).detach().cpu(),
-                    ignore_index=-1,
+                    ignore_index=getattr(config, "ignore_index", -1),
                 )
                 more_stats[supervision_tag]["correct"] += _correct
                 more_stats[supervision_tag]["demo"] += _demo

@@ -1,0 +1,44 @@
+digraph "29_dfa" {
+s0 [label="s0", shape=doublecircle];
+s1 [label="s1"];
+s2 [label="s2"];
+s3 [label="s3"];
+s4 [label="s4"];
+s5 [label="s5"];
+s6 [label="s6", shape=doublecircle];
+s7 [label="s7", shape=doublecircle];
+s8 [label="s8", shape=doublecircle];
+s9 [label="s9", shape=doublecircle];
+s10 [label="s10"];
+s0 -> s1 [label="("];
+s0 -> s7 [label=")"];
+s1 -> s2 [label="("];
+s1 -> s3 [label=")"];
+s2 -> s4 [label="("];
+s2 -> s5 [label=")"];
+s3 -> s5 [label="("];
+s3 -> s5 [label=")"];
+s4 -> s10 [label="("];
+s4 -> s2 [label=")"];
+s5 -> s2 [label="("];
+s5 -> s6 [label=")"];
+s6 -> s5 [label="("];
+s6 -> s5 [label=")"];
+s7 -> s10 [label="("];
+s7 -> s8 [label=")"];
+s8 -> s5 [label="("];
+s8 -> s9 [label=")"];
+s9 -> s2 [label="("];
+s9 -> s8 [label=")"];
+s10 -> s10 [label="("];
+s10 -> s4 [label=")"];
+__start0 [shape=none, label=""];
+__start0 -> s0 [label=""];
+}
+
+
+================================================================================
+Faithfulness (exact match between RNN and DFA predictions):
+train: 0.9494
+val: 0.8129
+test: 0.8716

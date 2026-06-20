@@ -64,9 +64,14 @@ class RNNModel(nn.Module):
             if module.padding_idx is not None:
                 module.weight.data[module.padding_idx].zero_()
 
-    def forward(self, x, **kwargs):
-        x = self.encoder(x)
-        x, _ = self.model(x)        
+    def forward(self, input_ids):
+        x = self.encoder(input_ids)
+
+        # Rollout
+        # without passing h_start, PyTorch uses an all-zero initial hidden state h_0 of the appropriate shape.
+        # nn.RNN also supports "self.model(x, h_start)".
+        x, _ = self.model(x) 
+
         result = {'logits': self.decoder(x)}  # (B, seq_len, d_model) -> (B, seq_len, d_output)
 
         for supervision_tag in ["S2", "S3"]:
