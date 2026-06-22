@@ -4,19 +4,23 @@ from collections import defaultdict
 import matplotlib.pyplot as plt
 import numpy as np
 
-
 MODEL = "Transformer"  # "RNN" or "Transformer"
 OUTPUT_ROOT = f"/home/yingshac/workspace/tmlr/scripts/experiments/"
 
 SUPERVISION = "S1" # ["S1", "S2", "S3", "S1a", "S2a", "S3a"]
-MODE = "cumu" # ["non-cumu", "cumu"] will map to ["d", "trulyleqd"]
-LOSS_OR_ACC = "acc" # "loss" or "acc"
-NUM_HIDDEN_LAYERS = 1
-CAUSAL = False
+MODE = "non-cumu" # ["non-cumu", "cumu"] will map to ["d", "trulyleqd"]
+NUM_HIDDEN_LAYERS = 4
+CAUSAL = True
 PE_CODE_RANGE =  "A-G" # "O-U" #
 
-METRIC = ["cvg", "pg", "dg_larger", "lg"] # ["cvg", "pg", "dg_larger", "dg_smaller", "lg"]
+METRIC = ["pg", "dg_larger", "dg_smaller", "lg"] # ["cvg", "pg", "dg_larger", "dg_smaller", "lg"]
+LOSS_OR_ACC = ["p_acc", "n_acc"] 
+"""
+["loss", "acc", "S2_loss", "S2_acc", "S3_loss", "S3_acc", "p_acc", "n_acc"]
 
+    p_acc = TP / (TP + FN)  i.e. acc on positive samples
+    n_acc = TN / (TN + FP)  i.e. acc on negative samples
+"""
 
 # ------------------------------------------------------------------
 # Useful mappings for and plotting
@@ -28,12 +32,15 @@ METRIC_SHORTHAND_TO_FULL = {
     "dg_smaller": "Depth Generalization (towards smaller)", # only available for non-cumu
     "lg": "Length Generalization",
 }
-METRIC_SHORTHAND_TO_LOGFILE = {
+
+# When value is a list, 
+# if the 1st file exists, then use 1st file; otherwise use 2nd file.
+METRIC_SHORTHAND_TO_LOGFILE = { 
     "cvg": "training_metrics.txt",
-    "pg": "terminal.txt",
-    "dg_larger": "terminal.txt",
-    "dg_smaller": "terminal.txt", # only available for non-cumu
-    "lg": "terminal.txt",
+    "pg": ["validation_metrics.txt", "terminal.txt"],
+    "dg_larger": ["validation_metrics.txt", "terminal.txt"],
+    "dg_smaller": ["validation_metrics.txt", "terminal.txt"], # only available for non-cumu
+    "lg": ["testing_metrics.txt", "terminal.txt"],
 }
 METRIC_SHORTHAND_TO_SPLIT = {
     "cvg": "Training",
@@ -158,10 +165,19 @@ def infer_train_d_range(task_suite):
             write to plot_stats[pe_name][train_d]: {"mean": mean, "std": std}
 """
 def read_logfile(output_dir, task_suite, task, handle, logfile):
-    log_path = os.path.join(output_dir, task_suite, task, handle, logfile)
-    if not os.path.exists(log_path):
-        Print(f"Func read_logfile(): [skip] Missing logfile: {log_path}")
+    if isinstance(logfile, list):
+        log_path = None
+        for f in logfile:
+            log_path = os.path.join(output_dir, task_suite, task, handle, f)
+            if os.path.exists(log_path):
+                break
+    else:
+        log_path = os.path.join(output_dir, task_suite, task, handle, logfile)
+    
+    if log_path is None or (not os.path.exists(log_path)):
+        Print(f"Func read_logfile(): [skip] Missing logfile: {task_suite}/{task}/{handle}: ", logfile)
         return None
+    
     with open(log_path, "r") as f: lines = f.readlines()
     return lines
 
@@ -219,6 +235,34 @@ def locate_best_epoch_lineidx(lines, best_epoch_id, split):
     Print(f"Func locate_best_epoch_lineidx(): [skip] Cannot find best epoch line for epoch {best_epoch_id} and split {split}")
     return None
 
+
+def get_loss_or_acc(metrics, loss_or_acc):
+    """
+    metrics: a dict recovered from log
+    
+    e.g. {
+        'num_samples': 50, 
+        'S3_loss': 0.53, 
+        'S3_acc': 0.87, 
+        'S3_numel': 4550, 
+        'FP': 0.06, 
+        'TP': 0.0, 
+        'FN': 0.0, 
+        'TN': 0.94, 
+        'loss': 0.45, 
+        'acc': 0.94
+    }
+    """
+    
+    if loss_or_acc == "p_acc":
+        return metrics["TP"] / (metrics["TP"] + metrics["FN"]) if (metrics["TP"] + metrics["FN"]) > 0 else 0.0
+    if loss_or_acc == "n_acc":
+        return metrics["TN"] / (metrics["TN"] + metrics["FP"]) if (metrics["TN"] + metrics["FP"]) > 0 else 0.0
+    elif loss_or_acc in metrics:
+        return metrics[loss_or_acc]
+    else:
+        Print(f"Func get_loss_or_acc(): [skip] Cannot find {loss_or_acc} in metrics: {metrics}")
+        return None
 
 """
 # ------------------------------------------------------------------
@@ -398,15 +442,17 @@ Testing set: d_8_l_42
 """
 
 
-def run_all(args):
-    ### 1. Get Task Suites
-    task_suites = get_task_suites(
-        args.output_dir, 
-        args.supervision, 
-        args.depth_mode, 
-        args.num_hidden_layers, 
-        args.pe_code_range.upper() if args.causal else args.pe_code_range.lower()
-    )
+def run_all(args, task_suites = None):
+    ### 1. Get Task Suites (if task_suites not provided)
+    if task_suites is None:
+        task_suites = get_task_suites(
+            args.output_dir, 
+            args.supervision, 
+            args.depth_mode, 
+            args.num_hidden_layers, 
+            args.pe_code_range.upper() if args.causal else args.pe_code_range.lower()
+        )
+    
     pe_codes = sorted([task_suite[-1] for task_suite in task_suites])
     task_suite_full = task_suites[0][:-1] + "".join(pe_codes)
 
@@ -447,7 +493,7 @@ def run_all(args):
                     line2 = lines[i+1].strip()
                     try:
                         metrics = eval(line2)
-                        y = metrics[args.loss_or_acc]
+                        y = get_loss_or_acc(metrics, args.loss_or_acc)
                         x_y_pairs.append((x, y))
                     except:
                         Print(f"Func plot(): [skip] Cannot parse metrics as dict from line {i+1}: {line2}")
@@ -517,7 +563,7 @@ def parse_args():
         "--loss_or_acc",
         type=str,
         default=LOSS_OR_ACC,
-        help="Whether to plot loss or accuracy: loss or acc"
+        help="Whether to plot loss or accuracy: one of ['loss', 'acc', 'p_acc', 'n_acc']"
     )
     parser.add_argument(
         "--metric",
@@ -556,8 +602,23 @@ if __name__ == "__main__":
     args = parse_args()
     args.output_dir = os.path.join(OUTPUT_ROOT, f"output_{args.model.lower()}")
     args.depth_mode = "d" if args.mode == "non-cumu" else "trulyleqd"
-    if isinstance(args.metric, list):
-        for metric in args.metric:
+
+    task_suites = get_task_suites(
+        args.output_dir, 
+        args.supervision, 
+        args.depth_mode, 
+        args.num_hidden_layers, 
+        args.pe_code_range.upper() if args.causal else args.pe_code_range.lower()
+    )
+
+    list_loss_or_acc = args.loss_or_acc
+    list_metric = args.metric
+
+    for loss_or_acc in list_loss_or_acc:
+        args.loss_or_acc = loss_or_acc
+        for metric in list_metric:
+            # Some training_metrics.txt don’t have FP/TP/FN/TN
+            # don’t try to plot “cvg” with p_acc/n_acc
+            if metric == "cvg" and loss_or_acc in ["p_acc", "n_acc"]: continue
             args.metric = metric
-            run_all(args)
-    else: run_all(args)
+            run_all(args, task_suites)

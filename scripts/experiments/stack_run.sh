@@ -1,20 +1,10 @@
-# python run.py --port 29514 --cuda 3 --task S1_d_trulyleq2 > /dev/null 2>&1 &
-# python run.py --port 29515 --cuda 1 --task S1_d_trulyleq3 > /dev/null 2>&1 &
-# python run.py --port 29516 --cuda 2 --task S1_d_trulyleq4 > /dev/null 2>&1 &
-# python run.py --port 29500 --cuda 0 --task S1_d_4 > /dev/null 2>&1 &
-# python run.py --port 29518 --cuda 3 --task S1_d_trulyleq6 > /dev/null 2>&1 &
-# python run.py --port 29519 --cuda 1 --task S1_d_trulyleq7 > /dev/null 2>&1 &
-# python run.py --port 29520 --cuda 2 --task S1_d_trulyleq8 > /dev/null 2>&1 &
-
-CUDA_VISIBLE_DEVICES="3" accelerate launch --main_process_port 29500 --num_processes 1 trainer.py --date 0622_011009 --task S3_d_trulyleq8 --output_dir '/home/yingshac/workspace/tmlr/scripts/experiments/output_transformer/S3_d_trulyleq[2-8]_2G/S3_d_trulyleq8' 2> '/home/yingshac/workspace/tmlr/scripts/experiments/output_transformer/S3_d_trulyleq[2-8]_2G/S3_d_trulyleq8/0622_011009/stderr.txt' | tee '/home/yingshac/workspace/tmlr/scripts/experiments/output_transformer/S3_d_trulyleq[2-8]_2G/S3_d_trulyleq8/0622_011009/terminal.txt'
-  >/dev/null &
+# CUDA_VISIBLE_DEVICES="3" accelerate launch --main_process_port 29500 --num_processes 1 trainer.py --date 0622_011009 --task S3_d_trulyleq8 --output_dir '/home/yingshac/workspace/tmlr/scripts/experiments/output_transformer/S3_d_trulyleq[2-8]_2G/S3_d_trulyleq8' 2> '/home/yingshac/workspace/tmlr/scripts/experiments/output_transformer/S3_d_trulyleq[2-8]_2G/S3_d_trulyleq8/0622_011009/stderr.txt' | tee '/home/yingshac/workspace/tmlr/scripts/experiments/output_transformer/S3_d_trulyleq[2-8]_2G/S3_d_trulyleq8/0622_011009/terminal.txt' >/dev/null &
 # wait
 
-# python standalone_inference.py --cuda 0 --task_suites 'S1_d_trulyleq[2-8]_1a' > /dev/null 2>&1 &
-# python standalone_inference.py --cuda 1 --task_suites 'S1_d_trulyleq[2-8]_1b' > /dev/null 2>&1 &
-# python standalone_inference.py --cuda 1 --task_suites 'S1_d_trulyleq[2-8]_1c' > /dev/null 2>&1 &
-# python standalone_inference.py --cuda 2 --task_suites 'S1_d_trulyleq[2-8]_1d' > /dev/null 2>&1 &
-# python standalone_inference.py --cuda 2 --task_suites 'S1_d_trulyleq[2-8]_1e' > /dev/null 2>&1 &
-# python standalone_inference.py --cuda 3 --task_suites 'S1_d_trulyleq[2-8]_1f' > /dev/null 2>&1 &
-# python standalone_inference.py --cuda 3 --task_suites 'S1_d_trulyleq[2-8]_1g' > /dev/null 2>&1 &
-# wait
+python standalone_inference.py --cuda 0 --task_suites 'S2_d_trulyleq[2-8]_2E' > /dev/null 2>&1 &
+python standalone_inference.py --cuda 0 --task_suites 'S2_d_trulyleq[2-8]_2F' > /dev/null 2>&1 &
+python standalone_inference.py --cuda 1 --task_suites 'S2_d_trulyleq[2-8]_2G' > /dev/null 2>&1 &
+python standalone_inference.py --cuda 2 --task_suites 'S3_d_trulyleq[2-8]_2E' > /dev/null 2>&1 &
+python standalone_inference.py --cuda 3 --task_suites 'S3_d_trulyleq[2-8]_2F' > /dev/null 2>&1 &
+python standalone_inference.py --cuda 3 --task_suites 'S3_d_trulyleq[2-8]_2G' > /dev/null 2>&1 &
+wait

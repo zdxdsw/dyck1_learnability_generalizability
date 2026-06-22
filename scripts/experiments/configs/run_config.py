@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 
-task_suite = "S2_d_trulyleq[2-8]_2F"
+task_suite = "S3_d_trulyleq[2-8]_2A"
 @dataclass
 class RunConfig:
     # lists are mutable objects, so we use field(default_factory=...) to avoid all instances sharing the same list
