@@ -111,13 +111,15 @@ def sequence_collator_builder(config):
     else:
         raise ValueError(f"Haven't implemented collator for model type: {config.model}")
 
-def get_acc(logits, labels, ignore_index):
+def get_acc(logits, labels, ignore_index, binary_label=True):
     """
         logits: [batch, seq_len, vocab_size]
         labels: [batch, seq_len]
-        labels use:
+        labels use (if binary_label=True):
             0 = accept / 'a'
             1 = reject / 'r'
+
+        otherwise, don't compute TP, FP, TN, FN
     """
     pred = logits.argmax(dim=-1) # [batch, seq_len]
 
@@ -128,6 +130,15 @@ def get_acc(logits, labels, ignore_index):
     correct = (pred == label).sum()
     demo = label.numel()
 
+    if not binary_label: 
+        return (
+            correct.item(),
+            demo,
+            None,
+            None,
+            None,
+            None,
+        )
     """ Convention:
         TP: pred 0, label 0
         FP: pred 0, label 1
@@ -182,18 +193,21 @@ def inference(model_to_eval, dataloader, device, config):
     loss, num_samples = 0, 0
     more_stats = {}
     for supervision_tag in ["S2", "S3"]:
+        # for S3, FP, TP, FN, TN don't apply
         if supervision_tag in config.task:
             more_stats[supervision_tag] = {
                 "loss": 0,
                 "correct": 0,
                 "demo": 0,
-                "FP": 0,
-                "TP": 0,
-                "FN": 0,
-                "TN": 0,
             }
+            if supervision_tag == "S2":
+                more_stats[supervision_tag].update({
+                    "FP": 0,
+                    "TP": 0,
+                    "FN": 0,
+                    "TN": 0,
+                })
 
-    # testing_output = {}
     # k = 0
     for i, batch in enumerate(dataloader):
         forward_result = model_to_eval(
@@ -228,6 +242,7 @@ def inference(model_to_eval, dataloader, device, config):
 
         for supervision_tag in ["S2", "S3"]:
             if supervision_tag in config.task:
+                binary_label = supervision_tag == "S2"
                 supervision_logits = forward_result.get(f"{supervision_tag}_logits")
                 supervision_ce = F.cross_entropy(
                     supervision_logits.view(-1, supervision_logits.size(-1)),
@@ -241,29 +256,37 @@ def inference(model_to_eval, dataloader, device, config):
                     supervision_logits.detach().cpu(),
                     batch[f"{supervision_tag}_labels"].to(device).detach().cpu(),
                     ignore_index=getattr(config, "ignore_index", -1),
+                    binary_label=binary_label,
                 )
+
                 more_stats[supervision_tag]["correct"] += _correct
                 more_stats[supervision_tag]["demo"] += _demo
-                more_stats[supervision_tag]["FP"] += _FP
-                more_stats[supervision_tag]["TP"] += _TP
-                more_stats[supervision_tag]["FN"] += _FN
-                more_stats[supervision_tag]["TN"] += _TN
+
+                if binary_label:
+                    more_stats[supervision_tag]["FP"] += _FP
+                    more_stats[supervision_tag]["TP"] += _TP
+                    more_stats[supervision_tag]["FN"] += _FN
+                    more_stats[supervision_tag]["TN"] += _TN
 
     # float numbers to 2 decimal places
     metrics = {"num_samples": num_samples,}
     for supervision_tag in ["S2", "S3"]:
         if supervision_tag in config.task:
-            assert more_stats[supervision_tag]["correct"] + more_stats[supervision_tag]["FP"] + more_stats[supervision_tag]["FN"] == more_stats[supervision_tag]["demo"], f"Failed sanity check for {supervision_tag}: correct + FP + FN == demo; correct={more_stats[supervision_tag]['correct']}, FP={more_stats[supervision_tag]['FP']}, FN={more_stats[supervision_tag]['FN']}, demo={more_stats[supervision_tag]['demo']}"
-            assert more_stats[supervision_tag]["TP"] + more_stats[supervision_tag]["TN"] == more_stats[supervision_tag]["correct"], f"Failed sanity check for {supervision_tag}: TP + TN == correct; TP={more_stats[supervision_tag]['TP']}, TN={more_stats[supervision_tag]['TN']}, correct={more_stats[supervision_tag]['correct']}"
+            binary_label = supervision_tag == "S2"
             metrics.update({
-                f"{supervision_tag}_FP": more_stats[supervision_tag]["FP"],
-                f"{supervision_tag}_TP": more_stats[supervision_tag]["TP"],
-                f"{supervision_tag}_FN": more_stats[supervision_tag]["FN"],
-                f"{supervision_tag}_TN": more_stats[supervision_tag]["TN"],
                 f"{supervision_tag}_loss": round(more_stats[supervision_tag]["loss"] / more_stats[supervision_tag]["demo"], 2) if more_stats[supervision_tag]["demo"] > 0 else -1,
                 f"{supervision_tag}_acc": round(more_stats[supervision_tag]["correct"] / more_stats[supervision_tag]["demo"], 2) if more_stats[supervision_tag]["demo"] > 0 else -1,
                 f"{supervision_tag}_numel": more_stats[supervision_tag]["demo"],
             })
+            if binary_label:
+                assert more_stats[supervision_tag]["correct"] + more_stats[supervision_tag]["FP"] + more_stats[supervision_tag]["FN"] == more_stats[supervision_tag]["demo"], f"Failed sanity check for {supervision_tag}: correct + FP + FN == demo; correct={more_stats[supervision_tag]['correct']}, FP={more_stats[supervision_tag]['FP']}, FN={more_stats[supervision_tag]['FN']}, demo={more_stats[supervision_tag]['demo']}"
+                assert more_stats[supervision_tag]["TP"] + more_stats[supervision_tag]["TN"] == more_stats[supervision_tag]["correct"], f"Failed sanity check for {supervision_tag}: TP + TN == correct; TP={more_stats[supervision_tag]['TP']}, TN={more_stats[supervision_tag]['TN']}, correct={more_stats[supervision_tag]['correct']}"
+                metrics.update({
+                    f"{supervision_tag}_FP": more_stats[supervision_tag]["FP"],
+                    f"{supervision_tag}_TP": more_stats[supervision_tag]["TP"],
+                    f"{supervision_tag}_FN": more_stats[supervision_tag]["FN"],
+                    f"{supervision_tag}_TN": more_stats[supervision_tag]["TN"],
+                })
     
     assert correct + FP + FN == demo, f"Failed sanity check: correct + FP + FN == demo; correct={correct}, FP={FP}, FN={FN}, demo={demo}"
     assert TP + TN == correct, f"Failed sanity check: TP + TN == correct; TP={TP}, TN={TN}, correct={correct}"

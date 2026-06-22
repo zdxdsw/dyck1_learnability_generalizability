@@ -115,7 +115,7 @@ def add_supervision_specific_configs(
         return cfg
 
     if supervision_level == "S2":
-        cfg.out_S2_vocab = ["0", "1"]
+        cfg.out_S2_vocab = ['1', '0']
         cfg.S2_loss_weight = 0.5
         return cfg
 

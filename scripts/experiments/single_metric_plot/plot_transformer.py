@@ -4,6 +4,7 @@ from collections import defaultdict
 import matplotlib.pyplot as plt
 import numpy as np
 
+
 MODEL = "Transformer"  # "RNN" or "Transformer"
 OUTPUT_ROOT = f"/home/yingshac/workspace/tmlr/scripts/experiments/"
 
@@ -15,6 +16,7 @@ CAUSAL = False
 PE_CODE_RANGE =  "A-G" # "O-U" #
 
 METRIC = ["cvg", "pg", "dg_larger", "lg"] # ["cvg", "pg", "dg_larger", "dg_smaller", "lg"]
+
 
 # ------------------------------------------------------------------
 # Useful mappings for and plotting

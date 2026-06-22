@@ -604,6 +604,16 @@ class TransformerModel(nn.Module):
         self.ln_f = nn.LayerNorm(self.hidden_size, eps=config.layer_norm_epsilon)
         self.lm_head = nn.Linear(config.hidden_size, len(config.out_vocab), bias=False)
 
+        for supervision_tag in ["S2", "S3"]:
+            if supervision_tag in config.task:
+                vocab_name = f"out_{supervision_tag}_vocab"
+                assert hasattr(config, vocab_name), f"{vocab_name} is required for {supervision_tag} head"
+                setattr(
+                    self,
+                    f"{supervision_tag}_head",
+                    nn.Linear(config.hidden_size, len(getattr(config, vocab_name)), bias=False),
+                )
+        
         # Initialize weights
         self.apply(self._init_weights)
         
@@ -667,4 +677,10 @@ class TransformerModel(nn.Module):
             result = {'logits': lm_logits, 'attn_weights': attn_weights_list}
         else:
             result = {'logits': lm_logits}
+
+        for supervision_tag in ["S2", "S3"]:
+            if supervision_tag in self.config.task:
+                head = getattr(self, f"{supervision_tag}_head")
+                result[f"{supervision_tag}_logits"] = head(hidden_states)
+
         return result
