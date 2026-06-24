@@ -19,8 +19,8 @@ class RNNConfig:
 
 @dataclass
 class PositionEncodingConfig:
-    pe_type: str = "rotary"
-    pe_aug_type: PEAugType = "shifted"
+    pe_type: str = "relative"
+    pe_aug_type: PEAugType = "randomized"
     max_position_embeddings: int = 128
     relative_pe_num_buckets: int = 32
     relative_pe_max_distance: int = 128
@@ -37,7 +37,7 @@ class TransformerConfig:
     resid_pdrop: float = 0.1
     layer_norm_epsilon: float = 1e-5
 
-    causal: bool = True
+    causal: bool = False
     mlp_dim_multiplier: int = 4
     activation_function: str = "gelu"
 

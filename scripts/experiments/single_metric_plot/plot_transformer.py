@@ -8,13 +8,13 @@ MODEL = "Transformer"  # "RNN" or "Transformer"
 OUTPUT_ROOT = f"/home/yingshac/workspace/tmlr/scripts/experiments/"
 
 SUPERVISION = "S1" # ["S1", "S2", "S3", "S1a", "S2a", "S3a"]
-MODE = "non-cumu" # ["non-cumu", "cumu"] will map to ["d", "trulyleqd"]
-NUM_HIDDEN_LAYERS = 4
-CAUSAL = True
-PE_CODE_RANGE =  "A-G" # "O-U" #
+MODE = "cumu" # ["non-cumu", "cumu"] will map to ["d", "trulyleqd"]
+NUM_HIDDEN_LAYERS = 2
+CAUSAL = False
+PE_CODE_RANGE =  "G-M" # "O-U" #
 
-METRIC = ["pg", "dg_larger", "dg_smaller", "lg"] # ["cvg", "pg", "dg_larger", "dg_smaller", "lg"]
-LOSS_OR_ACC = ["p_acc", "n_acc"] 
+METRIC = ["cvg", "pg", "dg_larger", "lg"] # ["cvg", "pg", "dg_larger", "dg_smaller", "lg"]
+LOSS_OR_ACC = ["acc", "p_acc", "n_acc"] 
 """
 ["loss", "acc", "S2_loss", "S2_acc", "S3_loss", "S3_acc", "p_acc", "n_acc"]
 
@@ -58,6 +58,12 @@ PE_CODE_TO_NAME = {
 	"E": "alibi",
 	"F": "relative",
 	"G": "none",
+    "H": "rotary",
+	"I": "scaler",
+	"J": "sinusoidal",
+	"K": "absolute",
+	"L": "alibi",
+	"M": "relative",
     "O": "rotary",
 	"P": "scaler",
 	"Q": "sinusoidal",
@@ -75,6 +81,16 @@ PE_NAME_TO_COLOR = {
 	"alibi": "deepskyblue",
 	"relative": "goldenrod",
 	"none": "hotpink"
+}
+
+PE_NAME_TO_PLOT_ORDER = {
+	"rotary": 0,
+	"scaler": 1,
+	"sinusoidal": 2,
+	"absolute": 3,
+	"alibi": 4,
+	"relative": 5,
+	"none": 6
 }
 
 def Print(s=""): print(s, flush=True)
@@ -528,9 +544,8 @@ def run_all(args, task_suites = None):
             plot_stats[pe_name][train_d]["std"] = std
             # we can also remove the "values" list to save memory, since we only need
             # skip for now
-    # sort plot_stats.keys() according to PE_CODE_TO_NAME
-    pe_name_to_code = {v: k for k, v in PE_CODE_TO_NAME.items()}
-    plot_stats = dict(sorted(plot_stats.items(), key=lambda item: pe_name_to_code[item[0]]))
+    # sort plot_stats.keys() according to PE_NAME_TO_PLOT_ORDER
+    plot_stats = dict(sorted(plot_stats.items(), key=lambda item: PE_NAME_TO_PLOT_ORDER[item[0]]))
     # also sort plot_stats[pe_name]
     for pe_name in plot_stats:
         plot_stats[pe_name] = dict(sorted(plot_stats[pe_name].items()))
