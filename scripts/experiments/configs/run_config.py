@@ -1,11 +1,11 @@
 from dataclasses import dataclass, field
 
-task_suite = "S1_d_trulyleq[2-8]_2m"
+task_suite = "S3_d_[2-8]_F"
 @dataclass
 class RunConfig:
     # lists are mutable objects, so we use field(default_factory=...) to avoid all instances sharing the same list
     seed: int | list[int] = field(default_factory=lambda: [31, 42, 49, 57, 61, 77, 79, 89, 91])
-    model: str = "Transformer"
+    model: str = "RNN"  # "RNN" or "Transformer"
     task: str = ""
     date: str = ""
 

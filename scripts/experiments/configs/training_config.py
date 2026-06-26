@@ -2,7 +2,7 @@ from dataclasses import dataclass
 
 @dataclass
 class TrainingConfig:
-    num_epochs: int = 10
+    num_epochs: int = 30
     per_device_train_batch_size: int = 32
     gradient_accumulation_steps: int = 1
     per_device_eval_batch_size: int = 32

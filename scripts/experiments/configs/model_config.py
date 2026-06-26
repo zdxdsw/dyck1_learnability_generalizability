@@ -12,7 +12,7 @@ PEAugType = Literal["none", "shifted", "randomized"]
 @dataclass
 class RNNConfig:
     num_hidden_layers: int = 1
-    hidden_size: int = 64
+    hidden_size: int = 4
     initializer_range: float = 0.02
     dropout: float = 0.1
 
