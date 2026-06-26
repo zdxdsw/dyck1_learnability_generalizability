@@ -4,4 +4,5 @@ __pycache__
 __pycache__/
 /scripts/experiments/output_transformer/
 /scripts/experiments/output_rnn/
+/scripts/experiments/output_old_rnn/
 /scripts/extraction/dynet/
