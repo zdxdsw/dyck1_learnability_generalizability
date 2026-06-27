@@ -1,24 +1,40 @@
 import os
 from tqdm import tqdm
 
-MODEL = "transformer"
+MODEL = "rnn"
 OUTPUT_DIR = f"/home/yingshac/workspace/tmlr/scripts/experiments/output_{MODEL}/"
 
 TASK_SUITES = [
-    "S2_d_trulyleq[2-8]_2A",
-    "S2_d_trulyleq[2-8]_2B",
-    "S2_d_trulyleq[2-8]_2C",
-    "S2_d_trulyleq[2-8]_2D",
-    "S2_d_trulyleq[2-8]_2E",
-    "S2_d_trulyleq[2-8]_2F",
-    "S2_d_trulyleq[2-8]_2G",
-    "S3_d_trulyleq[2-8]_2A",
-    "S3_d_trulyleq[2-8]_2B",
-    "S3_d_trulyleq[2-8]_2C",
-    "S3_d_trulyleq[2-8]_2D",
-    "S3_d_trulyleq[2-8]_2E",
-    "S3_d_trulyleq[2-8]_2F",
-    "S3_d_trulyleq[2-8]_2G",
+    "S1_d_[2-8]_A",
+    "S1_d_[2-8]_C",
+    "S1_d_[2-8]_D",
+    "S1_d_[2-8]_E",
+    "S1_d_[2-8]_F",
+    "S1_d_trulyleq[2-8]_A",
+    "S1_d_trulyleq[2-8]_C",
+    "S1_d_trulyleq[2-8]_D",
+    "S1_d_trulyleq[2-8]_E",
+    "S1_d_trulyleq[2-8]_F",
+    "S2_d_trulyleq[2-8]_A",
+    "S2_d_trulyleq[2-8]_C",
+    "S2_d_trulyleq[2-8]_D",
+    "S2_d_trulyleq[2-8]_E",
+    "S2_d_trulyleq[2-8]_F",
+    "S2_d_[2-8]_A",
+    "S2_d_[2-8]_C",
+    "S2_d_[2-8]_D",
+    "S2_d_[2-8]_E",
+    "S2_d_[2-8]_F",
+    "S3_d_trulyleq[2-8]_A",
+    "S3_d_trulyleq[2-8]_C",
+    "S3_d_trulyleq[2-8]_D",
+    "S3_d_trulyleq[2-8]_E",
+    "S3_d_trulyleq[2-8]_F",
+    "S3_d_[2-8]_A",
+    "S3_d_[2-8]_C",
+    "S3_d_[2-8]_D",
+    "S3_d_[2-8]_E",
+    "S3_d_[2-8]_F", 
 ]
 
 CHECK_TRAINING_METRICS = True

@@ -40,7 +40,7 @@ from utils import sequence_collator_builder, inference
 # User-facing defaults: edit these
 # ---------------------------------------------------------------------
 
-MODEL = "Transformer"  # "RNN" or "Transformer"
+MODEL = "RNN"  # "RNN" or "Transformer"
 OUTPUT_DIR = f"/home/yingshac/workspace/tmlr/scripts/experiments/output_{MODEL.lower()}"
 CKPT_DIR = f"/data/yingshac/tmlr/ckpts_{MODEL.lower()}"
 # DATASET_ROOT = "/data/yingshac/tmlr"
@@ -50,7 +50,7 @@ EVAL_BATCH_SIZE = 2048
 SPLITS = ["Training"] # ["Training", "Validation", "Testing"]
 
 TASK_SUITES = [
-    "S1_d_trulyleq[2-8]_2u",
+    "S3_d_[2-8]_E",
 ]
 
 
@@ -304,10 +304,11 @@ def build_split_to_dataloaders(config, splits, eval_batch_size):
                 assert isinstance(datafile_config, (tuple, list)) and len(datafile_config) == 3, f"Test files should be tuples of (path, name, specific_length), but got: {datafile_config}"
                 path = datafile_config[0]
                 name = datafile_config[1]
+                specific_length = datafile_config[2]
                 if name is None: name = infer_dataset_name_from_datafile_config(datafile_config)
                 split_to_dataloaders[split][name] = build_one_dataloader(
                     config, 
-                    (path, name, None), 
+                    (path, name, specific_length), 
                     eval_batch_size,
                     num_workers=1,
                     persistent_workers=False, # keeping persistent workers for dozens of dataloaders could be worse than the overhead of worker setup
@@ -438,9 +439,6 @@ def run_all(args):
         ### Build dataloaders once per task
         split_to_dataloaders = build_split_to_dataloaders(
             config, 
-            # args.dataset_root, 
-            # args.min_test_l, 
-            # args.max_test_l, 
             args.splits, 
             args.eval_batch_size
         )

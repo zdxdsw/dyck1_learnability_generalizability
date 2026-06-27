@@ -1,12 +1,16 @@
 import os, json, re
 
 JOBS_NEEDED = """
-Job Unfinished: S1_d_trulyleq[2-8]_2H/S1_d_trulyleq6/0622_191748                                           
-Job Unfinished: S1_d_trulyleq[2-8]_2H/S1_d_trulyleq6/0622_191919                                           
-Job Unfinished: S1_d_trulyleq[2-8]_2H/S1_d_trulyleq8/0622_233419 
+Job Unfinished: S2_d_trulyleq[2-8]_F/S2_d_trulyleq2/0626_130513                                            
+Job Unfinished: S2_d_trulyleq[2-8]_F/S2_d_trulyleq2/0626_124844                                            
+Job Unfinished: S2_d_trulyleq[2-8]_F/S2_d_trulyleq3/0626_133726                                            
+Job Unfinished: S2_d_trulyleq[2-8]_F/S2_d_trulyleq3/0626_140618                                            
+Job Unfinished: S2_d_trulyleq[2-8]_F/S2_d_trulyleq4/0626_124800                                            
+Job Unfinished: S2_d_trulyleq[2-8]_F/S2_d_trulyleq4/0626_124818
+Job Unfinished: S1_d_[2-8]_F/S1_d_6/0626_192455                                        
 """
 
-MODEL = "transformer"
+MODEL = "rnn"
 OUTPUT_DIR = f"/home/yingshac/workspace/tmlr/scripts/experiments/output_{MODEL}/"
 CKPT_DIR = f"/data/yingshac/tmlr/ckpts_{MODEL}/"
 
@@ -32,7 +36,7 @@ for line in JOBS_NEEDED.strip().split("\n"):
 print(SUITE_TASK_HANDLE_LIST)
 
 to_launch = []
-port = 29500
+port = 29517
 
 for task_suite, task, handle in SUITE_TASK_HANDLE_LIST:
     ### prepare command 

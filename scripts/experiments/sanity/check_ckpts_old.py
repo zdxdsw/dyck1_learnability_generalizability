@@ -15,9 +15,11 @@ First, collect handles in the output directory and arrange them as a dict:
     <task_suite> is something like "S1_d_[2-8]_4B", we extract "4B" as the suffix.
 """
 
-MODEL = "transformer"
+MODEL = "rnn"
 OUTPUT_DIR = f"/home/yingshac/workspace/tmlr/scripts/experiments/output_{MODEL}/"
 CKPT_DIR = f"/data/yingshac/tmlr/ckpts_{MODEL}/"
+# CKPT_DIR = f"/data/yingshac/tmlr/ckpts/"
+# NEW_CKPT_DIR = f"/data/yingshac/tmlr/ckpts_{MODEL}/"
 TASK_AND_SUFFIX_TO_TASK_SUITE = {}
 
 import os, shutil, json
@@ -31,7 +33,15 @@ Arrange handles in the output directory as a dict:
 """
 print(f"Collecting handles in {OUTPUT_DIR}...")
 output_handles = defaultdict(lambda: defaultdict(list))
+
+avail_task_suites = [
+    "S1_d_[2-8]_A", "S1_d_trulyleq[2-8]_A", "S1_d_trulyleq[2-8]_C", 
+    "S1_d_trulyleq[2-8]_D", "S1_d_trulyleq[2-8]_E", "S1_d_trulyleq[2-8]_F",
+    "S3_d_[2-8]_A", "S3_d_trulyleq[2-8]_A" 
+] # for RNN, only process task suites that were completed last month.
+
 for task_suite in os.listdir(OUTPUT_DIR):
+    if task_suite not in avail_task_suites: continue
     task_suite_path = os.path.join(OUTPUT_DIR, task_suite)
     task_suite_suffix = task_suite.split("_")[-1]
     for task in os.listdir(task_suite_path):
@@ -40,6 +50,7 @@ for task_suite in os.listdir(OUTPUT_DIR):
         for handle in os.listdir(task_path):
             output_handles[task][task_suite_suffix].append(handle)
 
+"""
 ### Sanity check1: All handles under the same <task> must be distinct!
 print("Sanity check 1: All handles under the same <task> must be distinct!")
 to_delete = []
@@ -77,6 +88,7 @@ if makeup_jobs:
 # for handle_path in to_delete: shutil.rmtree(handle_path)
 print("Sanity check 1 Done!\n")
 
+"""
 ### Sanity check2: All handles in the output directory must be present in the ckpt directory!
 print("Sanity check 2: All handles in the output directory must be present in the ckpt directory!")
 for task, suffix_to_handles in output_handles.items():
@@ -117,7 +129,7 @@ for task in os.listdir(CKPT_DIR):
         print(f"|list_ckpt_handles| = {len(list_ckpt_handles)}")
         print(f"|unique_output_handles| = {len(set(list_output_handles))}")
         print(f"|unique_ckpt_handles| = {len(set(list_ckpt_handles))}")
-        print(f"|unique_ckpt_handles \ unique_output_handles| = {len(to_delete)} = #handles to delete.")
+        print(f"|unique_ckpt_handles exclude unique_output_handles| = {len(to_delete)} = #handles to delete.")
     else: print("pass")
     
     ### BE CAREFUL!
@@ -126,6 +138,7 @@ for task in os.listdir(CKPT_DIR):
 print(f"\nTotal unique handles in output directory across all tasks: {all_task_unique_output_handles}")
 print(f"Total unique handles in ckpt directory across all tasks: {all_task_unique_ckpt_handles}")
 
+"""
 
 ### Refactor ckpt directory
 print("\nRefactoring ckpt directory to have the same structure as the output directory...")
@@ -144,11 +157,12 @@ for task in os.listdir(CKPT_DIR):
             if handle in handles:
                 corresponding_task_suite = TASK_AND_SUFFIX_TO_TASK_SUITE.get((task, suffix), None)
                 break
+        if not corresponding_task_suite in avail_task_suites: continue
         if corresponding_task_suite is None:
             print(f"Error: cannot find corresponding task suite for task {task} and handle {handle}!")
             continue
-        new_ckpt_handle_path = os.path.join(CKPT_DIR, corresponding_task_suite, task, handle)
-        os.makedirs(os.path.dirname(new_ckpt_handle_path), exist_ok=True)
+        new_ckpt_handle_path = os.path.join(NEW_CKPT_DIR, corresponding_task_suite, task, handle)
+        # os.makedirs(os.path.dirname(new_ckpt_handle_path), exist_ok=True)
         # print(f"Preview: mv {ckpt_handle_path} {new_ckpt_handle_path}")
         move += 1
         ### BE CAREFUL!
@@ -161,3 +175,4 @@ for task in os.listdir(CKPT_DIR):
         shutil.rmtree(ckpt_task_path)
 print(f"Will move {move} handles to the new structure.")
 print("Refactoring done!")
+"""

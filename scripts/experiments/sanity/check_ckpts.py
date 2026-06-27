@@ -11,7 +11,7 @@ First, collect handles in the output directory and arrange them as a dict:
     <task_suite> is something like "S1_d_[2-8]_4B", we extract "4B" as the suffix.
 """
 
-MODEL = "transformer"
+MODEL = "rnn"
 OUTPUT_DIR = f"/home/yingshac/workspace/tmlr/scripts/experiments/output_{MODEL}/"
 CKPT_DIR = f"/data/yingshac/tmlr/ckpts_{MODEL}/"
 TASK_AND_SUFFIX_TO_TASK_SUITE = {}
@@ -27,7 +27,16 @@ Arrange handles in the output directory as a dict:
 """
 print(f"Collecting handles in {OUTPUT_DIR}...")
 output_handles = defaultdict(lambda: defaultdict(list))
+
+avail_task_suites = [
+    "S1_d_[2-8]_A", "S1_d_trulyleq[2-8]_A", "S1_d_trulyleq[2-8]_C", 
+    "S1_d_trulyleq[2-8]_D", "S1_d_trulyleq[2-8]_E", "S1_d_trulyleq[2-8]_F",
+    "S3_d_[2-8]_A", "S3_d_trulyleq[2-8]_A" 
+] # for RNN, only process task suites that were completed last month.
+
+
 for task_suite in os.listdir(OUTPUT_DIR):
+    if task_suite not in avail_task_suites: continue
     task_suite_path = os.path.join(OUTPUT_DIR, task_suite)
     task_suite_suffix = task_suite.split("_")[-1]
     for task in os.listdir(task_suite_path):
@@ -51,6 +60,7 @@ print("Sanity check Done!\n")
 print("Deleting handles in the ckpt directory that are not in the output directory...")
 
 for task_suite in os.listdir(CKPT_DIR):
+    if task_suite not in avail_task_suites: continue
     print(f"\nTask Suite {task_suite}:", end=" ")
     to_delete = []
     ckpt_task_suite_path = os.path.join(CKPT_DIR, task_suite)
