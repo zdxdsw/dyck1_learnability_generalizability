@@ -282,10 +282,10 @@ def inference(model_to_eval, dataloader, device, config):
                 assert more_stats[supervision_tag]["correct"] + more_stats[supervision_tag]["FP"] + more_stats[supervision_tag]["FN"] == more_stats[supervision_tag]["demo"], f"Failed sanity check for {supervision_tag}: correct + FP + FN == demo; correct={more_stats[supervision_tag]['correct']}, FP={more_stats[supervision_tag]['FP']}, FN={more_stats[supervision_tag]['FN']}, demo={more_stats[supervision_tag]['demo']}"
                 assert more_stats[supervision_tag]["TP"] + more_stats[supervision_tag]["TN"] == more_stats[supervision_tag]["correct"], f"Failed sanity check for {supervision_tag}: TP + TN == correct; TP={more_stats[supervision_tag]['TP']}, TN={more_stats[supervision_tag]['TN']}, correct={more_stats[supervision_tag]['correct']}"
                 metrics.update({
-                    f"{supervision_tag}_FP": more_stats[supervision_tag]["FP"],
-                    f"{supervision_tag}_TP": more_stats[supervision_tag]["TP"],
-                    f"{supervision_tag}_FN": more_stats[supervision_tag]["FN"],
-                    f"{supervision_tag}_TN": more_stats[supervision_tag]["TN"],
+                    f"{supervision_tag}_FP": round(more_stats[supervision_tag]["FP"]/more_stats[supervision_tag]["demo"], 2) if more_stats[supervision_tag]["demo"] > 0 else -1,
+                    f"{supervision_tag}_TP": round(more_stats[supervision_tag]["TP"]/more_stats[supervision_tag]["demo"], 2) if more_stats[supervision_tag]["demo"] > 0 else -1,
+                    f"{supervision_tag}_FN": round(more_stats[supervision_tag]["FN"]/more_stats[supervision_tag]["demo"], 2) if more_stats[supervision_tag]["demo"] > 0 else -1,
+                    f"{supervision_tag}_TN": round(more_stats[supervision_tag]["TN"]/more_stats[supervision_tag]["demo"], 2) if more_stats[supervision_tag]["demo"] > 0 else -1,
                 })
     
     assert correct + FP + FN == demo, f"Failed sanity check: correct + FP + FN == demo; correct={correct}, FP={FP}, FN={FN}, demo={demo}"
