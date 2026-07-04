@@ -7,13 +7,13 @@ import numpy as np
 MODEL = "RNN"
 OUTPUT_ROOT = f"/home/yingshac/workspace/tmlr/scripts/experiments/"
 
-SUPERVISION = "S3" # ["S1", "S2", "S3", "S1a", "S2a", "S3a"]
-MODE = "cumu" # ["non-cumu", "cumu"] will map to ["d", "trulyleqd"]
+SUPERVISION = "S1" # ["S1", "S2", "S3", "S1a", "S2a", "S3a"]
+MODE = "non-cumu" # ["non-cumu", "cumu"] will map to ["d", "trulyleqd"]
 NUM_HIDDEN_LAYERS = 1 
 LEGEND_CODE_RANGE =  "ABCDEF"
 
-METRIC = ["dg_larger"] # ["cvg", "pg", "dg_larger", "dg_smaller", "lg"]
-LOSS_OR_ACC = ["acc", "p_acc", "n_acc"] 
+METRIC = ["dg_smaller"] # ["cvg", "pg", "dg_larger", "dg_smaller", "lg", "dg_+1", "dg_+2"]
+LOSS_OR_ACC = ["acc"] 
 """
 ["loss", "acc", "S2_loss", "S2_acc", "S2_p_acc", "S2_n_acc", "S3_loss", "S3_acc", "p_acc", "n_acc"]
 
@@ -30,6 +30,8 @@ METRIC_SHORTHAND_TO_FULL = {
     "dg_larger": "Depth Generalization (towards larger)",
     "dg_smaller": "Depth Generalization (towards smaller)", # only available for non-cumu
     "lg": "Length Generalization",
+    "dg_+1": "Depth Generalization (+1)",
+    "dg_+2": "Depth Generalization (+2)",
 }
 
 # When value is a list, 
@@ -38,6 +40,8 @@ METRIC_SHORTHAND_TO_LOGFILE = {
     "cvg": "training_metrics.txt",
     "pg": ["validation_metrics.txt", "terminal.txt"],
     "dg_larger": ["validation_metrics.txt", "terminal.txt"],
+    "dg_+1": ["validation_metrics.txt", "terminal.txt"],
+    "dg_+2": ["validation_metrics.txt", "terminal.txt"],
     "dg_smaller": ["validation_metrics.txt", "terminal.txt"], # only available for non-cumu
     "lg": ["testing_metrics.txt", "terminal.txt"],
 }
@@ -45,6 +49,8 @@ METRIC_SHORTHAND_TO_SPLIT = {
     "cvg": "Training",
     "pg": "Validation",
     "dg_larger": "Validation",
+    "dg_+1": "Validation",
+    "dg_+2": "Validation",
     "dg_smaller": "Validation", # only available for non-cumu
     "lg": "Testing",
 }
@@ -345,6 +351,14 @@ def get_single_metric(x_y_pairs, metric, mode, train_d):
     elif metric == "dg_larger":
         auc = compute_auc(x_y_pairs, train_d + 1, None)
         return auc
+    
+    elif metric == "dg_+1":
+        result = [y for x, y in x_y_pairs if x == train_d + 1]
+        return result[0] if result else None
+    
+    elif metric == "dg_+2":
+        result = [y for x, y in x_y_pairs if x == train_d + 2]
+        return result[0] if result else None
     
     elif metric == "lg":
         auc = compute_auc(x_y_pairs, None, None)
