@@ -1,7 +1,9 @@
 import os, json
+import matplotlib as mpl
 from matplotlib import pyplot as plt
 import numpy as np
 from matplotlib.patches import Rectangle
+from matplotlib.lines import Line2D
 
 PLOT_STATS = [
     [ # first row
@@ -131,6 +133,7 @@ def plot_one_ax(plot_stats_filename, ax, row_idx, col_idx):
     y_label = METRIC_SHORTHAND_TO_FULL[metric]
 
     # plot error band
+    legend_handles = []
     for legend_name in plot_stats:
         x = []
         y = []
@@ -141,15 +144,26 @@ def plot_one_ax(plot_stats_filename, ax, row_idx, col_idx):
             y.append(stats["mean"])
             y_err.append(stats["std"])
 
+        upper = np.minimum(np.array(y)+np.array(y_err), YLIM[1]) # clip upper bound to YLIM[1]
+        lower = np.maximum(np.array(y)-np.array(y_err), YLIM[0]-0.05) # clip lower bound to YLIM[0]
+        
         # if (row_idx, col_idx, legend_name) in HIGHLIGHT: solid line, linewidth=1.8, alpha=0.5
         # else: dotted line, linewidth=1.2, alpha=0.3
         if (row_idx, col_idx, legend_name) in HIGHLIGHT:
-            ax.plot(x, y, label=legend_name, color=LEGEND_NAME_TO_COLOR[legend_name], marker='.', alpha=0.8, linewidth=1.8)
+            ax.plot(x, y, color=LEGEND_NAME_TO_COLOR[legend_name], marker='.', alpha=0.8, linewidth=1.8)
+            ax.fill_between(x, lower, upper, color=LEGEND_NAME_TO_COLOR[legend_name], alpha=0.1)
         else:
-            ax.plot(x, y, label=legend_name, color=LEGEND_NAME_TO_COLOR[legend_name], marker='.', alpha=0.3, linewidth=1.2, linestyle=":")
-        upper = np.minimum(np.array(y)+np.array(y_err), YLIM[1]) # clip upper bound to YLIM[1]
-        lower = np.maximum(np.array(y)-np.array(y_err), YLIM[0]-0.05) # clip lower bound to YLIM[0]
-        ax.fill_between(x, lower, upper, color=LEGEND_NAME_TO_COLOR[legend_name], alpha=0.1)
+            ax.plot(x, y, color=LEGEND_NAME_TO_COLOR[legend_name], marker='.', alpha=0.4, linewidth=1.2, linestyle=":")
+            ax.fill_between(x, lower, upper, color=LEGEND_NAME_TO_COLOR[legend_name], alpha=0.05)
+
+        # separately decide handles for legend
+        legend_handles.append(
+            Line2D(
+                [0], [0], 
+                color=LEGEND_NAME_TO_COLOR[legend_name], 
+                linewidth=1.8, marker='.', alpha=0.8, 
+                label=legend_name
+        ))
 
     ax.tick_params(axis="both", labelsize=10)
     if row_idx == num_rows - 1: ax.set_xlabel(x_label, fontsize=12)
@@ -163,9 +177,10 @@ def plot_one_ax(plot_stats_filename, ax, row_idx, col_idx):
         ax.set_ylim(0.45, 1.05)
         ax.set_yticks(list(np.arange(1.0, 0.45-0.01, step=-0.2))[::-1])    
     
-    if col_idx == row_idx == 2: 
-        ax.legend(loc="lower right", framealpha=0.6, 
-                  fontsize=11, title="Positional Encoding")
+    if col_idx == row_idx == 3: 
+        ax.legend(handles=legend_handles, 
+                  loc="lower right", framealpha=0.6, 
+                  fontsize=12, title="Positional Encoding")
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
 
@@ -243,16 +258,19 @@ for c in [0, 2]:
     pad_x = 0.0
     pad_y = 0.0
 
-    rect = Rectangle(
-        (x0 - pad_x, y0 - pad_y),
-        (x1 - x0) + 2 * pad_x,
-        (y1 - y0) + 2 * pad_y,
-        transform=fig.transFigure,
-        facecolor="0.95",
-        edgecolor="none",
-        zorder=-1,
-    )
-    fig.add_artist(rect)
+    with mpl.rc_context({"hatch.linewidth": 5}):
+        rect = Rectangle(
+            (x0 - pad_x, y0 - pad_y),
+            (x1 - x0) + 2 * pad_x,
+            (y1 - y0) + 2 * pad_y,
+            transform=fig.transFigure,
+            facecolor="0.95",
+            edgecolor="0.98",   # hatch color
+            linewidth=0.0,      # hide rectangle border
+            hatch="-",        # diagonal stripes
+            zorder=-1,
+        )
+        fig.add_artist(rect)
 
 # set fig super title: "Supervision: S1 Eval on: S1"
 fig.suptitle(r"Supervision: S1; Eval on: S1.", fontsize=12, fontweight="bold", y=1.03)

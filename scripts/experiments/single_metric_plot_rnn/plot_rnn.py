@@ -7,13 +7,13 @@ import numpy as np
 MODEL = "RNN"
 OUTPUT_ROOT = f"/home/yingshac/workspace/tmlr/scripts/experiments/"
 
-SUPERVISION = "S1" # ["S1", "S2", "S3", "S1a", "S2a", "S3a"]
+SUPERVISION = "S3" # ["S1", "S2", "S3", "S1a", "S2a", "S3a"]
 MODE = "non-cumu" # ["non-cumu", "cumu"] will map to ["d", "trulyleqd"]
 NUM_HIDDEN_LAYERS = 1 
 LEGEND_CODE_RANGE =  "ABCDEF"
 
-METRIC = ["dg_smaller"] # ["cvg", "pg", "dg_larger", "dg_smaller", "lg", "dg_+1", "dg_+2"]
-LOSS_OR_ACC = ["acc"] 
+METRIC = ["dg_+1"] # ["cvg", "pg", "dg_larger", "dg_smaller", "lg", "dg_+1", "dg_+2"]
+LOSS_OR_ACC = ["p_acc", "n_acc"] 
 """
 ["loss", "acc", "S2_loss", "S2_acc", "S2_p_acc", "S2_n_acc", "S3_loss", "S3_acc", "p_acc", "n_acc"]
 

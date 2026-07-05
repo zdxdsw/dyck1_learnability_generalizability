@@ -7,16 +7,16 @@ import numpy as np
 MODEL = "Transformer"  # "RNN" or "Transformer"
 OUTPUT_ROOT = f"/home/yingshac/workspace/tmlr/scripts/experiments/"
 
-SUPERVISION = "S1" # ["S1", "S2", "S3", "S1a", "S2a", "S3a"]
+SUPERVISION = "S3" # ["S1", "S2", "S3", "S1a", "S2a", "S3a"]
 MODE = "cumu" # ["non-cumu", "cumu"] will map to ["d", "trulyleqd"]
 NUM_HIDDEN_LAYERS = 2
-CAUSAL = False
-PE_CODE_RANGE =  "G-M" # "O-U" #
+CAUSAL = True
+PE_CODE_RANGE =  "A-G" # "O-U" #
 
 METRIC = ["cvg", "pg", "dg_larger", "lg"] # ["cvg", "pg", "dg_larger", "dg_smaller", "lg"]
-LOSS_OR_ACC = ["acc", "p_acc", "n_acc"] 
+LOSS_OR_ACC = ["acc", "p_acc", "n_acc", "S3_acc"] 
 """
-["loss", "acc", "S2_loss", "S2_acc", "S3_loss", "S3_acc", "p_acc", "n_acc"]
+["loss", "acc", "S2_loss", "S2_acc", "S2_p_acc", "S2_n_acc", "S3_loss", "S3_acc", "p_acc", "n_acc"]
 
     p_acc = TP / (TP + FN)  i.e. acc on positive samples
     n_acc = TN / (TN + FP)  i.e. acc on negative samples
@@ -274,6 +274,10 @@ def get_loss_or_acc(metrics, loss_or_acc):
         return metrics["TP"] / (metrics["TP"] + metrics["FN"]) if (metrics["TP"] + metrics["FN"]) > 0 else 0.0
     if loss_or_acc == "n_acc":
         return metrics["TN"] / (metrics["TN"] + metrics["FP"]) if (metrics["TN"] + metrics["FP"]) > 0 else 0.0
+    if loss_or_acc == "S2_p_acc":
+        return metrics["S2_TP"] / (metrics["S2_TP"] + metrics["S2_FN"]) if (metrics["S2_TP"] + metrics["S2_FN"]) > 0 else 0.0
+    if loss_or_acc == "S2_n_acc":
+        return metrics["S2_TN"] / (metrics["S2_TN"] + metrics["S2_FP"]) if (metrics["S2_TN"] + metrics["S2_FP"]) > 0 else 0.0
     elif loss_or_acc in metrics:
         return metrics[loss_or_acc]
     else:
@@ -634,6 +638,7 @@ if __name__ == "__main__":
         for metric in list_metric:
             # Some training_metrics.txt don’t have FP/TP/FN/TN
             # don’t try to plot “cvg” with p_acc/n_acc
-            if metric == "cvg" and loss_or_acc in ["p_acc", "n_acc"]: continue
+            if metric == "cvg" and loss_or_acc in ["p_acc", "n_acc", "S2_p_acc", "S2_n_acc"]: continue
+            if loss_or_acc == "S3_acc" and "dg" in metric: continue # depth generalization does not apply to S3.
             args.metric = metric
             run_all(args, task_suites)
