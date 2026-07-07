@@ -13,7 +13,7 @@ TASK_SUITES = [
 ]
 
 COL_TITLES = [
-    "Supervision: S1\nEval on: S1",
+    "Supervision: SL1; Eval on: SL1.\nhs=64.",
 ]
 
 num_rows = len(TASK_SUITES)
@@ -35,7 +35,7 @@ MODEL = "rnn"
 OUTPUT_ROOT = f"/home/yingshac/workspace/tmlr/scripts/experiments/output_{MODEL}/"
 YLIM = (0.43, 1.0)
 ROW_WIDTH = 3.6
-ROW_HEIGHT = 2.8
+ROW_HEIGHT = 2.6
 DPI = 300
 
 # Constants --------------------------------------------------------------------------------
@@ -152,17 +152,17 @@ def plot_one_ax(val_d_to_acc, ax, row_idx, col_idx):
         ax.scatter(d, np.mean(val_d_to_acc[d][d]), color=colors[d-DMIN], s=20, zorder=5) # draw a dot on val_d = train_d
     
     ax.tick_params(axis="both", labelsize=10)
-    if row_idx == num_rows - 1: ax.set_xlabel(r"$d^{test}$", fontsize=12, labelpad=10)
+    if row_idx == num_rows - 1: ax.set_xlabel(r"$d^{test}$", fontsize=12, labelpad=6)
 
     y_label = r"acc at $d^{test}$"
-    if col_idx == 0: ax.set_ylabel(y_label, fontsize=12, labelpad=6)
+    if col_idx == 0: ax.set_ylabel(y_label, fontsize=12, labelpad=2)
     
     ax.set_ylim(YLIM[0]-0.05, YLIM[1]+0.05)
     #ax.set_xticks(list(range(1, 17)))
     ax.set_xticks([1,2,3,4,5,6,7,8,9,10,12,14,16])
     ax.set_yticks(list(np.arange(YLIM[1], YLIM[0]-0.01, step=-0.2))[::-1])
 
-    if col_idx == 1: ax.legend(loc="upper right", framealpha=0.6)
+    if row_idx == 0: ax.legend(loc="lower left", framealpha=0.6, fontsize=9)
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
 
@@ -208,7 +208,7 @@ else:
 
 for ax, title in zip(first_row_axes, COL_TITLES):
     ax.text(
-        0.5, 1.03,
+        0.4, 1.02,
         title,
         transform=ax.transAxes,
         ha="center",

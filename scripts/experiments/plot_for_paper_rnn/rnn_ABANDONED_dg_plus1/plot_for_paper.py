@@ -5,33 +5,27 @@ import numpy as np
 
 PLOT_STATS = [
     [ # first row
-        "cvg(acc)/S1_d_trulyleq[2-8]_ABCDEF_cvg",
-        "cvg(acc)/S2_d_trulyleq[2-8]_ABCDEF_cvg",
-        "cvg(acc)/S3_d_trulyleq[2-8]_ABCDEF_cvg",
-    ],
-    [ # second row
-        "pg(acc)/S1_d_trulyleq[2-8]_ABCDEF_pg",
-        "pg(acc)/S2_d_trulyleq[2-8]_ABCDEF_pg",
-        "pg(acc)/S3_d_trulyleq[2-8]_ABCDEF_pg",
-    ],
-    [ # third row
-        "lg(acc)/S1_d_trulyleq[2-8]_ABCDEF_lg",
-        "lg(acc)/S2_d_trulyleq[2-8]_ABCDEF_lg",
-        "lg(acc)/S3_d_trulyleq[2-8]_ABCDEF_lg",
-    ],
+        "dg_+1(acc)/S1_d_trulyleq[2-8]_ABCDEF_dg_+1",
+        "dg_+1(acc)/S2_d_trulyleq[2-8]_ABCDEF_dg_+1",
+        "dg_+1(acc)/S3_d_trulyleq[2-8]_ABCDEF_dg_+1",
+    ]
 ]
 
 COL_TITLES = [
-    "Supervision: S1\nEval on: S1 (acc)",
-    "Supervision: S1 + S2\nEval on: S1 (acc)",
-    "Supervision: S1 + S3\nEval on: S1 (acc)",
+    "Supervision: SL1;\nEval on: SL1",
+    "Supervision: SL1 + SL2;\nEval on: SL1",
+    "Supervision: SL1 + SL3;\nEval on: SL1",
+]
+
+ROW_TITLEs = [
+    r"acc on depth = $d^{tr}_{\max}$+1",
 ]
 
 MODEL = "rnn"
 PLOT_STATS_DIR = f"/home/yingshac/workspace/tmlr/scripts/experiments/single_metric_plot_{MODEL}"
-YLIM = (0.4, 1.0)
+YLIM = (0.42, 1.0)
 ROW_WIDTH = 10
-ROW_HEIGHT = 2.8
+ROW_HEIGHT = 3
 DPI = 300
 
 # Constants --------------------------------------------------------------------------------
@@ -44,6 +38,7 @@ METRIC_SHORTHAND_TO_FULL = {
     "dg_larger": "Depth Generalization (towards larger)",
     "dg_smaller": "Depth Generalization (towards smaller)", # only available for non-cumu
     "lg": "Length Generalization",
+    "dg_+1": "Depth Generalization",
 }
 
 RNN_LEGEND_NAME_TO_COLOR = {
@@ -100,7 +95,7 @@ def plot_one_ax(plot_stats_filename, ax, row_idx, col_idx):
     
     ### parse filename
     mode = "cumu" if "trulyleq" in plot_stats_filename else "non-cumu"
-    metric = plot_stats_filename.split("_")[-1]
+    metric = "_".join(plot_stats_filename.split("/")[-1].split("_")[4:])
 
     # title = f"{args.supervision} L={args.num_hidden_layers}"
     x_label = r"$d^{tr}_{\max}$ (cumu)" if mode == "cumu" else r"$d^{tr}$ (non-cumu)"
@@ -123,12 +118,12 @@ def plot_one_ax(plot_stats_filename, ax, row_idx, col_idx):
 
     ax.tick_params(axis="both", labelsize=10)
     if row_idx == num_rows - 1: ax.set_xlabel(x_label, fontsize=12)
-    if col_idx == 0: ax.set_ylabel(y_label, fontsize=12, fontweight="semibold", labelpad=10)
+    if col_idx == 0: ax.set_ylabel(y_label, fontsize=12, labelpad=10)
     ax.set_ylim(YLIM[0]-0.05, YLIM[1]+0.05)
     ax.set_xticks(list(range(DMIN, DMAX+1)))
-    # yticks: ymin, ymax, step=0.2
-    ax.set_yticks(np.arange(YLIM[0], YLIM[1]+0.01, 0.2))
-    if col_idx == 0: ax.legend(loc="lower right", framealpha=0.4)
+    # yticks: ymax, ymin, step=-0.2, then reverse the list to get ascending order
+    ax.set_yticks(list(np.arange(YLIM[1], YLIM[0]-0.01, step=-0.2))[::-1])
+    if col_idx == 0: ax.legend(loc="lower center", framealpha=0.4)
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
 
@@ -155,17 +150,31 @@ for row in range(num_rows):
         ax = axes[row, col] if num_rows > 1 else axes[col] # if only one row, axes is 1D array
         plot_one_ax(os.path.join(PLOT_STATS_DIR, plot_stats_filename), ax, row_idx=row, col_idx=col)
 
-for ax, title in zip(axes[0], COL_TITLES):
+first_row_axes = axes[0] if num_rows > 1 else axes
+for ax, title in zip(first_row_axes, COL_TITLES):
     ax.text(
-        0.5, 1.03,
+        0.4, 1.03,
         title,
         transform=ax.transAxes,
         ha="center",
         va="bottom",
-        fontsize=12,
+        fontsize=11,
         linespacing=1.75,
         fontweight="semibold",
     )
 
-# fig.tight_layout()
+first_col_axes = axes[:, 0] if num_rows > 1 else axes
+for ax, title in zip(first_col_axes, ROW_TITLEs):
+    ax.text(
+        -0.3, 0.5,
+        title,
+        transform=ax.transAxes,
+        ha="center",
+        va="center",
+        fontsize=12,
+        linespacing=1.75,
+        fontweight="semibold",
+        rotation=90,
+    )
+
 fig.savefig(save_path, bbox_inches="tight", dpi=DPI)

@@ -7,8 +7,6 @@ PLOT_STATS = [
     [ # first row
         "cvg(acc)/S1_d_trulyleq[2-8]_2ABCDEFG_cvg",
         "pg(acc)/S1_d_trulyleq[2-8]_2ABCDEFG_pg",
-    ],
-    [ # second row
         "dg_larger(acc)/S1_d_trulyleq[2-8]_2ABCDEFG_dg_larger",
         "lg(acc)/S1_d_trulyleq[2-8]_2ABCDEFG_lg",
     ]
@@ -17,8 +15,8 @@ PLOT_STATS = [
 MODEL = "transformer"
 PLOT_STATS_DIR = f"/home/yingshac/workspace/tmlr/scripts/experiments/single_metric_plot_{MODEL}"
 YLIM = (0.58, 1.0)
-ROW_WIDTH = 7.5
-ROW_HEIGHT = 3
+ROW_WIDTH = 13.5
+ROW_HEIGHT = 2.8
 DPI = 300
 
 # Constants --------------------------------------------------------------------------------
@@ -114,7 +112,7 @@ def plot_one_ax(plot_stats_filename, ax, row_idx, col_idx):
     ax.set_ylabel(y_label, fontsize=12, labelpad=6)
     
     ax.set_xticks(list(range(DMIN, DMAX+1)))
-    if row_idx > 0: 
+    if col_idx > 1: 
         ax.set_ylim(YLIM[0]-0.05, YLIM[1]+0.05)
         # yticks: ymax, ymin, step=-0.2, then reverse the list to get ascending order
         ax.set_yticks(list(np.arange(YLIM[1], YLIM[0]-0.01, step=-0.1))[::-1])
@@ -147,6 +145,6 @@ for row in range(num_rows):
         plot_one_ax(os.path.join(PLOT_STATS_DIR, plot_stats_filename), ax, row_idx=row, col_idx=col)
 
 # set fig super title: "Supervision: S1 Eval on: S1"
-fig.suptitle(r"Supervision: S1; Eval on: S1.$\ \ \ $2-Layer; Causal.", fontsize=12, fontweight="bold", y=1.04)
+fig.suptitle(r"Supervision: SL1; Eval on: SL1.$\ \ \ $2-Layer; Causal.", fontsize=13, fontweight="bold", y=1.12)
 
 fig.savefig(save_path, bbox_inches="tight", dpi=DPI)

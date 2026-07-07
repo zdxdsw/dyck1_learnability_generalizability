@@ -18,7 +18,7 @@ COL_TITLES = [
 MODEL = "transformer"
 PLOT_STATS_DIR = f"/home/yingshac/workspace/tmlr/scripts/experiments/single_metric_plot_{MODEL}"
 YLIM = (0.12, 1.0)
-ROW_WIDTH = 7.5
+ROW_WIDTH = 6.6
 ROW_HEIGHT = 3
 DPI = 300
 
@@ -119,7 +119,7 @@ def plot_one_ax(plot_stats_filename, ax, row_idx, col_idx):
     ax.set_yticks(list(np.arange(YLIM[1], YLIM[0]-0.01, step=-0.2))[::-1])
     
     if col_idx == 1: 
-        ax.legend(loc="lower left", framealpha=0.4, title="Positional Encoding")
+        ax.legend(loc="lower left", framealpha=0.6, title="Positional Encoding", fontsize=9.5)
     
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
@@ -159,6 +159,6 @@ for ax, title in zip(axes, COL_TITLES):
     )
 
 # set fig super title: "Supervision: S1 Eval on: S1"
-fig.suptitle(r"Supervision: S1; Eval on: S1.$\ \ \ $2-Layer; Causal.", fontsize=12, fontweight="bold", y=1.08)
+fig.suptitle(r"Supervision: SL1; Eval on: SL1.$\ \ \ $2-Layer; Causal.", fontsize=13, fontweight="bold", y=1.1)
 
 fig.savefig(save_path, bbox_inches="tight", dpi=DPI)
