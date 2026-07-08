@@ -5,28 +5,58 @@ from matplotlib.patches import Rectangle
 
 PLOT_STATS = [
     [ # first row
-        "cvg(acc)/S1_d_trulyleq[2-8]_2abcdefg_cvg",
-        "cvg(acc)/S1_d_trulyleq[2-8]_2ghijklm_cvg",
-        "cvg(acc)/S1_d_trulyleq[2-8]_1ABCDEFG_cvg",
-        "cvg(acc)/S1_d_trulyleq[2-8]_1GHIJKLM_cvg",
-    ],
-    [ # second row
         "pg(acc)/S1_d_trulyleq[2-8]_2abcdefg_pg",
         "pg(acc)/S1_d_trulyleq[2-8]_2ghijklm_pg",
         "pg(acc)/S1_d_trulyleq[2-8]_1ABCDEFG_pg",
         "pg(acc)/S1_d_trulyleq[2-8]_1GHIJKLM_pg", 
     ], 
+    [ # second row
+        "pg(p_acc)/S1_d_trulyleq[2-8]_2abcdefg_pg",
+        "pg(p_acc)/S1_d_trulyleq[2-8]_2ghijklm_pg",
+        "pg(p_acc)/S1_d_trulyleq[2-8]_1ABCDEFG_pg",
+        "pg(p_acc)/S1_d_trulyleq[2-8]_1GHIJKLM_pg", 
+    ],
     [ # third row
+        "pg(n_acc)/S1_d_trulyleq[2-8]_2abcdefg_pg",
+        "pg(n_acc)/S1_d_trulyleq[2-8]_2ghijklm_pg",
+        "pg(n_acc)/S1_d_trulyleq[2-8]_1ABCDEFG_pg",
+        "pg(n_acc)/S1_d_trulyleq[2-8]_1GHIJKLM_pg", 
+    ],
+    [ # fourth row
         "dg_larger(acc)/S1_d_trulyleq[2-8]_2abcdefg_dg_larger",
         "dg_larger(acc)/S1_d_trulyleq[2-8]_2ghijklm_dg_larger",
         "dg_larger(acc)/S1_d_trulyleq[2-8]_1ABCDEFG_dg_larger",
         "dg_larger(acc)/S1_d_trulyleq[2-8]_1GHIJKLM_dg_larger",
     ],
-    [ # fourth row
+    [ # fifth row
+        "dg_larger(p_acc)/S1_d_trulyleq[2-8]_2abcdefg_dg_larger",
+        "dg_larger(p_acc)/S1_d_trulyleq[2-8]_2ghijklm_dg_larger",
+        "dg_larger(p_acc)/S1_d_trulyleq[2-8]_1ABCDEFG_dg_larger",
+        "dg_larger(p_acc)/S1_d_trulyleq[2-8]_1GHIJKLM_dg_larger",
+    ],
+    [ # sixth row
+        "dg_larger(n_acc)/S1_d_trulyleq[2-8]_2abcdefg_dg_larger",
+        "dg_larger(n_acc)/S1_d_trulyleq[2-8]_2ghijklm_dg_larger",
+        "dg_larger(n_acc)/S1_d_trulyleq[2-8]_1ABCDEFG_dg_larger",
+        "dg_larger(n_acc)/S1_d_trulyleq[2-8]_1GHIJKLM_dg_larger",
+    ],
+    [ # seventh row
         "lg(acc)/S1_d_trulyleq[2-8]_2abcdefg_lg",
         "lg(acc)/S1_d_trulyleq[2-8]_2ghijklm_lg",
         "lg(acc)/S1_d_trulyleq[2-8]_1ABCDEFG_lg",
         "lg(acc)/S1_d_trulyleq[2-8]_1GHIJKLM_lg",
+    ],
+    [ # eighth row
+        "lg(p_acc)/S1_d_trulyleq[2-8]_2abcdefg_lg",
+        "lg(p_acc)/S1_d_trulyleq[2-8]_2ghijklm_lg",
+        "lg(p_acc)/S1_d_trulyleq[2-8]_1ABCDEFG_lg",
+        "lg(p_acc)/S1_d_trulyleq[2-8]_1GHIJKLM_lg",
+    ],
+    [ # ninth row
+        "lg(n_acc)/S1_d_trulyleq[2-8]_2abcdefg_lg",
+        "lg(n_acc)/S1_d_trulyleq[2-8]_2ghijklm_lg",
+        "lg(n_acc)/S1_d_trulyleq[2-8]_1ABCDEFG_lg",
+        "lg(n_acc)/S1_d_trulyleq[2-8]_1GHIJKLM_lg",
     ]
 ]
 
@@ -37,11 +67,26 @@ COL_TITLES = [
     "\n1-Layer; Causal.",
 ]
 
+ROW_TITLES = [
+    "",
+    "p_acc",
+    "n_acc",
+    "",
+    "p_acc",
+    "n_acc",
+    "",
+    "p_acc",
+    "n_acc",
+    "",
+    "p_acc",
+    "n_acc",
+]
+
 MODEL = "transformer"
 PLOT_STATS_DIR = f"/home/yingshac/workspace/tmlr/scripts/experiments/single_metric_plot_{MODEL}"
-YLIM = (0.3, 1.0)
-ROW_WIDTH = 14
-ROW_HEIGHT = 2.8
+YLIM = (0.0, 1.0)
+ROW_WIDTH = 13
+ROW_HEIGHT = 2.6
 DPI = 300
 
 # Constants --------------------------------------------------------------------------------
@@ -136,7 +181,7 @@ def plot_one_ax(plot_stats_filename, ax, row_idx, col_idx):
     if col_idx == 0: ax.set_ylabel(y_label, fontsize=12, labelpad=10)
     
     ax.set_xticks(list(range(DMIN, DMAX+1)))
-    if row_idx > 2: 
+    if row_idx > 0: 
         ax.set_ylim(YLIM[0]-0.05, YLIM[1]+0.05)
         ax.set_yticks(list(np.arange(YLIM[1], YLIM[0]-0.01, step=-0.2))[::-1])
     else: 
@@ -209,6 +254,18 @@ ax.text(
     fontweight="semibold",
 )
 
+for ax, title in zip(axes[:, 0], ROW_TITLES):
+    ax.text(
+        -0.35, 0.5,
+        title,
+        transform=ax.transAxes,
+        ha="center",
+        va="center",
+        fontsize=12,
+        linespacing=1.75,
+        rotation=90,
+        fontweight="semibold",
+    )
 
 # Shades ------------------------------------------------------------------------------------------
 fig.canvas.draw()

@@ -43,7 +43,7 @@ ROW_TITLEs = [
     "Neg type five",
 ]
 
-PICKLE_PATH = "/scratch/yingshac/tmlr/scripts/experiments/hardness_metric/CATETORY_TO_STATS_train.pkl"
+PICKLE_PATH = "/scratch/yingshac/tmlr/scripts/experiments/hardness_metric/CATEGORY_TO_STATS_train.pkl"
 
 RGBA = (57, 132, 83, 0.5)
 # ------------------------------------------------------------------------------------------
@@ -180,14 +180,20 @@ print(f"Total negatives in training: {len(all_train_negatives)}")
         Type two and three only have distributions for p_fv and r_fv.
         Type four and five have distributions fo all. 
 """
-CATETORY_TO_STATS = {
+CATEGORY_TO_STATS = {
     "one": {"p_fv": [], "r_fv": [], "ratio_p": []},
     "two": {"p_fv": [], "r_fv": [], "ratio_p": []},
     "three": {"p_fv": [], "r_fv": [], "ratio_p": []},
     "four": {"p_fv": [], "r_fv": [], "ratio_p": []},
     "five": {"p_fv": [], "r_fv": [], "ratio_p": []},
 }
-
+CATEGORY_TO_RANGE = {
+    "one": {"p_fv": [], "r_fv": [], "ratio_p": []},
+    "two": {"p_fv": [], "r_fv": [], "ratio_p": []},
+    "three": {"p_fv": [], "r_fv": [], "ratio_p": []},
+    "four": {"p_fv": [], "r_fv": [], "ratio_p": []},
+    "five": {"p_fv": [], "r_fv": [], "ratio_p": []},
+}
 # keep track of whether we plot historgram or just print out the count (ax.annotate)
 HAS_PLOT = [
     ("two", "p_fv"), ("two", "r_fv"),
@@ -202,21 +208,23 @@ for s in tqdm(
         desc="Computing P_FV, R_FV values"
     ):
     r_fv, p_fv, ratio_p, neg_type = get_first_violation_statistics(s)
-    CATETORY_TO_STATS[neg_type]["r_fv"].append(r_fv)
-    CATETORY_TO_STATS[neg_type]["p_fv"].append(p_fv)
-    CATETORY_TO_STATS[neg_type]["ratio_p"].append(ratio_p)
+    CATEGORY_TO_STATS[neg_type]["r_fv"].append(r_fv)
+    CATEGORY_TO_STATS[neg_type]["p_fv"].append(p_fv)
+    CATEGORY_TO_STATS[neg_type]["ratio_p"].append(ratio_p)
 
-# pickle CATETORY_TO_STATS so that I can play around with the plots without loading the negatives again
-with open(PICKLE_PATH, "wb") as f: pickle.dump(CATETORY_TO_STATS, f)
+# pickle CATEGORY_TO_STATS so that I can play around with the plots without loading the negatives again
+with open(PICKLE_PATH, "wb") as f: pickle.dump(CATEGORY_TO_STATS, f)
 exit(0)
 """
 
 # ------------------------------------------------------------------------------------------
-# load CATETORY_TO_STATS from pickle
-with open(PICKLE_PATH, "rb") as f: CATETORY_TO_STATS = pickle.load(f)
-print("Loaded CATETORY_TO_STATS from pickle.")
+# load CATEGORY_TO_STATS from pickle
+with open(PICKLE_PATH, "rb") as f: CATEGORY_TO_STATS = pickle.load(f)
+print("Loaded CATEGORY_TO_STATS from pickle.")
 # ------------------------------------------------------------------------------------------
 def plot_for_one_category(ax_r, ax_p, ax_ratio_p, neg_type, stats):
+    # save the min and max for each variable for each negative type
+    
     p_fv_values = np.asarray(stats["p_fv"])
     r_fv_values = np.asarray(stats["r_fv"])
     ratio_p_values = np.asarray(stats["ratio_p"])
@@ -235,13 +243,15 @@ def plot_for_one_category(ax_r, ax_p, ax_ratio_p, neg_type, stats):
                 ax.hist(values, bins=100, range=(values.min(), values.max()), density=True, color="mycolor")
             elif variable == "p_fv":
                 # bins = max(p_fv) - min(p_fv) + 1
-                bins = np.arange(p_fv_values.min(), p_fv_values.max() + 1) - 0.5
+                bins = np.arange(p_fv_values.min(), p_fv_values.max() + 2) - 0.5
                 ax.hist(values, bins=bins, density=True, color="mycolor")
             elif variable == "ratio_p":
                 ax.hist(values, bins=200, range=(0, 1), density=True, color="mycolor")
             # annotate the min and max value on the top left corner
+            _min, _max = values.min(), values.max()
+            CATEGORY_TO_RANGE[neg_type][variable] = (_min.item(), _max.item())
             ax.annotate(
-                f"Min: {values.min():.4f}\nMax: {values.max():.4f}",
+                f"Min: {_min:.4f}\nMax: {_max:.4f}",
                 xy=(0.1, 0.9), xycoords="axes fraction",
                 ha="left", va="top", fontsize=14
             )
@@ -249,8 +259,10 @@ def plot_for_one_category(ax_r, ax_p, ax_ratio_p, neg_type, stats):
             ax.axis("off")
             single_value = set(values)
             assert len(single_value) == 1
+            _v = single_value.pop()
+            CATEGORY_TO_RANGE[neg_type][variable] = (_v.item(), _v.item())
             ax.annotate(
-                f"{variable} = {single_value.pop()}", 
+                f"{variable} = {_v:.4f}", 
                 xy=(0.9, 0.8), xycoords="axes fraction", 
                 ha="right", va="top", fontsize=14
             ) 
@@ -269,7 +281,7 @@ fig, axes = plt.subplots(
 )
 
 for neg_type in ["one", "two", "three", "four", "five"]:
-    stats = CATETORY_TO_STATS[neg_type]
+    stats = CATEGORY_TO_STATS[neg_type]
     row_idx = ["one", "two", "three", "four", "five"].index(neg_type)
     ax_r, ax_p, ax_ratio_p = axes[row_idx]
     plot_for_one_category(ax_r, ax_p, ax_ratio_p, neg_type, stats)
@@ -330,3 +342,7 @@ for r in range(4):  # between 5 rows
 
 save_path = "results/five_neg_types_distr_R_and_P_train.pdf"
 fig.savefig(save_path, bbox_inches="tight", dpi=DPI)
+
+# save CATEGORY_TO_RANGE to json
+with open("results/five_neg_types_distr_R_and_P_train_range.json", "w") as f:
+    json.dump(CATEGORY_TO_RANGE, f, indent=2)

@@ -50,7 +50,7 @@ ROW_TITLEs = [
     "Neg type five",
 ]
 
-PICKLE_PATH = "/scratch/yingshac/tmlr/scripts/experiments/hardness_metric/CATETORY_TO_STATS.pkl"
+PICKLE_PATH = "/scratch/yingshac/tmlr/scripts/experiments/hardness_metric/CATEGORY_TO_STATS.pkl"
 
 RGBA = (57, 132, 83, 0.5)
 
@@ -204,7 +204,7 @@ print(f"Total available negatives after exclusion: {len(available_negatives)}")
         Type two and three only have distributions for p_fv and r_fv.
         Type four and five have distributions fo all. 
 """
-CATETORY_TO_STATS = {
+CATEGORY_TO_STATS = {
     "one": {"p_fv": [], "r_fv": [], "ratio_p": []},
     "two": {"p_fv": [], "r_fv": [], "ratio_p": []},
     "three": {"p_fv": [], "r_fv": [], "ratio_p": []},
@@ -228,18 +228,21 @@ with ProcessPoolExecutor(max_workers=48) as pool:
         total=len(available_negatives),
         desc="Computing P_FV, R_FV values",
     ):
-        CATETORY_TO_STATS[neg_type]["r_fv"].append(r_fv)
-        CATETORY_TO_STATS[neg_type]["p_fv"].append(p_fv)
-        CATETORY_TO_STATS[neg_type]["ratio_p"].append(ratio_p)
+        CATEGORY_TO_STATS[neg_type]["r_fv"].append(r_fv)
+        CATEGORY_TO_STATS[neg_type]["p_fv"].append(p_fv)
+        CATEGORY_TO_STATS[neg_type]["ratio_p"].append(ratio_p)
 
-# pickle CATETORY_TO_STATS so that I can play around with the plots without loading the negatives again
-with open(PICKLE_PATH, "wb") as f: pickle.dump(CATETORY_TO_STATS, f)
+# pickle CATEGORY_TO_STATS so that I can play around with the plots without loading the negatives again
+with open(PICKLE_PATH, "wb") as f: pickle.dump(CATEGORY_TO_STATS, f)
 """
 
 # ------------------------------------------------------------------------------------------
-# load CATETORY_TO_STATS from pickle
-with open(PICKLE_PATH, "rb") as f: CATETORY_TO_STATS = pickle.load(f)
-print("Loaded CATETORY_TO_STATS from pickle.")
+# load CATEGORY_TO_STATS from pickle
+with open(PICKLE_PATH, "rb") as f: CATEGORY_TO_STATS = pickle.load(f)
+print("Loaded CATEGORY_TO_STATS from pickle.")
+
+with open("results/five_neg_types_distr_R_and_P_train_range.json", "r") as f: 
+    CATEGORY_TO_RANGE_TRAIN = json.load(f) # load training negatives range from json
 # ------------------------------------------------------------------------------------------
 def plot_for_one_category(ax_r, ax_p, ax_ratio_p, neg_type, stats):
     p_fv_values = np.asarray(stats["p_fv"])
@@ -260,16 +263,35 @@ def plot_for_one_category(ax_r, ax_p, ax_ratio_p, neg_type, stats):
                 ax.hist(values, bins=100, range=(values.min(), values.max()), density=True, color="mycolor")
             elif variable == "p_fv":
                 # bins = max(p_fv) - min(p_fv) + 1
-                bins = np.arange(p_fv_values.min(), p_fv_values.max() + 1) - 0.5
+                bins = np.arange(p_fv_values.min(), p_fv_values.max() + 2) - 0.5
                 ax.hist(values, bins=bins, density=True, color="mycolor")
             elif variable == "ratio_p":
                 ax.hist(values, bins=200, range=(0, 1), density=True, color="mycolor")
             # annotate the min and max value on the top left corner
+            _min, _max = values.min(), values.max()
             ax.annotate(
-                f"Min: {values.min():.4f}\nMax: {values.max():.4f}",
+                f"Min: {_min:.4f}\nMax: {_max:.4f}",
                 xy=(0.1, 0.9), xycoords="axes fraction",
                 ha="left", va="top", fontsize=14
             )
+            range_te = [_min, _max]
+            range_tr = CATEGORY_TO_RANGE_TRAIN[neg_type][variable]
+            intersection = max(range_te[0], range_tr[0]), min(range_te[1], range_tr[1])
+            x1, x2 = intersection
+            ax.axvline(x1, linestyle="--", color="lightgreen", linewidth=1)
+            ax.axvline(x2, linestyle="--", color="lightgreen", linewidth=1)
+            # shaded region between x1 and x2
+            ax.axvspan(x1, x2, color="lightgreen", alpha=0.1, zorder=-1)
+            # annotate in and out counts on the top right corner. 
+            # In count is the number of values within intersection
+            in_count = np.sum((values >= x1) & (values <= x2))
+            out_count = len(values) - in_count
+            ax.annotate(
+                f"#In: {in_count}\n#Out: {out_count}",
+                xy=(0.9, 0.8), xycoords="axes fraction",
+                ha="right", va="top", fontsize=14
+            )
+
         else: 
             ax.axis("off")
             single_value = set(values)
@@ -294,7 +316,7 @@ fig, axes = plt.subplots(
 )
 
 for neg_type in ["one", "two", "three", "four", "five"]:
-    stats = CATETORY_TO_STATS[neg_type]
+    stats = CATEGORY_TO_STATS[neg_type]
     row_idx = ["one", "two", "three", "four", "five"].index(neg_type)
     ax_r, ax_p, ax_ratio_p = axes[row_idx]
     plot_for_one_category(ax_r, ax_p, ax_ratio_p, neg_type, stats)
