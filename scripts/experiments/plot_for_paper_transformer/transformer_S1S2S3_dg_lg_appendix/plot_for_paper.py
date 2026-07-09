@@ -26,10 +26,10 @@ PLOT_STATS = [
 ]
 
 COL_TITLES = [
-    r"Supervision: S1$\qquad$",
-    r"Supervision: S1$\qquad$",
-    r"Supervision: S1$\qquad$",
-    r"Supervision: S1$\qquad$",  
+    r"Supervision: SL1$\qquad$",
+    r"Supervision: SL1$\qquad$",
+    r"Supervision: SL1$\qquad$",
+    r"Supervision: SL1$\qquad$",  
 ]
 
 ROW_TITLEs = [
@@ -213,11 +213,12 @@ for ax, title in zip(axes[0], COL_TITLES):
         linespacing=1.6,
         fontweight="semibold",
     )
-# # separately add a red S2 for the last column's title
+# # separately add a red SL2 for the last column's title
 ax = axes[0][0]
+X = 0.855
 ax.text(
-    0.805, 1.055,
-    "+ S2",
+    X, 1.055,
+    "+ SL2",
     transform=ax.transAxes,
     ha="center",
     va="bottom",
@@ -227,8 +228,8 @@ ax.text(
 )
 ax = axes[0][1]
 ax.text(
-    0.805, 1.055,
-    "+ S3",
+    X, 1.055,
+    "+ SL3",
     transform=ax.transAxes,
     ha="center",
     va="bottom",
@@ -238,8 +239,8 @@ ax.text(
 )
 ax = axes[0][-2]
 ax.text(
-    0.805, 1.055,
-    "+ S2",
+    X, 1.055,
+    "+ SL2",
     transform=ax.transAxes,
     ha="center",
     va="bottom",
@@ -249,8 +250,8 @@ ax.text(
 )
 ax = axes[0][-1]
 ax.text(
-    0.805, 1.055,
-    "+ S3",
+    X, 1.055,
+    "+ SL3",
     transform=ax.transAxes,
     ha="center",
     va="bottom",
@@ -261,7 +262,7 @@ ax.text(
 
 for ax, title in zip(axes[:, 0], ROW_TITLEs):
     ax.text(
-        -0.28, 0.5,
+        -0.29, 0.5,
         title,
         transform=ax.transAxes,
         ha="center",
@@ -272,7 +273,6 @@ for ax, title in zip(axes[:, 0], ROW_TITLEs):
         rotation=90,
     )
 
-# set fig super title: "Supervision: S1 Eval on: S1"
-fig.suptitle(r"Eval on: S1.$\ \ \ $2-Layer; Causal.", fontsize=12, fontweight="bold", y=1.04)
+fig.suptitle(r"Eval on: SL1.$\ \ \ $2-Layer; Causal.", fontsize=12, fontweight="bold", y=1.04)
 
 fig.savefig(save_path, bbox_inches="tight", dpi=DPI)

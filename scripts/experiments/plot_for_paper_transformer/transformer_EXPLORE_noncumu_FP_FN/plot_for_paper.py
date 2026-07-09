@@ -278,6 +278,6 @@ for ax, title in zip(axes[:, 0], ROW_TITLES):
 
 
 # set fig super title: "Supervision: S1 Eval on: S1"
-fig.suptitle(r"Supervision: S1; Eval on: S1.$\ \ \ $Causal.", fontsize=12, fontweight="bold", y=1.01)
+fig.suptitle(r"Supervision: SL1; Eval on: SL1.$\ \ \ $Causal.", fontsize=12, fontweight="bold", y=1.01)
 
 fig.savefig(save_path, bbox_inches="tight", dpi=DPI)

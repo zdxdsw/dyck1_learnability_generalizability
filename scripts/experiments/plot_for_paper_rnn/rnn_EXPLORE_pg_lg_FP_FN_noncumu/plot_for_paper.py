@@ -32,10 +32,10 @@ PLOT_STATS = [
 ]
 
 COL_TITLES = [
-    "Supervision: S1\nEval on: S1",
-    "Supervision: S1 + S2\nEval on: S1",
-    "Supervision: S1 + S3\nEval on: S1", 
-    "Supervision: S1 + S2\nEval on: ",
+    "Supervision: SL1\nEval on: SL1",
+    "Supervision: SL1 + SL2\nEval on: SL1",
+    "Supervision: SL1 + SL3\nEval on: SL1", 
+    "Supervision: SL1 + SL2\nEval on: ",
 ]
 
 ROW_TITLEs = [
@@ -47,7 +47,7 @@ ROW_TITLEs = [
 
 MODEL = "rnn"
 PLOT_STATS_DIR = f"/home/yingshac/workspace/tmlr/scripts/experiments/single_metric_plot_{MODEL}"
-YLIM = (0.05, 1.0)
+YLIM = (0.02, 1.0)
 ROW_WIDTH = 14
 ROW_HEIGHT = 2.8
 DPI = 300
@@ -151,7 +151,7 @@ def plot_one_ax(plot_stats_filename, ax, row_idx, col_idx):
     ax.set_xticks(list(range(DMIN, DMAX+1)))
     # yticks: ymax, ymin, step=-0.2, then reverse the list to get ascending order
     ax.set_yticks(list(np.arange(YLIM[1], YLIM[0]-0.01, step=-0.2))[::-1])
-    if col_idx == 0: # only first column has legend
+    if col_idx == row_idx == 0: # only first column has legend
         ax.legend(loc="lower right", framealpha=0.4)
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
@@ -190,11 +190,11 @@ for ax, title in zip(axes[0], COL_TITLES):
         linespacing=1.75,
         fontweight="semibold",
     )
-# separately add a red S2 for the last column's title
+# separately add a red SL2 for the last column's title
 ax = axes[0][-1]
 ax.text(
-    0.67, 1.03,
-    "S2",
+    0.7, 1.03,
+    "SL2",
     transform=ax.transAxes,
     ha="center",
     va="bottom",
@@ -205,7 +205,7 @@ ax.text(
 
 for ax, title in zip(axes[:, 0], ROW_TITLEs):
     ax.text(
-        -0.23, 0.5,
+        -0.25, 0.5,
         title,
         transform=ax.transAxes,
         ha="center",

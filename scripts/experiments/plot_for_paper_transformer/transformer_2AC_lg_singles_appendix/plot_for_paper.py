@@ -154,11 +154,15 @@ def extract_metrics_for_one_ax(output_dir, metric):
                     metrics = eval(lines[j+1].strip())
                     if test_l not in test_l_to_metric[d]: test_l_to_metric[d][test_l] = []
                     if metric == "p_acc":
-                        p_acc = metrics["TP"] / (metrics["TP"] + metrics["FN"]) if (metrics["TP"] + metrics["FN"]) > 0 else 0.0
-                        test_l_to_metric[d][test_l].append(p_acc)
+                        if (metrics["TP"] + metrics["FN"]) > 0:
+                            p_acc = metrics["TP"] / (metrics["TP"] + metrics["FN"])
+                            test_l_to_metric[d][test_l].append(p_acc)
+                        else: continue
                     elif metric == "n_acc":
-                        n_acc = metrics["TN"] / (metrics["TN"] + metrics["FP"]) if (metrics["TN"] + metrics["FP"]) > 0 else 0.0
-                        test_l_to_metric[d][test_l].append(n_acc)
+                        if (metrics["TN"] + metrics["FP"]) > 0:
+                            n_acc = metrics["TN"] / (metrics["TN"] + metrics["FP"])  
+                            test_l_to_metric[d][test_l].append(n_acc)
+                        else: continue
                     else:
                         test_l_to_metric[d][test_l].append(metrics[metric])
     
@@ -280,6 +284,6 @@ for ax, title in zip(axes[:, 0], ROW_TITLEs):
         rotation=90,
     )
 
-fig.suptitle(r"Length Generalization.$\ \ \ $Supervision: S1; Eval on: S1.$\ \ \ $2-Layer; Causal.", fontsize=12, fontweight="bold", y=1.05)
+fig.suptitle(r"Length Generalization.$\ \ \ $Supervision: SL1; Eval on: SL1.$\ \ \ $2-Layer; Causal.", fontsize=12, fontweight="bold", y=1.05)
 
 fig.savefig(save_path, bbox_inches="tight", dpi=DPI)

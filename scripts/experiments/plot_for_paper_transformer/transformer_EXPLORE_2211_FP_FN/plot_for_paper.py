@@ -173,7 +173,7 @@ def plot_one_ax(plot_stats_filename, ax, row_idx, col_idx):
             y_err.append(stats["std"])
         ax.plot(x, y, label=legend_name, color=LEGEND_NAME_TO_COLOR[legend_name], marker='.', alpha=0.5, linewidth=1.8)
         upper = np.minimum(np.array(y)+np.array(y_err), YLIM[1]) # clip upper bound to YLIM[1]
-        lower = np.maximum(np.array(y)-np.array(y_err), YLIM[0]-0.05) # clip lower bound to YLIM[0]
+        lower = np.maximum(np.array(y)-np.array(y_err), YLIM[0]) # clip lower bound to YLIM[0]
         ax.fill_between(x, lower, upper, color=LEGEND_NAME_TO_COLOR[legend_name], alpha=0.1)
 
     ax.tick_params(axis="both", labelsize=10)
@@ -235,7 +235,7 @@ for ax, title in zip(axes[0], COL_TITLES):
 # # separately add a red S2 for the last column's title
 ax = axes[0][2]
 ax.text(
-    0.26, 1.03,
+    0.23, 1.03,
     "1",
     transform=ax.transAxes,
     ha="center",
@@ -258,7 +258,7 @@ ax.text(
 
 ax = axes[0][-1]
 ax.text(
-    0.18, 1.03,
+    0.145, 1.03,
     "1",
     transform=ax.transAxes,
     ha="center",
@@ -280,7 +280,7 @@ ax.text(
 
 for ax, title in zip(axes[:, 0], ROW_TITLES):
     ax.text(
-        -0.35, 0.5,
+        -0.32, 0.5,
         title,
         transform=ax.transAxes,
         ha="center",
@@ -315,6 +315,6 @@ rect = Rectangle(
 fig.add_artist(rect)
 
 # set fig super title: "Supervision: S1 Eval on: S1"
-fig.suptitle(r"Supervision: S1; Eval on: S1.", fontsize=12, fontweight="bold", y=1.03)
+fig.suptitle(r"Supervision: SL1; Eval on: SL1.", fontsize=12, fontweight="bold", y=1.02)
 
 fig.savefig(save_path, bbox_inches="tight", dpi=DPI)

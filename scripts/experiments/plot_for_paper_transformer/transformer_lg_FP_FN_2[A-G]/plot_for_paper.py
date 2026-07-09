@@ -17,7 +17,7 @@ COL_TITLES = [
 
 MODEL = "transformer"
 PLOT_STATS_DIR = f"/home/yingshac/workspace/tmlr/scripts/experiments/single_metric_plot_{MODEL}"
-YLIM = (0.12, 1.0)
+YLIM = (0.26, 1.0)
 ROW_WIDTH = 6.6
 ROW_HEIGHT = 3
 DPI = 300

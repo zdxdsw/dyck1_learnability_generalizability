@@ -291,7 +291,6 @@ for c in [0, 2]:
     )
     fig.add_artist(rect)
 
-# set fig super title: "Supervision: S1 Eval on: S1"
-fig.suptitle(r"Supervision: S1; Eval on: S1.", fontsize=12, fontweight="bold", y=1.03)
+fig.suptitle(r"Supervision: SL1; Eval on: SL1.", fontsize=12, fontweight="bold", y=1.03)
 
 fig.savefig(save_path, bbox_inches="tight", dpi=DPI)

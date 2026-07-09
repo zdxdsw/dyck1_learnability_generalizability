@@ -8,12 +8,12 @@ MODEL = "RNN"
 OUTPUT_ROOT = f"/home/yingshac/workspace/tmlr/scripts/experiments/"
 
 SUPERVISION = "S3" # ["S1", "S2", "S3", "S1a", "S2a", "S3a"]
-MODE = "non-cumu" # ["non-cumu", "cumu"] will map to ["d", "trulyleqd"]
+MODE = "cumu" # ["non-cumu", "cumu"] will map to ["d", "trulyleqd"]
 NUM_HIDDEN_LAYERS = 1 
 LEGEND_CODE_RANGE =  "ABCDEF"
 
-METRIC = ["dg_+1"] # ["cvg", "pg", "dg_larger", "dg_smaller", "lg", "dg_+1", "dg_+2"]
-LOSS_OR_ACC = ["p_acc", "n_acc"] 
+METRIC = ["lg"] # ["cvg", "pg", "dg_larger", "dg_smaller", "lg", "dg_+1", "dg_+2"]
+LOSS_OR_ACC = ["p_acc"] 
 """
 ["loss", "acc", "S2_loss", "S2_acc", "S2_p_acc", "S2_n_acc", "S3_loss", "S3_acc", "p_acc", "n_acc"]
 
@@ -267,13 +267,13 @@ def get_loss_or_acc(metrics, loss_or_acc):
     """
     
     if loss_or_acc == "p_acc":
-        return metrics["TP"] / (metrics["TP"] + metrics["FN"]) if (metrics["TP"] + metrics["FN"]) > 0 else 0.0
+        return metrics["TP"] / (metrics["TP"] + metrics["FN"]) if (metrics["TP"] + metrics["FN"]) > 0 else -1
     if loss_or_acc == "n_acc":
-        return metrics["TN"] / (metrics["TN"] + metrics["FP"]) if (metrics["TN"] + metrics["FP"]) > 0 else 0.0
+        return metrics["TN"] / (metrics["TN"] + metrics["FP"]) if (metrics["TN"] + metrics["FP"]) > 0 else -1
     if loss_or_acc == "S2_p_acc":
-        return metrics["S2_TP"] / (metrics["S2_TP"] + metrics["S2_FN"]) if (metrics["S2_TP"] + metrics["S2_FN"]) > 0 else 0.0
+        return metrics["S2_TP"] / (metrics["S2_TP"] + metrics["S2_FN"]) if (metrics["S2_TP"] + metrics["S2_FN"]) > 0 else -1
     if loss_or_acc == "S2_n_acc":
-        return metrics["S2_TN"] / (metrics["S2_TN"] + metrics["S2_FP"]) if (metrics["S2_TN"] + metrics["S2_FP"]) > 0 else 0.0
+        return metrics["S2_TN"] / (metrics["S2_TN"] + metrics["S2_FP"]) if (metrics["S2_TN"] + metrics["S2_FP"]) > 0 else -1
     elif loss_or_acc in metrics:
         return metrics[loss_or_acc]
     else:
@@ -518,15 +518,13 @@ def run_all(args, task_suites = None):
                     try:
                         metrics = eval(line2)
                         y = get_loss_or_acc(metrics, args.loss_or_acc)
+                        if y == -1: continue # skip when p_acc/n_acc with no positive/negative samples)
                         x_y_pairs.append((x, y))
                     except:
                         Print(f"Func plot(): [skip] Cannot parse metrics as dict from line {i+1}: {line2}")
                         continue
                 
                 ### 4. Get Single Metric for each handle
-                # Print(f"\nBefore get_single_metric(), task={task}, \
-                #       train_d={train_d}, type(train_d)={type(train_d)}\n\
-                #         x_y_pairs: length={len(x_y_pairs)}\n{x_y_pairs}")
                 single_metric = get_single_metric(
                     x_y_pairs, 
                     args.metric, 

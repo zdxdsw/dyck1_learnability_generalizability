@@ -77,11 +77,11 @@ PLOT_STATS = [
 ]
 
 COL_TITLES = [
-    "Supervision: S1\nEval on: S1",
-    "Supervision: S1 + S2\nEval on: S1",
-    "Supervision: S1 + S3\nEval on: S1", 
-    "Supervision: S1 + S2\nEval on: ",
-    "Supervision: S1 + S3\nEval on: ",
+    "Supervision: SL1\nEval on: SL1",
+    "Supervision: SL1 + SL2\nEval on: SL1",
+    "Supervision: SL1 + SL3\nEval on: SL1", 
+    "Supervision: SL1 + SL2\nEval on: ",
+    "Supervision: SL1 + SL3\nEval on: ",
 ]
 
 ROW_TITLEs = [
@@ -241,11 +241,11 @@ for ax, title in zip(axes[0], COL_TITLES):
         linespacing=1.75,
         fontweight="semibold",
     )
-# # separately add a red S2 for the last column's title
+# # separately add a red SL2 for the last column's title
 ax = axes[0][-2]
 ax.text(
-    0.72, 1.03,
-    "S2",
+    0.75, 1.03,
+    "SL2",
     transform=ax.transAxes,
     ha="center",
     va="bottom",
@@ -255,8 +255,8 @@ ax.text(
 )
 ax = axes[0][-1]
 ax.text(
-    0.72, 1.03,
-    "S3",
+    0.75, 1.03,
+    "SL3",
     transform=ax.transAxes,
     ha="center",
     va="bottom",
@@ -278,7 +278,6 @@ for ax, title in zip(axes[:, 0], ROW_TITLEs):
         rotation=90,
     )
 
-# set fig super title: "Supervision: S1 Eval on: S1"
 fig.suptitle("2-Layer; Causal.", fontsize=12, fontweight="bold", y=1.01)
 
 fig.savefig(save_path, bbox_inches="tight", dpi=DPI)
