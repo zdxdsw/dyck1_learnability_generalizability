@@ -5,13 +5,15 @@
 # python standalone_inference.py --cuda 1 --task_suites 'S2_d_trulyleq[2-8]_B' > /dev/null 2>&1 &
 # wait
 
+python stress_test_inference.py --cuda 0 --task_suites 'S1_d_trulyleq[2-8]_2B' 'S1_d_trulyleq[2-8]_2C' 'S1_d_trulyleq[2-8]_2D' > /dev/null 2>&1 &
+python stress_test_inference.py --cuda 0 --task_suites 'S1_d_trulyleq[2-8]_2E' 'S1_d_trulyleq[2-8]_2F' 'S1_d_trulyleq[2-8]_2G' > /dev/null 2>&1 &
 python stress_test_inference.py --cuda 1 --task_suites 'S1_d_trulyleq[2-8]_1A' 'S1_d_trulyleq[2-8]_1B' 'S1_d_trulyleq[2-8]_1C' > /dev/null 2>&1 &
 python stress_test_inference.py --cuda 1 --task_suites 'S1_d_trulyleq[2-8]_1D' 'S1_d_trulyleq[2-8]_1E' 'S1_d_trulyleq[2-8]_1F' > /dev/null 2>&1 &
 python stress_test_inference.py --cuda 2 --task_suites 'S1_d_trulyleq[2-8]_1G' 'S1_d_trulyleq[2-8]_2a' 'S1_d_trulyleq[2-8]_2b' > /dev/null 2>&1 &
 python stress_test_inference.py --cuda 2 --task_suites 'S1_d_trulyleq[2-8]_2c' 'S1_d_trulyleq[2-8]_2d' 'S1_d_trulyleq[2-8]_2e' > /dev/null 2>&1 &
 python stress_test_inference.py --cuda 3 --task_suites 'S1_d_trulyleq[2-8]_2f' 'S1_d_trulyleq[2-8]_2g' 'S1_d_trulyleq[2-8]_1a' > /dev/null 2>&1 &
 python stress_test_inference.py --cuda 3 --task_suites 'S1_d_trulyleq[2-8]_1b' 'S1_d_trulyleq[2-8]_1c' 'S1_d_trulyleq[2-8]_1d' > /dev/null 2>&1 &
-python stress_test_inference.py --cuda 0 --task_suites 'S1_d_trulyleq[2-8]_1e' 'S1_d_trulyleq[2-8]_1f' 'S1_d_trulyleq[2-8]_1g' > /dev/null 2>&1 &
+python stress_test_inference.py --cuda 3 --task_suites 'S1_d_trulyleq[2-8]_1e' 'S1_d_trulyleq[2-8]_1f' 'S1_d_trulyleq[2-8]_1g' > /dev/null 2>&1 &
 wait
 
 # python run.py --port 29510 --cuda 2 --task S2_d_trulyleq3 > /dev/null 2>&1 &

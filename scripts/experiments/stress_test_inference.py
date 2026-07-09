@@ -7,9 +7,7 @@ OUTPUT_DIR/
       handle/
         config.json
         terminal.txt
-        training_metrics.txt   # written by this script
-        validation_metrics.txt   # written by this script
-        testing_metrics.txt   # written by this script
+        ...
         stress_test_positives_metrics.txt   # written by this script
         stress_test_negatives_metrics.txt   # written by this script
 
@@ -31,6 +29,7 @@ import numpy as np
 import torch
 from torch.utils.data import DataLoader
 from tqdm import tqdm
+from functools import partial
 
 from rnn_model import RNNModel
 from transformer_model import TransformerModel
@@ -48,15 +47,10 @@ CKPT_DIR = f"/data/yingshac/tmlr/ckpts_{MODEL.lower()}"
 DATASET_ROOT = "/data/yingshac/tmlr"
 
 EVAL_BATCH_SIZE = 2048
-SPLITS = ["stress_test_positives"] # ["stress_test_positives", "stress_test_negatives"]
+SPLITS = ["stress_test_negatives"] # ["stress_test_positives", "stress_test_negatives"]
 
 TASK_SUITES = [
     "S1_d_trulyleq[2-8]_2A",
-    "S1_d_trulyleq[2-8]_2B",
-    "S1_d_trulyleq[2-8]_2C",
-    "S1_d_trulyleq[2-8]_2D",
-    "S1_d_trulyleq[2-8]_2F",
-    "S1_d_trulyleq[2-8]_2G",
 ]
 
 TASKS = [
@@ -123,13 +117,23 @@ def parse_task_d(task):
     raise ValueError(f"Func parse_task_d(): Could not infer d from task name: {task}")
 
 
-def get_ordering_key_from_name(name):
-    m = re.search(r"L(?:[A-Za-z][A-Za-z]*)?(\d+)[^_]*_RoD(?:[A-Za-z][A-Za-z]*)?(\d+)", name)
-    if m: n1, n2 = map(int, m.groups())
-    else: n1, n2 = 0, 0
-    # print(name, n2, n1)
-    # raise NotImplementedError("")
-    return (n2, n1)  # sort by RoD first, then L
+def get_ordering_key_from_name(split_name, split):
+    if "positives" in split:
+        m = re.search(r"L(?:[A-Za-z][A-Za-z]*)?(\d+)[^_]*_RoD(?:[A-Za-z][A-Za-z]*)?(\d+)", split_name)
+        if m: n1, n2 = map(int, m.groups())
+        else: n1, n2 = 0, 0
+        return (n2, n1)  # sort by RoD first, then L
+    elif "negatives" in split:
+        x = split_name.split("_")
+        neg_type = ["one", "two", "three", "four", "five"].index(x[0])
+        variable = ["rfv", "pfv", "ratiop"].index(x[1])
+        if len(x) == 3:
+            side = ["in", "out"].index(x[2])
+        else:
+            side = 0
+        return (neg_type, variable, side)
+    else: raise ValueError(f"Func get_ordering_key_from_name(): Unknown split: {split}")
+
 
 
 def get_last_nonempty_line(lines):
@@ -430,10 +434,11 @@ def run_all(args):
                 os.environ["HF_HOME"] = config.hf_cache_dir
             
             for split in args.splits:
+                ordering_key = partial(get_ordering_key_from_name, split=split)
                 dataloaders = [split_to_dataloaders[split][name] 
                                for name in sorted(
                                    split_to_dataloaders[split].keys(), 
-                                   key=get_ordering_key_from_name
+                                   key=ordering_key
                                 )]
                 
                 metrics_path = os.path.join(handle_output_dir, f"{split.lower()}_metrics.txt")
