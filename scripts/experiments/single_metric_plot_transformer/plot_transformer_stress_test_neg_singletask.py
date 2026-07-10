@@ -2,14 +2,15 @@ from typing import Literal
 import os, json, argparse, re
 from collections import defaultdict
 import matplotlib.pyplot as plt
+from matplotlib.lines import Line2D
 import numpy as np
 
 MODEL = "Transformer"  # "RNN" or "Transformer"
 OUTPUT_ROOT = f"/home/yingshac/workspace/tmlr/scripts/experiments/"
 
-SUPERVISION = "S1" # ["S1", "S2", "S3", "S1a", "S2a", "S3a"]
+SUPERVISION = "S3" # ["S1", "S2", "S3", "S1a", "S2a", "S3a"]
 MODE = "cumu" # ["non-cumu", "cumu"] will map to ["d", "trulyleqd"]
-NUM_HIDDEN_LAYERS = 1
+NUM_HIDDEN_LAYERS = 2
 CAUSAL = True
 PE_CODE_RANGE = "A-G" # "G-M" # "O-U" #
 LOSS_OR_ACC = "acc"
@@ -24,9 +25,9 @@ NOISE_STD = 0.1 # for jittering x values for better visualization
 # ------------------------------------------------------------------
 
 def SPLITNAME_TO_XTICKLABEL(split_name: str) -> str:
+    x = split_name.split("_")
     
     if split_name.startswith("one_"):
-        x = split_name.split("_")
         return "Type1"
     
     elif split_name.startswith("two_"):
@@ -53,7 +54,7 @@ def SPLITNAME_TO_XTICKLABEL(split_name: str) -> str:
     else: raise ValueError(f"Unexpected split_name: {split_name}")
 
 SPLITNAME_TO_X = {
-    "one_rfv": 1,
+    "one_rfv": 0.5,
     "two_rfv_in": 2,
     "two_rfv_out": 3,
     "three_rfv_in": 4,
@@ -62,7 +63,7 @@ SPLITNAME_TO_X = {
     "four_rfv_out": 7,
     "five_rfv_in": 8,
     "five_rfv_out": 9,
-    "one_pfv": 1,
+    "one_pfv": 0.5,
     "two_pfv_in": 2,
     "two_pfv_out": 3,
     "three_pfv_in": 4,
@@ -71,9 +72,9 @@ SPLITNAME_TO_X = {
     "four_pfv_out": 7,
     "five_pfv_in": 8,
     "five_pfv_out": 9,
-    "one_ratiop": 1,
+    "one_ratiop": 1.5,
     "two_ratiop": 3,
-    "three_ratiop": 5,
+    "three_ratiop": 4.5,
     "four_ratiop_in": 6,
     "four_ratiop_out": 7,
     "five_ratiop_in": 8,
@@ -84,6 +85,12 @@ SHORT_VAR_TO_ROW_IDX = {
     "rfv": 0,
     "pfv": 1,
     "ratiop": 2,
+}
+
+SHORT_VAR_TO_DISPLAY = {
+    "rfv": "RFV",
+    "pfv": "PFV",
+    "ratiop": "RatioP",
 }
 
 PE_CODE_TO_NAME = {
@@ -196,65 +203,90 @@ def get_loss_or_acc(metrics, loss_or_acc):
 # ------------------------------------------------------------------
 
 def plot(plot_stats, args, save_path):
-    title = f"{args.supervision} {args.num_hidden_layers}-Layer, {'Causal' if args.causal else 'Non-causal'}"
-    # x_label = 
-    # y_label = 
+    title = f"{args.supervision} {args.num_hidden_layers}-Layer, {'Causal' if args.causal else 'Non-causal'}."+\
+            r"$\ \ \ \ $Stress-Testing Negatives by Type."
+
 
     fig, axes = plt.subplots(
-        3, 1,
-        figsize=(5, 10)
+        1, 3,
+        figsize=(12, 2.8),
+        constrained_layout=True,
     )
+
+    # fig.set_constrained_layout_pads(wspace=0.05)
+
     for pe_name in plot_stats:
-        X, Y, Y_err = [[], [], []], [[], [], []], [[], [], []] # three rows
-        
+        X, Y, Y_err, Xticklabels = [[], [], []], [[], [], []], [[], [], []], [[], [], []] # three cols
+        ax_titles = []
         for split_name in plot_stats[pe_name]:
             short_var = split_name.split("_")[1] # e.g. "rfv", "pfv", "ratiop"
             row_idx = SHORT_VAR_TO_ROW_IDX[short_var]
-            # randomly sample noise from a normal distribution with mean=0 and std=args.noise_std to add to the x values for better visualization
-            x = SPLITNAME_TO_X[split_name] + np.random.normal(0, args.noise_std)
+            x = SPLITNAME_TO_X[split_name]
             X[row_idx].append(x)
             Y[row_idx].append(plot_stats[pe_name][split_name]["mean"])
             Y_err[row_idx].append(plot_stats[pe_name][split_name]["std"])
-        
-        Y_err = np.asarray(Y_err)
-        lower = np.clip(Y - Y_err, 0, 1)
-        upper = np.clip(Y + Y_err, 0, 1)
-        yerr_clipped = np.vstack([
-            Y - lower,   # distance from marker to lower cap
-            upper - Y,   # distance from marker to upper cap
-        ])
-        # markers only: more opaque
-        ax.scatter(
-            X, Y,
-            marker='s',
-            facecolors='none',
-            edgecolors=PE_NAME_TO_COLOR[pe_name],
-            linewidths=1.2,
-            alpha=0.4,
-            label=pe_name,
-            s=50,
-        )
-        ax.errorbar(
-            X, Y,
-            yerr=yerr_clipped,       # vertical error bar size
-            fmt='none',              # circle marker
-            ecolor=PE_NAME_TO_COLOR[pe_name], # error bar color
-            capsize=4,               # cap width
-            capthick=1.2,
-            elinewidth=1.2,
-            linestyle='none',        # no connecting line
-            alpha=0.2,
-        )
-    ax.set_title(title, fontsize=12)
-    ax.set_xticks(X)
-    ax.set_xticklabels([SPLITNAME_TO_XTICKLABEL(split_name) for split_name in SPLITNAME_TO_X], rotation=30, ha='right', fontsize=10)
-    ax.spines['top'].set_visible(False)
-    ax.spines['right'].set_visible(False)
+            Xticklabels[row_idx].append(SPLITNAME_TO_XTICKLABEL(split_name))
+            ax_titles.append(f"In/out according to {SHORT_VAR_TO_DISPLAY[short_var]}")
+        for x, y, yerr, ax in zip(X, Y, Y_err, axes):
+            # add noise to x via np.random.normal(0, args.noise_std)
+            x = np.asarray(x, dtype=np.float64)
+            x += np.random.normal(0, args.noise_std, size=x.shape)
+            y = np.asarray(y)
+            yerr = np.asarray(yerr)
+
+            # clip y values to [0, 1] for better visualization
+            lower = np.clip(y - yerr, 0, 1)
+            upper = np.clip(y + yerr, 0, 1)
+            yerr_clipped = np.vstack([
+                y - lower,   # distance from marker to lower cap
+                upper - y,   # distance from marker to upper cap
+            ])
+            # markers only: more opaque
+            ax.scatter(
+                x, y,
+                facecolors='none', edgecolors=PE_NAME_TO_COLOR[pe_name],
+                marker='s', linewidths=1.2, s=50, alpha=0.5,
+                label=pe_name + r"$\qquad$" if pe_name == "none" else pe_name,
+            )
+            ax.errorbar(
+                x, y,
+                yerr=yerr_clipped,       # vertical error bar size
+                fmt='none', ecolor=PE_NAME_TO_COLOR[pe_name], # error bar color
+                capsize=4, capthick=1.2,
+                elinewidth=1.2, linestyle='none', alpha=0.25
+            )
+
+        if pe_name == "none":
+            for col_idx, ax, x, xticklabels, ax_title in zip(range(len(axes)), axes, X, Xticklabels, ax_titles):
+                ax.set_title(ax_title, fontsize=12, y=1.07)
+                # xlim: min(x)-1, max(x)+1
+                ax.set_xlim(min(x)-1, max(x)+1)
+                ax.set_xticks(x)
+                ax.set_xticklabels(xticklabels, rotation=30, ha='right', fontsize=10)
+                if col_idx == 0: ax.set_ylabel("n_acc", labelpad=10, fontsize=12, fontweight="semibold")
+                ax.spines['top'].set_visible(False)
+                ax.spines['right'].set_visible(False)
+                # if col_idx == 2: 
+                #     ax.legend(
+                #         loc='lower left', framealpha=0.4, ncols=4,
+                #         fontsize=10, title="Positional Encoding"
+                #     )
+
+    fig.suptitle(title, fontsize=12, fontweight="semibold", y=1.1)
+
+    handles, labels = axes.flat[0].get_legend_handles_labels()
+    title_handle = Line2D([], [], linestyle="none", marker=None)
+    fig.legend(
+        [title_handle] + handles, 
+        ["Positional Encoding: "] + labels, # "fake" legend title on the left
+        ncol=8, fontsize=11,
+        loc="lower center", bbox_to_anchor=(0.5, -0.15),
+        columnspacing=0.8, handletextpad=0.05,
+    )
     fig.savefig(save_path, bbox_inches="tight", dpi=args.dpi)
-    plt.close(fig)
 
     # save plot_stats to the same dir
-    save_stats_path = save_path.replace(".png", ".json")
+    save_stats_path = save_path.replace(".pdf", ".json")
     with open(save_stats_path, "w") as f: json.dump(plot_stats, f, indent=4)
     
     Print("\n" + "="*19 + "Saving ..." + "="*19)
@@ -349,7 +381,7 @@ def run_all(args, task_suites = None):
     plot_stats = dict(sorted(plot_stats.items(), key=lambda item: PE_NAME_TO_PLOT_ORDER[item[0]]))
     
     ### 5. Plotting
-    figure_name = f"{task_suite_singletask}_{args.loss_or_acc}.png"
+    figure_name = f"{task_suite_singletask}_{args.loss_or_acc}.pdf"
     save_dir = os.path.join(".", f"{args.split[:-6]}_singletask", task_suite_full)
     os.makedirs(save_dir, exist_ok=True)
     save_path = os.path.join(save_dir, figure_name)
@@ -408,7 +440,7 @@ def parse_args():
     parser.add_argument(
         "--dpi",
         type=int,
-        default=200,
+        default=300,
         help="DPI for the saved plots"
     )
     parser.add_argument(

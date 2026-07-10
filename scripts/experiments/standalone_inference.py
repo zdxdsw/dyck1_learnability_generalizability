@@ -511,14 +511,6 @@ def parse_args():
         default=CKPT_DIR,
         help="Root checkpoint directory containing task_suite/task/handle/*.pt.",
     )
-    # parser.add_argument(
-    #     "--dataset_root",
-    #     type=str,
-    #     default=DATASET_ROOT,
-    #     help="Root directory containing train/*.json, validation/*.json and test/*.json.",
-    # )
-    # parser.add_argument("--min_test_l", type=int, default=MIN_TEST_L)
-    # parser.add_argument("--max_test_l", type=int, default=MAX_TEST_L)
     
     # nargs="*" means that this argument can take zero or more values
     #           argparse will collect them into a Python list.

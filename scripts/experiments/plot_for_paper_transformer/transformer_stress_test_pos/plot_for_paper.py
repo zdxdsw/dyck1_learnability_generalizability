@@ -30,7 +30,7 @@ SUBPLOT_TITLES = [
 
 PLOT_STATS_COLORBAR_HELPERS = [ # min_alpha, max_alpha,
     (0.1, 1.0),
-    (0.25, 0.8),
+    (0.15, 0.8),
     (0.15, 1.0),
     (0.15, 1.0),
 ]
@@ -192,6 +192,6 @@ for ax,path, pe_name, colorbar_helper, ax_title in zip(
 
 
 save_path = os.path.join(os.path.basename(os.getcwd()) + ".pdf") # figure name = basename of cwd
-fig.suptitle(r"Supervision: SL1; Eval on: SL1.$\ \ \ \ $Acc on stress testing sets of positives", fontsize=13, fontweight="bold", y=1.12)
+fig.suptitle(r"Supervision: SL1; Eval on: SL1.$\ \ \ $Cumu. $d^{tr}_{\max}=8\ \ \ \ $Stress-Testing Positives (p_acc)", fontsize=13, fontweight="bold", y=1.12)
 # Stress Test: Positives Bucketed by 'Longest Range-of-Dependency' (LRoD) and by 'Length'
 fig.savefig(save_path, bbox_inches="tight", dpi=DPI)

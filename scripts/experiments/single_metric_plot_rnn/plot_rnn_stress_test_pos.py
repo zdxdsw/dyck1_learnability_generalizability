@@ -1,0 +1,394 @@
+from typing import Literal
+import os, json, argparse, re
+from collections import defaultdict
+import matplotlib.pyplot as plt
+import numpy as np
+
+MODEL = "RNN"
+OUTPUT_ROOT = f"/home/yingshac/workspace/tmlr/scripts/experiments/"
+
+SUPERVISION = "S1" # ["S1", "S2", "S3", "S1a", "S2a", "S3a"]
+MODE = "cumu" # ["non-cumu", "cumu"] will map to ["d", "trulyleqd"]
+NUM_HIDDEN_LAYERS = 1
+LEGEND_CODE_RANGE =  "ABCDEF"
+LOSS_OR_ACC = "acc"
+
+LOGFILE = "stress_test_positives_metrics.txt"
+SPLIT = "stress_test_positives"
+
+# ------------------------------------------------------------------
+# Useful mappings for and plotting
+# ------------------------------------------------------------------
+ROW_WIDTH = 10
+ROW_HEIGHT = 3.2
+
+SPLITNAME_TO_SUBPLOTNAME = {
+    "Lleq40_RoDleq40": r"$L\leq$40, RoD$\leq$40",
+    "L42to80_RoDleq40": r"$L\in[42,80]$, RoD$\leq$40",
+    "L82to120_RoDleq40": r"$L\in[82,120]$, RoD$\leq$40",
+    "L42to80_RoD41to80": r"$L\in[42,80]$, RoD$\in(40,80]$",
+    "L82to120_RoD41to80": r"$L\in[82,120]$, RoD$\in(40,80]$",
+    "L82to120_RoD81to120": r"$L\in[82,120]$, RoD$\in(80,120]$",
+}
+
+SPLITNAME_TO_X = {
+    "Lleq40_RoDleq40": 1,
+    "L42to80_RoDleq40": 2,
+    "L82to120_RoDleq40": 3,
+    "L42to80_RoD41to80": 4,
+    "L82to120_RoD41to80": 5,
+    "L82to120_RoD81to120": 6,
+}
+
+SPLITNAME_TO_SUBPLOT_COORD = {
+    "Lleq40_RoDleq40": (0, 0),
+    "L42to80_RoDleq40": (0, 1),
+    "L82to120_RoDleq40": (0, 2),
+    "L42to80_RoD41to80": (1, 1),
+    "L82to120_RoD41to80": (1, 2),
+    "L82to120_RoD81to120": (2, 2),
+}
+
+CODE_TO_LEGEND_NAME = {
+	"A": "hs=64",
+	"B": "hs=32",
+	"C": "hs=16",
+	"D": "hs=8",
+	"E": "hs=6",
+	"F": "hs=4",
+}
+
+LEGEND_NAME_TO_COLOR = {
+	"hs=64": "firebrick",
+	"hs=32": "blue",
+	"hs=16": "darkorchid",
+	"hs=8": "deepskyblue",
+	"hs=6": "goldenrod",
+    "hs=4": "hotpink",
+}
+
+LEGEND_NAME_TO_PLOT_ORDER = {
+	"hs=64": 0,
+	"hs=32": 1,
+	"hs=16": 2,
+	"hs=8": 3,
+	"hs=6": 4,
+	"hs=4": 5,
+}
+
+def Print(s=""): print(s, flush=True)
+
+
+# ------------------------------------------------------------------
+# 1. Get Task Suites
+# ------------------------------------------------------------------
+
+def get_task_suites(output_dir, supervision, depth_mode, num_hidden_layers, legend_code_range):
+    
+    # since this is a regex, use a raw f-string for readability:
+    regex_pattern = (
+        rf"{supervision}_d_{depth_mode[:-1]}"
+        rf"\[\d+-\d+\]_"
+        rf"[{legend_code_range}]"
+    )
+
+    task_suites = []
+    for task_suite in os.listdir(output_dir):
+        if re.match(regex_pattern, task_suite):
+            task_suites.append(task_suite)
+    
+    Print("="*14 + " Found task_suites: " + "="*14 + f"\n{task_suites}\n")
+    
+    return task_suites
+
+# ------------------------------------------------------------------
+# 2. Infer range of train_d -> d_min, d_max
+# ------------------------------------------------------------------
+# infer from the first task_suite (inside brackets), which should be the same for all 7 task_suites. 
+
+def infer_train_d_range(task_suite):
+    match = re.search(r"\[(\d+)-(\d+)\]", task_suite)
+    if match:
+        d_min = int(match.group(1))
+        d_max = int(match.group(2))
+        Print("="*8 + f" Inferred train_d range: [{d_min}, {d_max}] " + "="*8)
+        return d_min, d_max
+    else:
+        raise ValueError(f"Cannot infer train_d range from task_suite: {task_suite}")
+
+        
+# ------------------------------------------------------------------
+# 3. Get Plot Stats
+# ------------------------------------------------------------------
+
+def read_logfile(output_dir, task_suite, task, handle, logfile):
+    if isinstance(logfile, list):
+        log_path = None
+        for f in logfile:
+            log_path = os.path.join(output_dir, task_suite, task, handle, f)
+            if os.path.exists(log_path):
+                break
+    else:
+        log_path = os.path.join(output_dir, task_suite, task, handle, logfile)
+    
+    if log_path is None or (not os.path.exists(log_path)):
+        Print(f"Func read_logfile(): [skip] Missing logfile: {task_suite}/{task}/{handle}/{logfile}")
+        return None
+    
+    with open(log_path, "r") as f: lines = f.readlines()
+    return lines
+
+
+def locate_best_epoch_lineidx(lines, split):
+    for i in range(len(lines)):
+        line = lines[i]
+        if f"Metrics on {split} Sets:" in line:
+            return i
+    Print(f"Func locate_best_epoch_lineidx(): [skip] Cannot find best epoch line for split {split}")
+    return None
+
+
+def get_loss_or_acc(metrics, loss_or_acc):
+    # metrics: a dict recovered from log
+    # e.g. {'num_samples': 10000, 'FP': 0.0, 'TP': 0.88, 'FN': 0.12, 'TN': 0.0, 'loss': 0.41, 'acc': 0.88}
+    return metrics[loss_or_acc]
+
+# ------------------------------------------------------------------
+# 4. Plotting
+# ------------------------------------------------------------------
+
+def plot(plot_stats, args, d_min, d_max, save_path):
+    title = f"{args.supervision} {args.num_hidden_layers}-Layer."
+    x_label = f"train_d ({args.mode})"
+
+    # plot one without error band and another with error band side by side
+    num_rows, num_cols, = 3, 3
+    fig, axes = plt.subplots(
+        num_rows, num_cols, 
+        figsize=(ROW_WIDTH, num_rows*ROW_HEIGHT),
+        constrained_layout=True
+    )
+    for row_idx in range(num_rows):
+        for col_idx in range(num_cols):
+            if (row_idx, col_idx) not in SPLITNAME_TO_SUBPLOT_COORD.values():
+                axes[row_idx, col_idx].axis('off')
+
+    for legend_name in plot_stats:
+        for split_name in plot_stats[legend_name]:
+            row_idx, col_idx = SPLITNAME_TO_SUBPLOT_COORD[split_name]
+            ax = axes[row_idx, col_idx]
+            x = []
+            y = []
+            y_err = []
+            for train_d in sorted(plot_stats[legend_name][split_name].keys()):
+                stats = plot_stats[legend_name][split_name][train_d]
+                x.append(train_d)
+                y.append(stats["mean"])
+                y_err.append(stats["std"])
+            ax.plot(x, y, label=legend_name, color=LEGEND_NAME_TO_COLOR[legend_name], marker='.', alpha=0.5)
+            upper = np.minimum(np.array(y)+np.array(y_err), 1.0)
+            lower = np.maximum(np.array(y)-np.array(y_err), 0.0)
+            ax.fill_between(x, lower, upper, color=LEGEND_NAME_TO_COLOR[legend_name], alpha=0.1)
+
+            ax.set_xlabel(x_label, fontsize=12)
+            ax.set_xticks(list(range(d_min, d_max+1)))
+            ax.set_ylim(-0.05, 1.05)
+
+            ax.set_title(SPLITNAME_TO_SUBPLOTNAME[split_name], fontsize=12)
+            ax.spines['top'].set_visible(False)
+            ax.spines['right'].set_visible(False)
+            if col_idx == row_idx == 0: 
+                ax.legend(
+                    loc="lower right", framealpha=0.6, 
+                    title="Positional Encoding"
+                )
+        
+    fig.suptitle(title, fontsize=12, fontweight='semibold', y=1.03)
+    fig.set_constrained_layout_pads(hspace=0.1)
+    fig.canvas.draw()
+    fig.savefig(save_path, bbox_inches="tight", dpi=args.dpi)
+    plt.close(fig)
+
+    # save plot_stats to the same dir
+    save_stats_path = save_path.replace(".png", ".json")
+    with open(save_stats_path, "w") as f: json.dump(plot_stats, f, indent=4)
+    
+    Print("\n" + "="*19 + "Saving ..." + "="*19)
+    Print(f"Plot destination: {save_path}\nStats destination: {save_stats_path}\n")
+
+
+# Example of key contents in log files
+"""
+--------------------------------------------------
+Epoch 9 Metrics on stress_test_positives Sets:
+
+stress_test_positives set: Lleq40_RoDleq40
+{'num_samples': 10000, 'FP': 0.0, 'TP': 1.0, 'FN': 0.0, 'TN': 0.0, 'loss': 0.0, 'acc': 1.0}
+stress_test_positives set: L42to80_RoDleq40
+{'num_samples': 10000, 'FP': 0.0, 'TP': 1.0, 'FN': 0.0, 'TN': 0.0, 'loss': 0.0, 'acc': 1.0}
+...
+...
+
+--------------------------------------------------
+"""
+
+def run_all(args, task_suites = None):
+    ### 1. Get Task Suites (if task_suites not provided)
+    if task_suites is None:
+        task_suites = get_task_suites(
+            args.output_dir, 
+            args.supervision, 
+            args.depth_mode, 
+            args.num_hidden_layers, 
+            args.legend_code_range.upper()
+        )
+    
+    legend_codes = sorted([task_suite[-1] for task_suite in task_suites])
+    task_suite_full = task_suites[0][:-1] + "".join(legend_codes)
+
+    ### 2. Infer range of train_d -> d_min, d_max
+    d_min, d_max = infer_train_d_range(task_suites[0])
+
+    ### 3. Get Plot Stats
+    logfile, split = args.logfile, args.split
+    plot_stats = defaultdict(lambda: defaultdict(dict)) # plot_stats[pe_name][split_name] = {"mean": mean, "std": std}
+    
+    for task_suite in task_suites:
+        legend_code = task_suite[-1]
+        legend_name = CODE_TO_LEGEND_NAME[legend_code.upper()]
+        for task in os.listdir(os.path.join(args.output_dir, task_suite)):
+            train_d = int(task[-1])
+            for handle in os.listdir(os.path.join(args.output_dir, task_suite, task)):
+
+                lines = read_logfile(args.output_dir, task_suite, task, handle, logfile)
+                if lines is None: continue
+
+                best_epoch_lineidx = locate_best_epoch_lineidx(lines, split)
+                if best_epoch_lineidx is None: continue
+                if lines[best_epoch_lineidx+1].strip() == "": 
+                    # some <split>_metrics.txt files have an extra empty line after the keyline.
+                    best_epoch_lineidx += 1
+
+                for i in range(best_epoch_lineidx+1, len(lines), 2):
+                    line1 = lines[i].strip()
+                    if line1 == "": break
+                    if not line1.startswith(f"{split} set: "):
+                        Print(f"Func plot(): [skip] Unexpected line format (expecting {split} set: d_x): {line1}")
+                        continue
+                    split_name = line1.split(': ')[-1] # extract split_name from line1
+                    if train_d not in plot_stats[legend_name][split_name]:
+                        plot_stats[legend_name][split_name].setdefault(train_d, {})
+                    
+                    line2 = lines[i+1].strip()
+                    try:
+                        metrics = eval(line2)
+                        y = get_loss_or_acc(metrics, args.loss_or_acc)
+                        if y == -1: continue # skip when p_acc/n_acc with no positive/negative samples)
+                        plot_stats[legend_name][split_name][train_d].setdefault("values", []).append(y)
+                    except:
+                        Print(f"Func plot(): [skip] Cannot parse metrics as dict from line {i+1}: {line2}")
+                        continue
+                
+            
+    # compute mean and std for each (legend_name, split_name)
+    for legend_name in plot_stats:
+        for split_name in plot_stats[legend_name]:
+            for train_d in plot_stats[legend_name][split_name]:
+                values = plot_stats[legend_name][split_name][train_d].get("values", [])
+                if len(values) == 0:
+                    Print(f"Func plot(): [skip] No values to compute mean and std for {legend_name} split_name={split_name} train_d={train_d}")
+                    continue
+                mean = sum(values) / len(values)
+                std = (sum((v - mean) ** 2 for v in values) / len(values)) ** 0.5
+                plot_stats[legend_name][split_name][train_d]["mean"] = mean
+                plot_stats[legend_name][split_name][train_d]["std"] = std
+
+    # sort plot_stats.keys() according to LEGEND_NAME_TO_PLOT_ORDER
+    # sort plot_stats[legend_name] according to SPLITNAME_TO_X
+    # sort plot_stats[legend_name][split_name] according to train_d
+    plot_stats = dict(sorted(plot_stats.items(), key=lambda x: LEGEND_NAME_TO_PLOT_ORDER[x[0]]))
+    for legend_name in plot_stats:
+        plot_stats[legend_name] = dict(sorted(plot_stats[legend_name].items(), key=lambda x: SPLITNAME_TO_X[x[0]]))
+        for split_name in plot_stats[legend_name]:
+            plot_stats[legend_name][split_name] = dict(sorted(plot_stats[legend_name][split_name].items(), key=lambda x: x[0]))
+
+    ### 5. Plotting
+    figure_name = f"{task_suite_full}_{args.loss_or_acc}.png"
+    save_dir = os.path.join(".", f"{args.split[:-6]}")
+    os.makedirs(save_dir, exist_ok=True)
+    save_path = os.path.join(save_dir, figure_name)
+    plot(plot_stats, args, d_min, d_max,save_path)
+
+
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--model", 
+        type=str, 
+        default=MODEL, 
+        help="Model type: RNN or Transformer"
+    )
+    parser.add_argument(
+        "--supervision", 
+        type=str, 
+        default=SUPERVISION, 
+        help="Supervision type: S1, S2, S3, S1a, S2a, S3a"
+    )
+    parser.add_argument(
+        "--mode", 
+        type=str, 
+        default=MODE, 
+        help="Mode: cumu or non-cumu"
+    )
+    parser.add_argument(
+        "--loss_or_acc",
+        type=str,
+        default=LOSS_OR_ACC,
+        help="Whether to plot loss or accuracy: one of ['loss', 'acc', 'p_acc', 'n_acc']"
+    )
+    parser.add_argument(
+        "--num_hidden_layers",
+        type=int,
+        default=NUM_HIDDEN_LAYERS,
+        help="Number of hidden layers in the model"
+    )
+    parser.add_argument(
+        "--legend_code_range",
+        type=str,
+        default=LEGEND_CODE_RANGE,
+        help="Range of legend codes to include: e.g. 'ABCDEF'."
+    )
+    parser.add_argument(
+        "--dpi",
+        type=int,
+        default=200,
+        help="DPI for the saved plots"
+    )
+    parser.add_argument(
+        "--logfile",
+        type=str,
+        default=LOGFILE,
+        help="Name of the logfile to read metrics from"
+    )
+    parser.add_argument(
+        "--split",
+        type=str,
+        default=SPLIT,
+        help="Name of the split to read metrics for"
+    )
+    return parser.parse_args()
+
+
+if __name__ == "__main__":
+    args = parse_args()
+    args.output_dir = os.path.join(OUTPUT_ROOT, f"output_{args.model.lower()}")
+    args.depth_mode = "d" if args.mode == "non-cumu" else "trulyleqd"
+
+    task_suites = get_task_suites(
+        args.output_dir, 
+        args.supervision, 
+        args.depth_mode, 
+        args.num_hidden_layers, 
+        args.legend_code_range.upper()
+    )
+    run_all(args, task_suites)

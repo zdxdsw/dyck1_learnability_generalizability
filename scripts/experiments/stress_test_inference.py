@@ -47,20 +47,21 @@ CKPT_DIR = f"/data/yingshac/tmlr/ckpts_{MODEL.lower()}"
 DATASET_ROOT = "/data/yingshac/tmlr"
 
 EVAL_BATCH_SIZE = 2048
-SPLITS = ["stress_test_negatives"] # ["stress_test_positives", "stress_test_negatives"]
+SPLITS = ["stress_test_negatives", "stress_test_positives"] # ["stress_test_positives", "stress_test_negatives"]
 
 TASK_SUITES = [
-    "S1_d_trulyleq[2-8]_2A",
+    # "S3_d_trulyleq[2-8]_2A",
+    # "S3_d_trulyleq[2-8]_2B",
+    # "S3_d_trulyleq[2-8]_2C",
+    "S3_d_trulyleq[2-8]_2D",
+    "S3_d_trulyleq[2-8]_2E",
+    # "S3_d_trulyleq[2-8]_2F",
+    # "S3_d_trulyleq[2-8]_2G",
 ]
 
 TASKS = [
-    "trulyleq2",
-    "trulyleq3",
-    "trulyleq4",
-    "trulyleq5",
-    "trulyleq6",
-    "trulyleq7",
     "trulyleq8",
+    "d_8",
 ]
 
 

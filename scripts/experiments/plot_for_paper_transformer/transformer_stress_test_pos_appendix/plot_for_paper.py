@@ -115,8 +115,20 @@ def plot_for_one_ax(ax, row_idx, col_idx, data, colorname, min_alpha, max_alpha,
     base = np.array(to_rgba(colorname))
     colors = [(*base[:3], min_alpha), (*base[:3], max_alpha)]
     cmap = LinearSegmentedColormap.from_list(f"{colorname}_alpha", colors)
-
+    
     # You can set vmin/vmax manually if you want a fixed scale across plots
+    # normalization tricks
+    print(f"Before normalization: {data}")
+    x1 = data[0][0]
+    cap = max([data[i][j] for i in range(heatmap_height) for j in range(1, heatmap_width) if i <= j]) # max entries other than the first cell
+    gap = x1 - cap
+    print(x1, cap, gap)
+    if gap > 0.5: data[0][0] -= gap/2 # reduce the first cell to make the color scale more visible
+
+    bottom = np.nanmin(data) # nanmin means it will ignore NaN values when computing the minimum
+    if bottom > 0.95: data[-1][0] = bottom*0.99
+    elif bottom > 0.7: data[-1][0] = bottom*0.95
+
     norm = Normalize(vmin=np.nanmin(data), vmax=np.nanmax(data))
     im = ax.imshow(data, cmap=cmap, norm=norm)
 
@@ -181,6 +193,7 @@ for col_idx, path in enumerate(PLOT_STATS_PATHS):
         min_alpha, max_alpha = PE_NAME_COLORBAR_HELPERS[pe_name]
         plot_stats = J[pe_name]
 
+        # initialize 3x3 heatmap filled with nan
         data = np.full((3, 3), np.nan)
         for split_name in plot_stats:
             i, j = SPLITNAME_TO_SUBPLOT_COORD[split_name]
@@ -222,6 +235,6 @@ for ax, title in zip(axes[:, 0], ROW_TITLES):
 
 # ------------------------------------------------------------------------------------------
 save_path = os.path.join(os.path.basename(os.getcwd()) + ".pdf") # figure name = basename of cwd
-fig.suptitle(r"Supervision: SL1; Eval on: SL1.$\ \ \ \ $Acc on stress testing sets of positives", fontsize=14, fontweight="bold", y=1.015)
+fig.suptitle(r"Supervision: SL1; Eval on: SL1.$\ \ \ $Cumu. $d^{tr}_{\max}=8\ \ \ \ $Stress-Testing Positives (p_acc)", fontsize=14, fontweight="bold", y=1.015)
 # Stress Test: Positives Bucketed by 'Longest Range-of-Dependency' (LRoD) and by 'Length'
 fig.savefig(save_path, bbox_inches="tight", dpi=DPI)
