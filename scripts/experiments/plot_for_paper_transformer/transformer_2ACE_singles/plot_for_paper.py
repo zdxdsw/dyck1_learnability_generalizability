@@ -30,8 +30,8 @@ LEGEND_PREFIX = [
 MODEL = "transformer"
 OUTPUT_ROOT = f"/home/yingshac/workspace/tmlr/scripts/experiments/output_{MODEL}/"
 YLIM = (0.41, 1.0)
-ROW_WIDTH = 10
-ROW_HEIGHT = 3
+ROW_WIDTH = 9.5
+ROW_HEIGHT = 2.8
 DPI = 300
 
 # Constants --------------------------------------------------------------------------------
@@ -148,10 +148,11 @@ def plot_one_ax(val_d_to_acc, ax, row_idx, col_idx):
         ax.scatter(d, np.mean(val_d_to_acc[d][d]), color=colors[d-DMIN], s=20, zorder=5) # draw a dot on val_d = train_d
     
     ax.tick_params(axis="both", labelsize=10)
-    if row_idx == num_rows - 1: ax.set_xlabel(r"$d^{test}$", fontsize=12, labelpad=10)
+    if row_idx == num_rows - 1: 
+        ax.set_xlabel(r"$d^{test}$", fontsize=13, labelpad=10)
 
     y_label = r"acc at $d^{test}$"
-    if col_idx == 0: ax.set_ylabel(y_label, fontsize=12, fontweight="semibold", labelpad=6)
+    if col_idx == 0: ax.set_ylabel(y_label, fontsize=13, fontweight="semibold", labelpad=6)
     
     ax.set_ylim(YLIM[0]-0.05, YLIM[1]+0.05)
     #ax.set_xticks(list(range(1, 17)))
@@ -195,6 +196,6 @@ for ax, title in zip(axes, COL_TITLES):
         # fontweight="semibold",
     )
 
-fig.suptitle(r"Supervision: S1; Eval on: S1.$\ \ \ $2-Layer; Causal.", fontsize=12, fontweight="bold", y=1.08)
+fig.suptitle(r"Supervision: S1; Eval on: S1.$\ \ \ $2-Layer; Causal.", fontsize=13, fontweight="bold", y=1.08)
 
 fig.savefig(save_path, bbox_inches="tight", dpi=DPI)
