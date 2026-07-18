@@ -220,9 +220,9 @@ def plot_one_ax(test_l_to_metric, ax, row_idx, col_idx, smooth=False):
         ax.fill_between(x, lower, upper, color=colors[d-DMIN], alpha=0.1)
     
     ax.tick_params(axis="both", labelsize=10)
-    if row_idx == num_rows - 1: ax.set_xlabel(r"$\ell^{test}$", fontsize=12, labelpad=10)
+    if row_idx == num_rows - 1: ax.set_xlabel(r"$L^{test}$", fontsize=12, labelpad=10)
 
-    y_label = r"acc at $\ell^{test}$"
+    y_label = r"acc at $L^{test}$"
     if col_idx == 0: ax.set_ylabel(y_label, fontsize=12, labelpad=6)
     
     # x ticks: TEST_L_RANGE, step = 20 + [TEST_L_RANGE[1]-1] if (TEST_L_RANGE[1]-1) % 20 != TEST_L_RANGE[0] % 20
@@ -284,6 +284,6 @@ for ax, title in zip(axes[:, 0], ROW_TITLEs):
         rotation=90,
     )
 
-fig.suptitle(r"Length Generalization.$\ \ \ $Supervision: SL1; Eval on: SL1.$\ \ \ $2-Layer; Causal.", fontsize=12, fontweight="bold", y=1.05)
+fig.suptitle(r"Length Generalization.$\ \ \ $Supervision: SL1; Eval on: SL1.$\ \ \ $2-Layer; Causal.", fontsize=13, fontweight="bold", y=1.07)
 
 fig.savefig(save_path, bbox_inches="tight", dpi=DPI)

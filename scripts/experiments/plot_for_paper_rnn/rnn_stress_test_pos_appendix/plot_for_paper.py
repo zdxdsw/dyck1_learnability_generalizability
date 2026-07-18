@@ -46,8 +46,8 @@ ROW_TITLES = list(LEGEND_NAME_COLORBAR_HELPERS.keys())
 HATCH_FACECOLOR = tuple([0.95]*3)
 HATCH_EDGECOLOR = tuple([0.75]*3)
 
-ROW_WIDTH = 8.5
-ROW_HEIGHT = 2.8
+ROW_WIDTH = 8.2
+ROW_HEIGHT = 2.6
 DPI = 300
 
 # Constants --------------------------------------------------------------------------------
@@ -59,9 +59,9 @@ X_TICKLABELS = [
 ]
 
 Y_TICKLABELS = [
-    r"$[2, 40]$",
-    r"$(40,80]$",
-    r"$(80,120]$"
+    r"$[1, 40]$",
+    r"$(40,80)$",
+    r"$(80,120)$"
 ]
 
 SPLITNAME_TO_SUBPLOT_COORD = {
@@ -135,27 +135,31 @@ def plot_for_one_ax(ax, row_idx, col_idx, data, colorname, min_alpha, max_alpha,
                     fontsize=11, color="black",
                 )
 
-    # Ticks / labels
-    ax.xaxis.tick_top()
-    ax.set_xticks(np.arange(heatmap_width))
-    ax.set_xticklabels(x_ticklabels)
-    if row_idx == 0:
-        ax.set_xlabel(r"$\ell$ Bucket", fontsize=13, labelpad=12)
-        ax.xaxis.set_label_position("top")
-
-    ax.set_yticks(np.arange(heatmap_height))
-    ax.set_yticklabels(y_ticklabels, rotation=90, va="center")
-    if col_idx == 0:
-        ax.set_ylabel(r"LRoD Bucket", fontsize=13, labelpad=10)
-    
     # Cell boundaries
     ax.set_xticks(np.arange(-0.5, heatmap_width, 1), minor=True)
     ax.set_yticks(np.arange(-0.5, heatmap_height, 1), minor=True)
     ax.grid(which="minor", color="white", linewidth=1.5)
     ax.tick_params(which="minor", bottom=False, left=False)
 
-    # ax.set_title(ax_title, y=-0.2, x=0.43, fontsize=12, fontweight="semibold")
+    # Ticks / labels
+    if row_idx == 0:
+        ax.xaxis.tick_top()
+        ax.set_xticks(np.arange(heatmap_width))
+        ax.set_xticklabels(x_ticklabels)
+        ax.set_xlabel(r"$L$ Bucket", fontsize=13, labelpad=12)
+        ax.xaxis.set_label_position("top")
+    else: # no xticks no xticklabels
+        ax.set_xticks([])
+        ax.set_xticklabels([])
 
+    if col_idx == 0:
+        ax.set_yticks(np.arange(heatmap_height))
+        ax.set_yticklabels(y_ticklabels, rotation=90, va="center")
+        ax.set_ylabel(r"LRoD Bucket", fontsize=13, labelpad=10)
+    else: # no yticks no yticklabels
+        ax.set_yticks([])
+        ax.set_yticklabels([])
+    
 
 # ------------------------------------------------------------------------------------------
 num_rows, num_cols = 6, 3
@@ -206,7 +210,7 @@ for ax, title in zip(axes[0], COL_TITLES):
 
 for ax, title in zip(axes[:, 0], ROW_TITLES):
     ax.text(
-        -0.38, 0.5,
+        -0.35, 0.5,
         title.capitalize(),
         transform=ax.transAxes,
         ha="center",
@@ -219,6 +223,6 @@ for ax, title in zip(axes[:, 0], ROW_TITLES):
 
 # ------------------------------------------------------------------------------------------
 save_path = os.path.join(os.path.basename(os.getcwd()) + ".pdf") # figure name = basename of cwd
-fig.suptitle(r"Eval on: SL1. Non-Cumu. $d^{tr}=8\ \ \ \ $Stress-Testing Positives (p_acc)", fontsize=14, fontweight="bold", y=1.015)
+fig.suptitle(r"Eval on: SL1. Non-Cumu. $d^{tr}=8\ \ \ \ $Stress-Testing Positives (p_acc)", fontsize=14, fontweight="bold", y=1.025)
 # Stress Test: Positives Bucketed by 'Longest Range-of-Dependency' (LRoD) and by 'Length'
 fig.savefig(save_path, bbox_inches="tight", dpi=DPI)

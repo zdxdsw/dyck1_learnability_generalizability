@@ -16,18 +16,54 @@ PLOT_STATS = [
         "pg(acc)/S1_d_trulyleq[2-8]_2abcdefg_pg",
         "pg(acc)/S1_d_trulyleq[2-8]_2opqrstu_pg",
     ], 
+    [
+        "pg(p_acc)/S1_d_trulyleq[2-8]_2ABCDEFG_pg",
+        "pg(p_acc)/S1_d_trulyleq[2-8]_2OPQRSTU_pg",
+        "pg(p_acc)/S1_d_trulyleq[2-8]_2abcdefg_pg",
+        "pg(p_acc)/S1_d_trulyleq[2-8]_2opqrstu_pg",
+    ],
+    [
+        "pg(n_acc)/S1_d_trulyleq[2-8]_2ABCDEFG_pg",
+        "pg(n_acc)/S1_d_trulyleq[2-8]_2OPQRSTU_pg",
+        "pg(n_acc)/S1_d_trulyleq[2-8]_2abcdefg_pg",
+        "pg(n_acc)/S1_d_trulyleq[2-8]_2opqrstu_pg",
+    ],
     [ # third row
         "dg_larger(acc)/S1_d_trulyleq[2-8]_2ABCDEFG_dg_larger",
         "dg_larger(acc)/S1_d_trulyleq[2-8]_2OPQRSTU_dg_larger",
         "dg_larger(acc)/S1_d_trulyleq[2-8]_2abcdefg_dg_larger",
         "dg_larger(acc)/S1_d_trulyleq[2-8]_2opqrstu_dg_larger",
     ],
+    [
+        "dg_larger(p_acc)/S1_d_trulyleq[2-8]_2ABCDEFG_dg_larger",
+        "dg_larger(p_acc)/S1_d_trulyleq[2-8]_2OPQRSTU_dg_larger",
+        "dg_larger(p_acc)/S1_d_trulyleq[2-8]_2abcdefg_dg_larger",
+        "dg_larger(p_acc)/S1_d_trulyleq[2-8]_2opqrstu_dg_larger",
+    ],
+    [
+        "dg_larger(n_acc)/S1_d_trulyleq[2-8]_2ABCDEFG_dg_larger",
+        "dg_larger(n_acc)/S1_d_trulyleq[2-8]_2OPQRSTU_dg_larger",
+        "dg_larger(n_acc)/S1_d_trulyleq[2-8]_2abcdefg_dg_larger",
+        "dg_larger(n_acc)/S1_d_trulyleq[2-8]_2opqrstu_dg_larger",
+    ],
     [ # fourth row
         "lg(acc)/S1_d_trulyleq[2-8]_2ABCDEFG_lg",
         "lg(acc)/S1_d_trulyleq[2-8]_2OPQRSTU_lg",
         "lg(acc)/S1_d_trulyleq[2-8]_2abcdefg_lg",
         "lg(acc)/S1_d_trulyleq[2-8]_2opqrstu_lg",
-    ]
+    ],
+    [
+        "lg(p_acc)/S1_d_trulyleq[2-8]_2ABCDEFG_lg",
+        "lg(p_acc)/S1_d_trulyleq[2-8]_2OPQRSTU_lg",
+        "lg(p_acc)/S1_d_trulyleq[2-8]_2abcdefg_lg",
+        "lg(p_acc)/S1_d_trulyleq[2-8]_2opqrstu_lg",
+    ],
+    [
+        "lg(n_acc)/S1_d_trulyleq[2-8]_2ABCDEFG_lg",
+        "lg(n_acc)/S1_d_trulyleq[2-8]_2OPQRSTU_lg",
+        "lg(n_acc)/S1_d_trulyleq[2-8]_2abcdefg_lg",
+        "lg(n_acc)/S1_d_trulyleq[2-8]_2opqrstu_lg",
+    ],
 ]
 
 COL_TITLES = [
@@ -37,9 +73,22 @@ COL_TITLES = [
     r"$\ $-head; 2-Layer; Non-Causal.",
 ]
 
+ROW_TITLES = [
+    "",
+    "",
+    "p_acc",
+    "n_acc",
+    "",
+    "p_acc",
+    "n_acc",
+    "",
+    "p_acc",
+    "n_acc",
+]
+
 MODEL = "transformer"
 PLOT_STATS_DIR = f"/home/yingshac/workspace/tmlr/scripts/experiments/single_metric_plot_{MODEL}"
-YLIM = (0.3, 1.0)
+YLIM = (0.0, 1.0)
 ROW_WIDTH = 14
 ROW_HEIGHT = 2.8
 DPI = 300
@@ -136,12 +185,12 @@ def plot_one_ax(plot_stats_filename, ax, row_idx, col_idx):
     if col_idx == 0: ax.set_ylabel(y_label, fontsize=12, labelpad=10)
     
     ax.set_xticks(list(range(DMIN, DMAX+1)))        
-    if row_idx > 2 and col_idx > 1:
+    if row_idx > 3 or col_idx > 1:
         ax.set_ylim(YLIM[0]-0.05, YLIM[1]+0.05)
         ax.set_yticks(list(np.arange(YLIM[1], YLIM[0]-0.01, step=-0.2))[::-1])  
     else:
-        ax.set_ylim(0.48, 1.05)
-        ax.set_yticks(list(np.arange(1.0, 0.48-0.01, step=-0.2))[::-1])  
+        ax.set_ylim(0.73, 1.05)
+        ax.set_yticks(list(np.arange(1.0, 0.73-0.01, step=-0.1))[::-1])  
     
     if col_idx == row_idx == 0: 
         ax.legend(loc="lower right", framealpha=0.6, 
@@ -188,7 +237,7 @@ for ax, title in zip(axes[0], COL_TITLES):
 ## separately add a red S2 for the last column's title
 ax = axes[0][1]
 ax.text(
-    0.13, 1.03,
+    0.12, 1.03,
     "1",
     transform=ax.transAxes,
     ha="center",
@@ -199,7 +248,7 @@ ax.text(
 )
 ax = axes[0][-1]
 ax.text(
-    0.055, 1.03,
+    0.045, 1.03,
     "1",
     transform=ax.transAxes,
     ha="center",
@@ -209,6 +258,18 @@ ax.text(
     fontweight="semibold",
 )
 
+for ax, title in zip(axes[:, 0], ROW_TITLES):
+    ax.text(
+        -0.3, 0.5,
+        title,
+        transform=ax.transAxes,
+        ha="center",
+        va="center",
+        fontsize=12,
+        linespacing=1.75,
+        rotation=90,
+        fontweight="semibold",
+    )
 
 # Shades ------------------------------------------------------------------------------------------
 fig.canvas.draw()
@@ -235,6 +296,6 @@ for c in [0, 2]:
     fig.add_artist(rect)
 
 # set fig super title: "Supervision: S1 Eval on: S1"
-fig.suptitle(r"Supervision: S1; Eval on: S1.", fontsize=12, fontweight="bold", y=1.03)
+fig.suptitle(r"Supervision: SL1; Eval on: SL1.", fontsize=12, fontweight="bold", y=1.02)
 
 fig.savefig(save_path, bbox_inches="tight", dpi=DPI)

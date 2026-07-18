@@ -2,57 +2,62 @@ import os, json
 from matplotlib import pyplot as plt
 import numpy as np
 from matplotlib.patches import Rectangle
+from matplotlib.lines import Line2D
+RGBA = (57, 132, 83, 0.5)
+import matplotlib.colors as mcolors
+mcolors.get_named_colors_mapping()["mycolor"] = (RGBA[0]/255, RGBA[1]/255, RGBA[2]/255, RGBA[3])
+
 
 PLOT_STATS = [
+    # [ # first row
+    #     "pg(acc)/S1_d_trulyleq[2-8]_2ABCDEFG_pg",
+    #     "pg(acc)/S1_d_trulyleq[2-8]_2abcdefg_pg",
+    #     "pg(acc)/S1_d_trulyleq[2-8]_1ABCDEFG_pg",
+    #     "pg(acc)/S1_d_trulyleq[2-8]_1abcdefg_pg", 
+    # ], 
     [ # second row
-        "pg(acc)/S1_d_trulyleq[2-8]_2ABCDEFG_pg",
-        "pg(acc)/S1_d_trulyleq[2-8]_2abcdefg_pg",
-        "pg(acc)/S1_d_trulyleq[2-8]_1ABCDEFG_pg",
-        "pg(acc)/S1_d_trulyleq[2-8]_1abcdefg_pg", 
-    ], 
-    [
         "pg(p_acc)/S1_d_trulyleq[2-8]_2ABCDEFG_pg",
         "pg(p_acc)/S1_d_trulyleq[2-8]_2abcdefg_pg",
         "pg(p_acc)/S1_d_trulyleq[2-8]_1ABCDEFG_pg",
         "pg(p_acc)/S1_d_trulyleq[2-8]_1abcdefg_pg", 
     ],
-    [
+    [ # third row
         "pg(n_acc)/S1_d_trulyleq[2-8]_2ABCDEFG_pg",
         "pg(n_acc)/S1_d_trulyleq[2-8]_2abcdefg_pg",
         "pg(n_acc)/S1_d_trulyleq[2-8]_1ABCDEFG_pg",
         "pg(n_acc)/S1_d_trulyleq[2-8]_1abcdefg_pg", 
     ],
-    [ # third row
-        "dg_larger(acc)/S1_d_trulyleq[2-8]_2ABCDEFG_dg_larger",
-        "dg_larger(acc)/S1_d_trulyleq[2-8]_2abcdefg_dg_larger",
-        "dg_larger(acc)/S1_d_trulyleq[2-8]_1ABCDEFG_dg_larger",
-        "dg_larger(acc)/S1_d_trulyleq[2-8]_1abcdefg_dg_larger",
-    ],
-    [
+    # [ # fourth row
+    #     "dg_larger(acc)/S1_d_trulyleq[2-8]_2ABCDEFG_dg_larger",
+    #     "dg_larger(acc)/S1_d_trulyleq[2-8]_2abcdefg_dg_larger",
+    #     "dg_larger(acc)/S1_d_trulyleq[2-8]_1ABCDEFG_dg_larger",
+    #     "dg_larger(acc)/S1_d_trulyleq[2-8]_1abcdefg_dg_larger",
+    # ],
+    [ # fifth row
         "dg_larger(p_acc)/S1_d_trulyleq[2-8]_2ABCDEFG_dg_larger",
         "dg_larger(p_acc)/S1_d_trulyleq[2-8]_2abcdefg_dg_larger",
         "dg_larger(p_acc)/S1_d_trulyleq[2-8]_1ABCDEFG_dg_larger",
         "dg_larger(p_acc)/S1_d_trulyleq[2-8]_1abcdefg_dg_larger",
     ],
-    [
+    [ # sixth row
         "dg_larger(n_acc)/S1_d_trulyleq[2-8]_2ABCDEFG_dg_larger",
         "dg_larger(n_acc)/S1_d_trulyleq[2-8]_2abcdefg_dg_larger",
         "dg_larger(n_acc)/S1_d_trulyleq[2-8]_1ABCDEFG_dg_larger",
         "dg_larger(n_acc)/S1_d_trulyleq[2-8]_1abcdefg_dg_larger",
     ],
-    [ # fourth row
-        "lg(acc)/S1_d_trulyleq[2-8]_2ABCDEFG_lg",
-        "lg(acc)/S1_d_trulyleq[2-8]_2abcdefg_lg",
-        "lg(acc)/S1_d_trulyleq[2-8]_1ABCDEFG_lg",
-        "lg(acc)/S1_d_trulyleq[2-8]_1abcdefg_lg",
-    ],
-    [
+    # [ # seventh row
+    #     "lg(acc)/S1_d_trulyleq[2-8]_2ABCDEFG_lg",
+    #     "lg(acc)/S1_d_trulyleq[2-8]_2abcdefg_lg",
+    #     "lg(acc)/S1_d_trulyleq[2-8]_1ABCDEFG_lg",
+    #     "lg(acc)/S1_d_trulyleq[2-8]_1abcdefg_lg",
+    # ],
+    [ # eighth row
         "lg(p_acc)/S1_d_trulyleq[2-8]_2ABCDEFG_lg",
         "lg(p_acc)/S1_d_trulyleq[2-8]_2abcdefg_lg",
         "lg(p_acc)/S1_d_trulyleq[2-8]_1ABCDEFG_lg",
         "lg(p_acc)/S1_d_trulyleq[2-8]_1abcdefg_lg",
     ],
-    [
+    [ # ninth row
         "lg(n_acc)/S1_d_trulyleq[2-8]_2ABCDEFG_lg",
         "lg(n_acc)/S1_d_trulyleq[2-8]_2abcdefg_lg",
         "lg(n_acc)/S1_d_trulyleq[2-8]_1ABCDEFG_lg",
@@ -68,16 +73,13 @@ COL_TITLES = [
 ]
 
 ROW_TITLES = [
-    "",
+    # "",
     "p_acc",
     "n_acc",
-    "",
+    # "",
     "p_acc",
     "n_acc",
-    "",
-    "p_acc",
-    "n_acc",
-    "",
+    # "",
     "p_acc",
     "n_acc",
 ]
@@ -85,8 +87,8 @@ ROW_TITLES = [
 MODEL = "transformer"
 PLOT_STATS_DIR = f"/home/yingshac/workspace/tmlr/scripts/experiments/single_metric_plot_{MODEL}"
 YLIM = (0.0, 1.0)
-ROW_WIDTH = 13
-ROW_HEIGHT = 2.6
+ROW_WIDTH = 14
+ROW_HEIGHT = 2.8
 DPI = 300
 
 # Constants --------------------------------------------------------------------------------
@@ -182,7 +184,7 @@ def plot_one_ax(plot_stats_filename, ax, row_idx, col_idx):
     
     ax.set_xticks(list(range(DMIN, DMAX+1)))
 
-    if row_idx > 2:
+    if row_idx > 1:
         ax.set_ylim(YLIM[0]-0.05, YLIM[1]+0.05)
         # yticks: ymax, ymin, step=-0.2, then reverse the list to get ascending order
         ax.set_yticks(list(np.arange(YLIM[1], YLIM[0]-0.01, step=-0.2))[::-1])
@@ -222,7 +224,7 @@ for row in range(num_rows):
 # Col Titles and Row Titles --------------------------------------------------------------------------------
 for ax, title in zip(axes[0], COL_TITLES):
     ax.text(
-        0.5, 1.02,
+        0.5, 1.07,
         title,
         transform=ax.transAxes,
         ha="center",
@@ -235,7 +237,7 @@ for ax, title in zip(axes[0], COL_TITLES):
 # # separately add a red S2 for the last column's title
 ax = axes[0][2]
 ax.text(
-    0.23, 1.03,
+    0.25, 1.08,
     "1",
     transform=ax.transAxes,
     ha="center",
@@ -246,7 +248,7 @@ ax.text(
 )
 ax = axes[0][1]
 ax.text(
-    0.51, 1.03,
+    0.51, 1.08,
     "Non",
     transform=ax.transAxes,
     ha="center",
@@ -258,7 +260,7 @@ ax.text(
 
 ax = axes[0][-1]
 ax.text(
-    0.145, 1.03,
+    0.165, 1.08,
     "1",
     transform=ax.transAxes,
     ha="center",
@@ -268,7 +270,7 @@ ax.text(
     fontweight="semibold",
 )
 ax.text(
-    0.5, 1.03,
+    0.5, 1.08,
     "Non",
     transform=ax.transAxes,
     ha="center",
@@ -280,7 +282,7 @@ ax.text(
 
 for ax, title in zip(axes[:, 0], ROW_TITLES):
     ax.text(
-        -0.32, 0.5,
+        -0.3, 0.5,
         title,
         transform=ax.transAxes,
         ha="center",
@@ -291,30 +293,42 @@ for ax, title in zip(axes[:, 0], ROW_TITLES):
         fontweight="semibold",
     )
 
-# Shades ------------------------------------------------------------------------------------------
+# Shades and Section lines ------------------------------------------------------------------------------------------
+fig.set_constrained_layout_pads(hspace=0.1)
 fig.canvas.draw()
-col_axes = axes[:, 0]
 
-x0 = min(ax.get_position().x0 for ax in col_axes)-0.048
-x1 = max(ax.get_position().x1 for ax in col_axes)+0.002
-y0 = 0.0
-y1 = 1.005
+x0, x1 = 0.0, 1.0
 
-pad_x = 0.0
-pad_y = 0.0
+for r in [1, 3]: # Lines between rows
+    upper_row_bottom = axes[r, 0].get_position().y0
+    lower_row_top = axes[r + 1, 0].get_position().y1
+    y = (upper_row_bottom + lower_row_top) / 2 - 0.004
+    fig.add_artist(Line2D(
+        [x0, x1], [y, y],
+        transform=fig.transFigure, linewidth=2,
+        color="cornflowerblue",
+    ))
 
-rect = Rectangle(
-    (x0 - pad_x, y0 - pad_y),
-    (x1 - x0) + 2 * pad_x,
-    (y1 - y0) + 2 * pad_y,
-    transform=fig.transFigure,
-    facecolor="0.95",
-    edgecolor="none",
-    zorder=-1,
-)
-fig.add_artist(rect)
+# Shade col0, selected rows.
+rows_to_shade = [4, 5]
+col = 0
+pad_left, pad_right, pad_top, pad_bottom = 0.049, 0.003, 0.008, 0.036
 
-# set fig super title: "Supervision: S1 Eval on: S1"
-fig.suptitle(r"Supervision: SL1; Eval on: SL1.", fontsize=12, fontweight="bold", y=1.02)
+for r in rows_to_shade:
+    ax = axes[r, col]
+    pos = ax.get_position()
+
+    rect = Rectangle(
+        (pos.x0 - pad_left, pos.y0 - pad_bottom),
+        (pos.x1 - pos.x0) + pad_left + pad_right,
+        (pos.y1 - pos.y0) + pad_top + pad_bottom,
+        transform=fig.transFigure,
+        facecolor="0.95",
+        edgecolor="none",
+        zorder=-1,
+    )
+    fig.add_artist(rect)
+
+fig.suptitle(r"Supervision: SL1; Eval on: SL1.", fontsize=13, fontweight="bold", y=1.025)
 
 fig.savefig(save_path, bbox_inches="tight", dpi=DPI)

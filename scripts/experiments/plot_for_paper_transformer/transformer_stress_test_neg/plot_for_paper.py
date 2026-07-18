@@ -25,46 +25,46 @@ ROW_TITLES = [
 ]
 
 YLIM = (0.32, 1.05)
-ROW_WIDTH = 4
-ROW_HEIGHT = 2.8
+ROW_WIDTH = 5.2
+ROW_HEIGHT = 2.6
 DPI = 300
 
 
 # Constants --------------------------------------------------------------------------------
 
-NOISE_STD = 0.1 # for jittering x values for better visualization
+NOISE_STD = 0.08 # for jittering x values for better visualization
 
 def SPLITNAME_TO_XTICKLABEL(split_name: str) -> str:
     x = split_name.split("_")
     
     if split_name.startswith("one_"):
-        return "Type1"
+        return "1"
     
     elif split_name.startswith("two_"):
         if len(x) == 3:
             side = x[-1]
-            return "Type2-" + side.capitalize()
-        else: return "Type2"
+            return "2-" + side.capitalize()
+        else: return "2"
     elif split_name.startswith("three_"):
         if len(x) == 3:
             side = x[-1]
-            return "Type3-" + side.capitalize()
-        else: return "Type3"
+            return "3-" + side.capitalize()
+        else: return "3"
     elif split_name.startswith("four_"):
         if len(x) == 3:
             side = x[-1]
-            return "Type4-" + side.capitalize()
-        else: return "Type4"
+            return "4-" + side.capitalize()
+        else: return "4"
     elif split_name.startswith("five_"):
         if len(x) == 3:
             side = x[-1]
-            return "Type5-" + side.capitalize()
-        else: return "Type5"
+            return "5-" + side.capitalize()
+        else: return "5"
     
     else: raise ValueError(f"Unexpected split_name: {split_name}")
 
 SPLITNAME_TO_X = {
-    "one_rfv": 0.5,
+    "one_rfv": 1,
     "two_rfv_in": 2,
     "two_rfv_out": 3,
     "three_rfv_in": 4,
@@ -170,7 +170,7 @@ def plot_for_one_row(row_idx, row_axes, plot_stats):
             ax.scatter(
                 x, y,
                 facecolors='none', edgecolors=PE_NAME_TO_COLOR[pe_name],
-                marker='s', linewidths=1.2, s=50, alpha=0.65,
+                marker='s', linewidths=1.4, s=50, alpha=0.6,
                 label=pe_name + r"$\qquad$" if pe_name == "none" else pe_name,
             )
             ax.errorbar(
@@ -178,21 +178,24 @@ def plot_for_one_row(row_idx, row_axes, plot_stats):
                 yerr=yerr_clipped,       # vertical error bar size
                 fmt='none', ecolor=PE_NAME_TO_COLOR[pe_name], # error bar color
                 capsize=4, capthick=1.2,
-                elinewidth=1.2, linestyle='none', alpha=0.15
+                elinewidth=1.2, linestyle='none', alpha=0.2
             )
 
         if pe_name == "none":
             for col_idx, ax, x, xticklabels in zip(range(len(row_axes)), row_axes, X, Xticklabels):
                 # xlim: min(x)-1, max(x)+1
-                ax.set_xlim(min(x)-1, max(x)+1)
+                ax.set_xlim(min(x)-0.5, max(x)+0.5)
                 ax.set_ylim(YLIM[0], YLIM[1])
                 if row_idx == 0:
                     ax.set_xticks(x)
-                    ax.set_xticklabels(xticklabels, rotation=35, ha='right', fontsize=11)
+                    ax.set_xticklabels(xticklabels, fontsize=10, 
+                                    #    rotation=35, ha='right'
+                                       )
                 else: # no xticks
                     ax.set_xticks([])
                     ax.set_xticklabels([])
                 
+                ax.set_xlabel("Negative Type", labelpad=8, fontweight="semibold", fontsize=11)
                 if col_idx == 0: ax.set_ylabel("n_acc", labelpad=8, fontweight="semibold", fontsize=12)
                 ax.spines['top'].set_visible(False)
                 ax.spines['right'].set_visible(False)
@@ -235,11 +238,14 @@ fig.legend(
     labels, # "fake" legend title on the left
     title="Positional\nEncoding",
     fontsize=11,
-    loc="lower center", bbox_to_anchor=(1.15, 0.23),
+    loc="lower center", bbox_to_anchor=(1.12, 0.17),
     columnspacing=1.2, handletextpad=0.05,
 )
 
 # ------------------------------------------------------------------------------------------
 save_path = os.path.join(os.path.basename(os.getcwd()) + ".pdf") # figure name = basename of cwd
-fig.suptitle(r"$d^{tr}_{\max}=8.\ \ \ \ $Stress-Testing Negatives by Type.", fontsize=12, fontweight="semibold", y=1.12, x=0.45)
+fig.suptitle(
+    r"$d^{tr}_{\max}=8.\ \ \ \ $Stress-Testing Negatives.", 
+    fontsize=13, fontweight="semibold", y=1.12, x=0.36
+)
 fig.savefig(save_path, bbox_inches="tight", dpi=DPI)

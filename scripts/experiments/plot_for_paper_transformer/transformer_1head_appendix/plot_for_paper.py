@@ -29,7 +29,19 @@ PLOT_STATS = [
         "lg(acc)/S1_d_trulyleq[2-8]_2OPQRSTU_lg",
         "lg(acc)/S1_d_trulyleq[2-8]_2abcdefg_lg",
         "lg(acc)/S1_d_trulyleq[2-8]_2opqrstu_lg",
-    ]
+    ],
+    [
+        "lg(p_acc)/S1_d_trulyleq[2-8]_2ABCDEFG_lg",
+        "lg(p_acc)/S1_d_trulyleq[2-8]_2OPQRSTU_lg",
+        "lg(p_acc)/S1_d_trulyleq[2-8]_2abcdefg_lg",
+        "lg(p_acc)/S1_d_trulyleq[2-8]_2opqrstu_lg",
+    ],
+    [
+        "lg(n_acc)/S1_d_trulyleq[2-8]_2ABCDEFG_lg",
+        "lg(n_acc)/S1_d_trulyleq[2-8]_2OPQRSTU_lg",
+        "lg(n_acc)/S1_d_trulyleq[2-8]_2abcdefg_lg",
+        "lg(n_acc)/S1_d_trulyleq[2-8]_2opqrstu_lg",
+    ],
 ]
 
 COL_TITLES = [
@@ -37,6 +49,15 @@ COL_TITLES = [
     r"$\ $-head; Causal.",
     "8-head; Non-Causal.",
     r"$\ $-head; Non-Causal.",
+]
+
+ROW_TITLES = [
+    "",
+    "",
+    "",
+    "",
+    "p_acc",
+    "n_acc",
 ]
 
 HIGHLIGHT = [
@@ -164,14 +185,17 @@ def plot_one_ax(plot_stats_filename, ax, row_idx, col_idx):
     if col_idx == 0: ax.set_ylabel(y_label, fontsize=12, labelpad=10)
     
     ax.set_xticks(list(range(DMIN, DMAX+1)))        
-    if row_idx > 2 and col_idx > 1:
+    if row_idx > 3 and col_idx > 1:
+        ax.set_ylim(-0.05, 1.05)
+        ax.set_yticks(list(np.arange(1.0, -0.01, step=-0.2))[::-1])  
+    elif row_idx > 2 or col_idx > 1:
         ax.set_ylim(YLIM[0]-0.05, YLIM[1]+0.05)
         ax.set_yticks(list(np.arange(YLIM[1], YLIM[0]-0.01, step=-0.2))[::-1])  
     else:
         ax.set_ylim(0.48, 1.05)
         ax.set_yticks(list(np.arange(1.0, 0.48-0.01, step=-0.2))[::-1])  
     
-    if col_idx == row_idx == 3: 
+    if col_idx == 1 and row_idx == 0: 
         ax.legend(handles=legend_handles, 
                   loc="lower right", framealpha=0.6, 
                   fontsize=12, title="Positional Encoding")
@@ -238,6 +262,18 @@ ax.text(
     fontweight="semibold",
 )
 
+for ax, title in zip(axes[:, 0], ROW_TITLES):
+    ax.text(
+        -0.27, 0.5,
+        title,
+        transform=ax.transAxes,
+        ha="center",
+        va="center",
+        fontsize=12,
+        linespacing=1.75,
+        rotation=90,
+        fontweight="semibold",
+    )
 
 # Shades ------------------------------------------------------------------------------------------
 fig.canvas.draw()
@@ -278,6 +314,6 @@ for c in [0, 2]:
             fig.add_artist(rect)
 
 # set fig super title: "Supervision: S1 Eval on: S1"
-fig.suptitle(r"Supervision: S1; Eval on: S1.$\ \ \ $2-Layer.", fontsize=12, fontweight="bold", y=1.03)
+fig.suptitle(r"Supervision: SL1; Eval on: SL1.$\ \ \ $2-Layer.", fontsize=13, fontweight="bold", y=1.025)
 
 fig.savefig(save_path, bbox_inches="tight", dpi=DPI)

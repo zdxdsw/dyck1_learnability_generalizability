@@ -19,10 +19,10 @@ PLOT_STATS = [
 ]
 
 COL_TITLES = [
-    r"Supervision: S1$\qquad$"+"\nEval on: S1",
-    r"Supervision: S1$\qquad$"+"\nEval on: ",
-    r"Supervision: S1$\qquad$"+"\nEval on: S1", 
-    r"Supervision: S1$\qquad$"+"\nEval on: ",
+    r"Supervision: SL1$\qquad$"+"\nEval on: SL1",
+    r"Supervision: SL1$\qquad$"+"\nEval on: ",
+    r"Supervision: SL1$\qquad$"+"\nEval on: SL1", 
+    r"Supervision: SL1$\qquad$"+"\nEval on: ",
 ]
 
 MODEL = "transformer"
@@ -125,9 +125,9 @@ def plot_one_ax(plot_stats_filename, ax, row_idx, col_idx):
     ax.set_xticks(list(range(DMIN, DMAX+1)))
     ax.set_ylim(YLIM[0]-0.01, YLIM[1]+0.01)
     # yticks: ymax, ymin, step=-0.2, then reverse the list to get ascending order
-    ax.set_yticks(list(np.arange(YLIM[1], YLIM[0]-0.01, step=-0.02))[::-1])
+    ax.set_yticks(list(np.arange(YLIM[1], YLIM[0]-0.01, step=-0.04))[::-1])
     
-    if col_idx == 0: 
+    if col_idx == row_idx ==0: 
         ax.legend(loc="lower center", framealpha=0.4, title="Positional Encoding")
     
     ax.spines["top"].set_visible(False)
@@ -172,8 +172,8 @@ for ax, title in zip(axes[0], COL_TITLES):
 # # separately add a red S2 for the last column's title
 ax = axes[0][1]
 ax.text(
-    0.699, 1.03,
-    "S2",
+    0.716, 1.03,
+    "SL2",
     transform=ax.transAxes,
     ha="center",
     va="bottom",
@@ -183,8 +183,8 @@ ax.text(
 )
 ax = axes[0][-1]
 ax.text(
-    0.69, 1.03,
-    "S3",
+    0.712, 1.03,
+    "SL3",
     transform=ax.transAxes,
     ha="center",
     va="bottom",
@@ -195,8 +195,8 @@ ax.text(
 
 for ax in axes[0][:2]:
     ax.text(
-        0.805, 1.16,
-        "+ S2",
+        0.845, 1.16,
+        "+ SL2",
         transform=ax.transAxes,
         ha="center",
         va="bottom",
@@ -207,8 +207,8 @@ for ax in axes[0][:2]:
     
 for ax in axes[0][-2:]:
     ax.text(
-        0.805, 1.16,
-        "+ S3",
+        0.845, 1.16,
+        "+ SL3",
         transform=ax.transAxes,
         ha="center",
         va="bottom",
@@ -218,6 +218,6 @@ for ax in axes[0][-2:]:
     )
 
 # set fig super title: "Supervision: S1 Eval on: S1"
-fig.suptitle("2-Layer; Causal.", fontsize=12, fontweight="bold", y=1.05)
+fig.suptitle("2-Layer; Causal.", fontsize=13, fontweight="bold", y=1.05)
 
 fig.savefig(save_path, bbox_inches="tight", dpi=DPI)

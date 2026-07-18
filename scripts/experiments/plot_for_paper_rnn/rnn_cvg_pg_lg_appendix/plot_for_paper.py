@@ -29,11 +29,11 @@ PLOT_STATS = [
 ]
 
 COL_TITLES = [
-    "Supervision: S1\nEval on: S1",
-    "Supervision: S1 + S2\nEval on: S1",
-    "Supervision: S1 + S2\nEval on: ",
-    "Supervision: S1 + S3\nEval on: S1", 
-    "Supervision: S1 + S3\nEval on: ",
+    "Supervision: SL1\nEval on: SL1",
+    "Supervision: SL1 + SL2\nEval on: SL1",
+    "Supervision: SL1 + SL2\nEval on: ",
+    "Supervision: SL1 + SL3\nEval on: SL1", 
+    "Supervision: SL1 + SL3\nEval on: ",
 ]
 
 SHADE_COLS = ([0, 1, 3], "0.95")
@@ -137,7 +137,7 @@ def plot_one_ax(plot_stats_filename, ax, row_idx, col_idx):
     if row_idx == num_rows - 1: # only last row has x label
         ax.set_xlabel(x_label, fontsize=12)
     if col_idx == 0: # only first column has y label
-        ax.set_ylabel(y_label, fontsize=12, labelpad=6)
+        ax.set_ylabel(y_label, fontsize=12, labelpad=10)
     ax.set_ylim(YLIM[0]-0.05, YLIM[1]+0.05)
     ax.set_xticks(list(range(DMIN, DMAX+1)))
     # yticks: ymax, ymin, step=-0.2, then reverse the list to get ascending order
@@ -186,8 +186,8 @@ for ax, title in zip(axes[0], COL_TITLES):
 # # separately add a red S2 for the last column's title
 ax = axes[0][2]
 ax.text(
-    0.72, 1.03,
-    "S2",
+    0.75, 1.025,
+    "SL2",
     transform=ax.transAxes,
     ha="center",
     va="bottom",
@@ -197,8 +197,8 @@ ax.text(
 )
 ax = axes[0][-1]
 ax.text(
-    0.72, 1.03,
-    "S3",
+    0.75, 1.025,
+    "SL3",
     transform=ax.transAxes,
     ha="center",
     va="bottom",

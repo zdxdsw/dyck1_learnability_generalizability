@@ -19,7 +19,7 @@ MODEL = "transformer"
 PLOT_STATS_DIR = f"/home/yingshac/workspace/tmlr/scripts/experiments/single_metric_plot_{MODEL}"
 YLIM = (0.26, 1.0)
 ROW_WIDTH = 6.6
-ROW_HEIGHT = 3
+ROW_HEIGHT = 2.7
 DPI = 300
 
 # Constants --------------------------------------------------------------------------------
@@ -119,7 +119,9 @@ def plot_one_ax(plot_stats_filename, ax, row_idx, col_idx):
     ax.set_yticks(list(np.arange(YLIM[1], YLIM[0]-0.01, step=-0.2))[::-1])
     
     if col_idx == 1: 
-        ax.legend(loc="lower left", framealpha=0.6, title="Positional Encoding", fontsize=9.5)
+        ax.legend(
+            loc="lower center", framealpha=0.6, ncol=2, 
+            title="Positional Encoding", fontsize=10)
     
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)

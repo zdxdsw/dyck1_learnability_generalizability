@@ -39,7 +39,7 @@ HATCH_FACECOLOR = tuple([0.95]*3)
 HATCH_EDGECOLOR = tuple([0.75]*3)
 
 ROW_WIDTH = 11
-ROW_HEIGHT = 2.8
+ROW_HEIGHT = 2.5
 DPI = 300
 
 # Constants --------------------------------------------------------------------------------
@@ -51,9 +51,9 @@ X_TICKLABELS = [
 ]
 
 Y_TICKLABELS = [
-    r"$[2, 40]$",
-    r"$(40,80]$",
-    r"$(80,120]$"
+    r"$[1, 40]$",
+    r"$(40,80)$",
+    r"$(80,120)$"
 ]
 
 SPLITNAME_TO_SUBPLOT_COORD = {
@@ -99,7 +99,7 @@ PE_NAME_TO_COLOR = {
 }
 
 
-def plot_for_one_ax(ax, data, colorname, min_alpha, max_alpha, x_ticklabels, y_ticklabels, ax_title):
+def plot_for_one_ax(ax, col_idx, data, colorname, min_alpha, max_alpha, x_ticklabels, y_ticklabels, ax_title):
     heatmap_height, heatmap_width = data.shape
 
     # Build a colormap from color with varying alpha
@@ -109,7 +109,7 @@ def plot_for_one_ax(ax, data, colorname, min_alpha, max_alpha, x_ticklabels, y_t
 
     # You can set vmin/vmax manually if you want a fixed scale across plots
     norm = Normalize(vmin=np.nanmin(data), vmax=np.nanmax(data))
-    im = ax.imshow(data, cmap=cmap, norm=norm)
+    im = ax.imshow(data, cmap=cmap, norm=norm, aspect='auto') # aspect='auto' leads to nonequal height and width.
 
     # Lower-triangular non-applicable cells: i > j
     for i in range(heatmap_height):
@@ -134,12 +134,8 @@ def plot_for_one_ax(ax, data, colorname, min_alpha, max_alpha, x_ticklabels, y_t
     ax.xaxis.tick_top()
     ax.set_xticks(np.arange(heatmap_width))
     ax.set_xticklabels(x_ticklabels)
-    ax.set_xlabel(r"$\ell$ Bucket", fontsize=12, labelpad=10)
+    ax.set_xlabel(r"$L$ Bucket", fontsize=12, labelpad=10)
     ax.xaxis.set_label_position("top")
-
-    ax.set_yticks(np.arange(heatmap_height))
-    ax.set_yticklabels(y_ticklabels, rotation=90, va="center")
-    ax.set_ylabel(r"LRoD Bucket", fontsize=12, labelpad=6)
     
     # Cell boundaries
     ax.set_xticks(np.arange(-0.5, heatmap_width, 1), minor=True)
@@ -147,7 +143,14 @@ def plot_for_one_ax(ax, data, colorname, min_alpha, max_alpha, x_ticklabels, y_t
     ax.grid(which="minor", color="white", linewidth=1.5)
     ax.tick_params(which="minor", bottom=False, left=False)
 
-    ax.set_title(ax_title, y=-0.2, x=0.43, fontsize=12, fontweight="semibold")
+    if col_idx == 0:
+        ax.set_yticks(np.arange(heatmap_height))
+        ax.set_yticklabels(y_ticklabels, va="center")
+        ax.set_ylabel(r"LRoD Bucket", fontsize=12, labelpad=6)
+    else: # hide yticks and yticklabels for other subplots
+        ax.set_yticks([])
+        ax.set_yticklabels([])
+    ax.set_title(ax_title, y=-0.2, x=0.47, fontsize=12, fontweight="semibold")
 
 
 # ------------------------------------------------------------------------------------------
@@ -161,13 +164,13 @@ fig, axes = plt.subplots(
 
 fig.set_constrained_layout_pads(wspace=0.1)
 
-for ax,path, pe_name, colorbar_helper, ax_title in zip(
-    axes,
+for col_idx, path, pe_name, colorbar_helper, ax_title in zip(
+    list(range(num_cols)),
     PLOT_STATS_PATHS, 
     PLOT_STATS_CHOOSE_PE_NAMES, 
     PLOT_STATS_COLORBAR_HELPERS, 
     SUBPLOT_TITLES
-):
+):  
     print(f"Processing {path} for {pe_name}...")
     min_alpha, max_alpha = colorbar_helper
     
@@ -181,8 +184,9 @@ for ax,path, pe_name, colorbar_helper, ax_title in zip(
         data[i, j] = plot_stats[split_name]["mean"]
 
     # def plot_for_one_ax(ax, data, colorname, min_alpha, max_alpha, x_labels, y_labels, ax_title):
+    ax = axes[col_idx]
     plot_for_one_ax(
-        ax, data,
+        ax, col_idx, data,
         PE_NAME_TO_COLOR[pe_name], min_alpha, max_alpha,
         x_ticklabels=X_TICKLABELS,
         y_ticklabels=Y_TICKLABELS,
