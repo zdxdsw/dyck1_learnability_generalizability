@@ -196,6 +196,6 @@ for ax, title in zip(axes, COL_TITLES):
         # fontweight="semibold",
     )
 
-fig.suptitle(r"Supervision: S1; Eval on: S1.$\ \ \ $2-Layer; Causal.", fontsize=13, fontweight="bold", y=1.08)
+fig.suptitle(r"Supervision: SL1; Eval on: SL1.$\ \ \ $2-Layer; Causal.", fontsize=13, fontweight="bold", y=1.08)
 
 fig.savefig(save_path, bbox_inches="tight", dpi=DPI)

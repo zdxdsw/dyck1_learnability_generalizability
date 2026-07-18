@@ -126,7 +126,7 @@ def plot_one_ax(plot_stats_filename, ax, row_idx, col_idx):
     if col_idx == 0:
         ax.set_ylim(YLIM[0]-0.01, YLIM[1]+0.01)
         # yticks: ymax, ymin, step=-0.2, then reverse the list to get ascending order
-        ax.set_yticks(list(np.arange(YLIM[1], YLIM[0]-0.01, step=-0.20))[::-1])
+        ax.set_yticks(list(np.arange(YLIM[1], YLIM[0]-0.01, step=-0.1))[::-1])
     else:
         ax.set_ylim(0.84, 1.01)
         ax.set_yticks(list(np.arange(1.0, 0.84, step=-0.05))[::-1])
@@ -180,11 +180,11 @@ for ax, title in zip(axes[:, 0], ROW_TITLEs):
     )
 
 # set fig super title: "Supervision: S1 Eval on: S1"
-fig.suptitle(r"Supervision: S1$\qquad\quad\ $; Eval on: $\quad\ \ $.$\ \ \ $2-Layer; Causal.", fontsize=12, fontweight="bold", y=1.04)
+fig.suptitle(r"Supervision: SL1$\qquad\quad\ \ $; Eval on: $\quad\ \ \ \ $.$\ \ \ $2-Layer; Causal.", fontsize=12, fontweight="bold", y=1.04)
 
 fig.text(
     0.36, 1.04,
-    "+ S2",
+    "+ SL2",
     color="red",
     ha="left",
     va="top",
@@ -193,7 +193,7 @@ fig.text(
 )
 fig.text(
     0.57, 1.04,
-    "S2",
+    "SL2",
     color="red",
     ha="left",
     va="top",

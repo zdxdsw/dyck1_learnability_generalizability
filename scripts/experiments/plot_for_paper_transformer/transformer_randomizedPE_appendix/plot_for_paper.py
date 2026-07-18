@@ -166,8 +166,8 @@ def plot_one_ax(plot_stats_filename, ax, row_idx, col_idx):
         ))
 
     ax.tick_params(axis="both", labelsize=10)
-    if row_idx == num_rows - 1: ax.set_xlabel(x_label, fontsize=12)
-    if col_idx == 0: ax.set_ylabel(y_label, fontsize=12, labelpad=10)
+    if row_idx == num_rows - 1: ax.set_xlabel(x_label, fontsize=13, labelpad=6)
+    if col_idx == 0: ax.set_ylabel(y_label, fontsize=13, labelpad=10)
     
     ax.set_xticks(list(range(DMIN, DMAX+1)))
     if row_idx > 2: 
@@ -273,6 +273,6 @@ for c in [0, 2]:
         fig.add_artist(rect)
 
 # set fig super title: "Supervision: S1 Eval on: S1"
-fig.suptitle(r"Supervision: S1; Eval on: S1.", fontsize=12, fontweight="bold", y=1.03)
+fig.suptitle(r"Supervision: SL1; Eval on: SL1.", fontsize=13, fontweight="bold", y=1.03)
 
 fig.savefig(save_path, bbox_inches="tight", dpi=DPI)

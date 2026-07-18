@@ -19,10 +19,10 @@ TASK_SUITES = [
 ]
 
 COL_TITLES = [
-    "Supervision: S1\nEval on: S1",
-    "Supervision: S1 + S2\nEval on: S1",
-    "Supervision: S1 + S3\nEval on: S1",
-    "Supervision: S1 + S2\nEval on: ",
+    "Supervision: SL1\nEval on: SL1",
+    "Supervision: SL1 + SL2\nEval on: SL1",
+    "Supervision: SL1 + SL3\nEval on: SL1",
+    "Supervision: SL1 + SL2\nEval on: ",
 ]
 
 num_rows = len(TASK_SUITES)
@@ -169,7 +169,7 @@ def plot_one_ax(val_d_to_acc, ax, row_idx, col_idx):
     ax.set_ylim(YLIM[0]-0.05, YLIM[1]+0.05)
     #ax.set_xticks(list(range(1, 17)))
     ax.set_xticks([1,2,3,4,5,6,7,8,9,10,12,14,16])
-    ax.set_yticks(list(np.arange(YLIM[1], YLIM[0]-0.01, step=-0.2))[::-1])
+    ax.set_yticks(list(np.arange(YLIM[1], YLIM[0]-0.01, step=-0.1))[::-1])
 
     if col_idx == 1: ax.legend(loc="upper right", framealpha=0.6)
     ax.spines["top"].set_visible(False)
@@ -186,6 +186,7 @@ fig, axes = plt.subplots(
 )
 
 for ax in axes.flat: ax.set_facecolor("none") # all subplots have transparent background
+fig.set_constrained_layout_pads(wspace=0.04)
 
 for row in range(num_rows):
     for col in range(num_cols):
@@ -240,8 +241,6 @@ col_axes = axes[:, 0]
 
 x0 = min(ax.get_position().x0 for ax in col_axes)-0.065
 x1 = max(ax.get_position().x1 for ax in col_axes)+0.003
-# y0 = min(ax.get_position().y0 for ax in col_axes)
-# y1 = max(ax.get_position().y1 for ax in col_axes)
 y0 = -0.01
 y1 = 1.01
 
@@ -258,6 +257,5 @@ rect = Rectangle(
     zorder=-1,
 )
 fig.add_artist(rect)
-
 
 fig.savefig(save_path, bbox_inches="tight", dpi=DPI)

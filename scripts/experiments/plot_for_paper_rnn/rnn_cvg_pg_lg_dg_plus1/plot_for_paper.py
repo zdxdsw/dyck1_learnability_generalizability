@@ -36,7 +36,7 @@ ROW_TITLEs = [
     "", 
     "", 
     "",
-    r"acc on depth = $d^{tr}_{\max}$+1",
+    r"acc $\ \ d^{test}=d^{tr}_{\max}+1$",
 ]
 
 MODEL = "rnn"
@@ -181,7 +181,7 @@ for ax, title in zip(axes[0], COL_TITLES):
 
 for ax, title in zip(axes[:, 0], ROW_TITLEs):
     ax.text(
-        -0.32, 0.5,
+        -0.3, 0.5,
         title,
         transform=ax.transAxes,
         ha="center",

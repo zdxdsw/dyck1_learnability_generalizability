@@ -44,19 +44,19 @@ PLOT_STATS = [
 ]
 
 COL_TITLES = [
-    "Supervision: S1\nEval on: S1",
-    "Supervision: S1 + S2\nEval on: S1",
-    "Supervision: S1 + S3\nEval on: S1",
-    "Supervision: S1 + S2\nEval on: ",
+    "Supervision: SL1\nEval on: SL1",
+    "Supervision: SL1 + SL2\nEval on: SL1",
+    "Supervision: SL1 + SL3\nEval on: SL1",
+    "Supervision: SL1 + SL2\nEval on: ",
 ]
 
 ROW_TITLEs = [
-    r"acc on depth = $d^{tr}_{\max}$+1",
-    r"p_acc on depth = $d^{tr}_{\max}$+1",
-    r"n_acc on depth = $d^{tr}_{\max}$+1",
-    r"acc on depth = $d^{tr}_{\max}$+2",
-    r"p_acc on depth = $d^{tr}_{\max}$+2",
-    r"n_acc on depth = $d^{tr}_{\max}$+2",
+    "\n"+r"$d^{test}=d^{tr}_{\max}+1$",
+    "p_acc\n"+r"$d^{test}=d^{tr}_{\max}+1$",
+    "n_acc\n"+r"$d^{test}=d^{tr}_{\max}+1$",
+    "\n"+r"$d^{test}=d^{tr}_{\max}+2$",
+    "p_acc\n"+r"$d^{test}=d^{tr}_{\max}+2$",
+    "n_acc\n"+r"$d^{test}=d^{tr}_{\max}+2$",
 ]
 
 MODEL = "rnn"
@@ -162,7 +162,7 @@ def plot_one_ax(plot_stats_filename, ax, row_idx, col_idx):
     ax.set_xticks(list(range(DMIN, DMAX+1)))
     # yticks: ymax, ymin, step=-0.2, then reverse the list to get ascending order
     ax.set_yticks(list(np.arange(YLIM[1], YLIM[0]-0.01, step=-0.2))[::-1])
-    if col_idx == 0: ax.legend(loc="lower center", framealpha=0.4)
+    if col_idx == row_idx == 0: ax.legend(loc="lower center", framealpha=0.4)
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
 
@@ -193,12 +193,12 @@ for row in range(num_rows):
 first_row_axes = axes[0] if num_rows > 1 else axes
 for ax, title in zip(first_row_axes, COL_TITLES):
     ax.text(
-        0.5, 1.03,
+        0.5, 1.035,
         title,
         transform=ax.transAxes,
         ha="center",
         va="bottom",
-        fontsize=12,
+        fontsize=13,
         linespacing=1.75,
         fontweight="semibold",
     )
@@ -206,25 +206,25 @@ for ax, title in zip(first_row_axes, COL_TITLES):
 # separately add a red S2 for the last column's title
 ax = axes[0][-1]
 ax.text(
-    0.68, 1.03,
-    "S2",
+    0.72, 1.03,
+    "SL2",
     transform=ax.transAxes,
     ha="center",
     va="bottom",
-    fontsize=12,
+    fontsize=13,
     color="red",
     fontweight="semibold",
 )
 
 for ax, title in zip(axes[:, 0], ROW_TITLEs):
     ax.text(
-        -0.32, 0.5,
+        -0.35, 0.5,
         title,
         transform=ax.transAxes,
         ha="center",
         va="center",
         fontsize=12,
-        linespacing=1.75,
+        linespacing=2.0,
         fontweight="semibold",
         rotation=90,
     )
@@ -238,7 +238,7 @@ block_axes = axes[0, :3]
 x0 = min(ax.get_position().x0 for ax in block_axes)-0.08
 x1 = max(ax.get_position().x1 for ax in block_axes)
 y0 = min(ax.get_position().y0 for ax in block_axes)-0.018
-y1 = max(ax.get_position().y1 for ax in block_axes)+0.035
+y1 = max(ax.get_position().y1 for ax in block_axes)+0.042
 
 pad_x = 0.0
 pad_y = 0.0

@@ -23,9 +23,9 @@ PLOT_STATS = [
 ]
 
 COL_TITLES = [
-    "Supervision: S1\nEval on: S1",
-    "Supervision: S1 + S2\nEval on: S1",
-    "Supervision: S1 + S3\nEval on: S1", 
+    "Supervision: SL1\nEval on: SL1",
+    "Supervision: SL1 + SL2\nEval on: SL1",
+    "Supervision: SL1 + SL3\nEval on: SL1", 
 ]
 
 num_rows = len(PLOT_STATS)
@@ -42,8 +42,8 @@ ROW_TITLEs = [
 MODEL = "rnn"
 PLOT_STATS_DIR = f"/home/yingshac/workspace/tmlr/scripts/experiments/single_metric_plot_{MODEL}"
 YLIM = (0.42, 1.0)
-ROW_WIDTH = 11
-ROW_HEIGHT = 3
+ROW_WIDTH = 10
+ROW_HEIGHT = 2.8
 DPI = 300
 
 # Constants --------------------------------------------------------------------------------
@@ -136,15 +136,15 @@ def plot_one_ax(plot_stats_filename, ax, row_idx, col_idx):
 
     ax.tick_params(axis="both", labelsize=10)
 
-    ax.set_xlabel(x_label, fontsize=12)
+    if row_idx ==2: ax.set_xlabel(x_label, fontsize=12, labelpad=6)
     if col_idx == 0: # only first column has y label
         ax.set_ylabel(y_label, fontsize=12, labelpad=6)
     ax.set_ylim(YLIM[0]-0.05, YLIM[1]+0.05)
     ax.set_xticks(list(range(DMIN, DMAX+1)))
     # yticks: ymax, ymin, step=-0.2, then reverse the list to get ascending order
     ax.set_yticks(list(np.arange(YLIM[1], YLIM[0]-0.01, step=-0.2))[::-1])
-    if col_idx == 0: # only first column has legend
-        ax.legend(loc="lower left", framealpha=0.4)
+    if col_idx == row_idx == 0: # only first column has legend
+        ax.legend(loc="lower left", framealpha=0.4, fontsize=11)
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
 
@@ -155,12 +155,11 @@ save_path = os.path.join(os.path.basename(os.getcwd()) + ".pdf") # figure name =
 fig, axes = plt.subplots(
     num_rows, num_cols, 
     figsize=(ROW_WIDTH, num_rows*ROW_HEIGHT),
-    # sharex=True,
-    # sharey=True,
     constrained_layout=True
 )
 
 for ax in axes.flat: ax.set_facecolor("none") # all subplots have transparent background
+fig.set_constrained_layout_pads(hspace=0.08)
 
 for row in range(num_rows):
     for col in range(num_cols):
@@ -184,7 +183,7 @@ for ax, title in zip(axes[0], COL_TITLES):
 first_col_axes = axes[:, 0] if num_rows > 1 else axes
 for ax, title in zip(first_col_axes, ROW_TITLEs):
     ax.text(
-        -0.25, 0.5,
+        -0.27, 0.5,
         title,
         transform=ax.transAxes,
         ha="center",
@@ -200,9 +199,9 @@ for ax, title in zip(first_col_axes, ROW_TITLEs):
 fig.canvas.draw()
 row_axes = axes[0, :]
 
-x0 = 0.024
+x0 = 0.023
 x1 = max(ax.get_position().x1 for ax in row_axes)
-y0 = min(ax.get_position().y0 for ax in row_axes)-0.06
+y0 = min(ax.get_position().y0 for ax in row_axes)-0.04
 y1 = 1.01
 
 pad_x = 0.0

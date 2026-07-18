@@ -47,8 +47,8 @@ COL_TITLES = [
 ROW_TITLEs = [
     "Convergence",
     "Permutation Generalization",
-    "Depth Generalization\n(toward larger depths)",
-    "Depth Generalization\n(toward smaller depths)",
+    r"Depth Gen $\mathbf{dg\_larger}$",
+    r"Depth Gen $\mathbf{dg\_smaller}$",
     "Length Generalization",
 ]
 
@@ -66,8 +66,8 @@ DMIN, DMAX = 2, 8
 METRIC_SHORTHAND_TO_FULL = {
     "cvg": "Convergence", 
     "pg": "Permutation Generalization", 
-    "dg_larger": "Depth Generalization",
-    "dg_smaller": "Depth Generalization (towards smaller)", # only available for non-cumu
+    "dg_larger": r"Depth Gen $\mathbf{dg\_larger}$",
+    "dg_smaller": r"Depth Gen $\mathbf{dg\_smaller}$", # only available for non-cumu
     "lg": "Length Generalization",
 }
 
@@ -128,7 +128,6 @@ def plot_one_ax(plot_stats_filename, ax, row_idx, col_idx):
     metric = "_".join(plot_stats_filename.split("/")[-1].split("_")[4:])
 
     x_label = r"$d^{tr}_{\max}$ (cumu)" if mode == "cumu" else r"$d^{tr}$ (non-cumu)"
-    y_label = METRIC_SHORTHAND_TO_FULL[metric]
 
     # plot error band
     for legend_name in plot_stats:
@@ -147,7 +146,6 @@ def plot_one_ax(plot_stats_filename, ax, row_idx, col_idx):
 
     ax.tick_params(axis="both", labelsize=10)
     if row_idx == num_rows - 1: ax.set_xlabel(x_label, fontsize=12, labelpad=10)
-    # if col_idx == 0: ax.set_ylabel(y_label, fontsize=12, labelpad=6)
     
     ax.set_xticks(list(range(DMIN, DMAX+1)))
     ax.set_ylim(YLIM[0]-0.05, YLIM[1]+0.05)
@@ -249,12 +247,12 @@ ax.text(
 
 for ax, title in zip(axes[:, 0], ROW_TITLEs):
     ax.text(
-        -0.23, 0.5,
+        -0.22, 0.5,
         title,
         transform=ax.transAxes,
         ha="center",
         va="center",
-        fontsize=12,
+        fontsize=13,
         linespacing=1.75,
         rotation=90,
     )
@@ -266,7 +264,7 @@ fig.canvas.draw()
 # First 3 x 1 block: col 0, row 0, 1, 2
 block_axes = axes[:3, 0]
 
-x0 = min(ax.get_position().x0 for ax in block_axes)-0.07
+x0 = min(ax.get_position().x0 for ax in block_axes)-0.03
 x1 = max(ax.get_position().x1 for ax in block_axes)
 y0 = min(ax.get_position().y0 for ax in block_axes)-0.024
 y1 = max(ax.get_position().y1 for ax in block_axes)+0.032
@@ -289,7 +287,7 @@ fig.add_artist(rect)
 # Bottom left 1 x 1 block: col 0, row 4
 block_axes = axes[4:5, 0]
 
-x0 = min(ax.get_position().x0 for ax in block_axes)-0.07
+x0 = min(ax.get_position().x0 for ax in block_axes)-0.03
 x1 = max(ax.get_position().x1 for ax in block_axes)
 y0 = min(ax.get_position().y0 for ax in block_axes)-0.054
 y1 = max(ax.get_position().y1 for ax in block_axes)+0.01
@@ -309,7 +307,5 @@ rect = Rectangle(
 
 fig.add_artist(rect)
 
-# set fig super title: "Supervision: S1 Eval on: S1"
-fig.suptitle(r"Supervision: S1; Eval on: S1.$\ \ \ $Causal.", fontsize=12, fontweight="bold", y=1.03)
-
+fig.suptitle(r"Supervision: SL1; Eval on: SL1.$\ \ \ $Causal.", fontsize=13, fontweight="bold", y=1.03)
 fig.savefig(save_path, bbox_inches="tight", dpi=DPI)

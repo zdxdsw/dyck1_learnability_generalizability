@@ -26,23 +26,17 @@ PLOT_STATS = [
 ]
 
 COL_TITLES = [
-    "Supervision: S1\nEval on: S1",
-    "Supervision: S1 + S2\nEval on: S1",
-    "Supervision: S1 + S3\nEval on: S1",
-    "Supervision: S1 + S2\nEval on: ",
-]
-
-ROW_TITLEs = [
-    r"AuC of acc $[d^{tr}_{\max}$+1, 16]",
-    r"AuC of p_acc $[d^{tr}_{\max}$+1, 16]",
-    r"AuC of n_acc $[d^{tr}_{\max}$+1, 16]"
+    "Supervision: SL1\nEval on: SL1",
+    "Supervision: SL1 + SL2\nEval on: SL1",
+    "Supervision: SL1 + SL3\nEval on: SL1",
+    "Supervision: SL1 + SL2\nEval on: ",
 ]
 
 MODEL = "rnn"
 PLOT_STATS_DIR = f"/home/yingshac/workspace/tmlr/scripts/experiments/single_metric_plot_{MODEL}"
 YLIM = (0.0, 1.0)
-ROW_WIDTH = 14
-ROW_HEIGHT = 2.8
+ROW_WIDTH = 13
+ROW_HEIGHT = 2.6
 DPI = 300
 
 # Constants --------------------------------------------------------------------------------
@@ -135,13 +129,14 @@ def plot_one_ax(plot_stats_filename, ax, row_idx, col_idx):
         ax.fill_between(x, lower, upper, color=LEGEND_NAME_TO_COLOR[legend_name], alpha=0.1)
 
     ax.tick_params(axis="both", labelsize=10)
-    if row_idx == num_rows - 1: ax.set_xlabel(x_label, fontsize=12)
+    if row_idx == num_rows - 1: ax.set_xlabel(x_label, fontsize=12, labelpad=10)
     if col_idx == 0: ax.set_ylabel(y_label, fontsize=12, labelpad=10)
     ax.set_ylim(YLIM[0]-0.05, YLIM[1]+0.05)
     ax.set_xticks(list(range(DMIN, DMAX+1)))
     # yticks: ymax, ymin, step=-0.2, then reverse the list to get ascending order
     ax.set_yticks(list(np.arange(YLIM[1], YLIM[0]-0.01, step=-0.2))[::-1])
-    if col_idx == 0: ax.legend(loc="lower right", framealpha=0.4)
+    if col_idx == 1 and row_idx == 0: 
+        ax.legend(loc="lower left", framealpha=0.6, fontsize=11)
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
 
@@ -156,12 +151,11 @@ save_path = os.path.join(os.path.basename(os.getcwd()) + ".pdf") # figure name =
 fig, axes = plt.subplots(
     num_rows, num_cols, 
     figsize=(ROW_WIDTH, num_rows*ROW_HEIGHT),
-    # sharex=True,
-    # sharey=True,
     constrained_layout=True
 )
 
 for ax in axes.flat: ax.set_facecolor("none")
+fig.set_constrained_layout_pads(wspace=0.05, hspace=0.05)
 
 for row in range(num_rows):
     for col in range(num_cols):
@@ -185,8 +179,8 @@ for ax, title in zip(first_row_axes, COL_TITLES):
 # separately add a red S2 for the last column's title
 ax = axes[0][-1]
 ax.text(
-    0.68, 1.03,
-    "S2",
+    0.7, 1.03,
+    "SL2",
     transform=ax.transAxes,
     ha="center",
     va="bottom",
@@ -195,17 +189,5 @@ ax.text(
     fontweight="semibold",
 )
 
-for ax, title in zip(axes[:, 0], ROW_TITLEs):
-    ax.text(
-        -0.32, 0.5,
-        title,
-        transform=ax.transAxes,
-        ha="center",
-        va="center",
-        fontsize=12,
-        linespacing=1.75,
-        fontweight="semibold",
-        rotation=90,
-    )
 
 fig.savefig(save_path, bbox_inches="tight", dpi=DPI)
