@@ -32,6 +32,12 @@ COL_TITLES = [
     "Supervision: SL1 + SL2\nEval on: ",
 ]
 
+ROW_TITLEs = [
+    "",
+    "p_acc",
+    "n_acc",
+]
+
 MODEL = "rnn"
 PLOT_STATS_DIR = f"/home/yingshac/workspace/tmlr/scripts/experiments/single_metric_plot_{MODEL}"
 YLIM = (0.0, 1.0)
@@ -179,7 +185,7 @@ for ax, title in zip(first_row_axes, COL_TITLES):
 # separately add a red S2 for the last column's title
 ax = axes[0][-1]
 ax.text(
-    0.7, 1.03,
+    0.72, 1.03,
     "SL2",
     transform=ax.transAxes,
     ha="center",
@@ -189,5 +195,17 @@ ax.text(
     fontweight="semibold",
 )
 
+for ax, title in zip(axes[:, 0], ROW_TITLEs):
+    ax.text(
+        -0.35, 0.5,
+        title,
+        transform=ax.transAxes,
+        ha="center",
+        va="center",
+        fontsize=12,
+        linespacing=2.0,
+        fontweight="semibold",
+        rotation=90,
+    )
 
 fig.savefig(save_path, bbox_inches="tight", dpi=DPI)
